@@ -1,0 +1,21 @@
+{
+  "clientId": "testClient",
+  "brokerAddr": "mqtt-dashboard.com",
+  "brokerPort": 1883,
+  "userName": "12451test",
+  "password": "test",
+  "topic": [
+    "DT/PeriodChange",
+    "mws/Notification/Periodic/SensingValueEvent",
+    "mws/Notification/Periodic/EvacueeEvent",
+    "mws/Set/Direction",
+    "DT/Request/SensorData",
+    "mws/Request/Area",
+    "mws/Response/Area/#",
+    "DT/UpdateSensorPosition",
+    "mws/Notification/Periodic/DisasterEvent",
+    "DT/Request/PastSensorData",
+    "mws/Request",
+    "mws/Response"
+  ]
+}

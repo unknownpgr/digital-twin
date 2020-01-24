@@ -1,0 +1,9 @@
+{
+  "ipAddress": "127.0.0.1",
+  "db_id": "root",
+  "db_pw": "uostest",
+  "db_name": "test",
+  "sensor_table": "tb_sensornode",
+  "sensor_value_table": "tb_sensingvalue",
+  "area_table": "areaTable"
+}

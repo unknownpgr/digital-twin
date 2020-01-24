@@ -1,0 +1,24 @@
+{"objects":{
+	"evacuaterNodes":[],"sensorNodes":[],
+	"exitNodes":
+		[{"nodeId":1,
+		"nodeType":0,
+		"areaId":0,
+		"positions":{"x":12.671479225158692,"y":0.7300000190734863,"z":2.225558280944824},
+		"value1":0.0,
+		"previousUpdate":0.0},
+		
+		{"nodeId":1,
+		"nodeType":0,
+		"areaId":0,
+		"positions":{"x":12.671479225158692,"y":0.7300000190734863,"z":2.225558280944824},
+		"value1":0.0,
+		"previousUpdate":0.0}],
+	"disasterNodes":
+		[{"nodeId":0,
+		"areaId":0,
+		"positions":{"x":13.096063613891602,"y":0.7300000190734863,"z":6.647437572479248},
+		"value1":0.0,
+		"previousUpdate":0.0}]
+	}
+}
