@@ -24,7 +24,7 @@ public class win_close : MonoBehaviour
     }
     public void on_close_button_click()
     {
-        Debug.Log("close 버튼눌림");
+        //Debug.Log("close 버튼눌림");
         Transform[] persons_children_copy = person_window.gameObject.GetComponentsInChildren<Transform>();
         for (int y = 0; y < window_chilren_size; y++)
         {

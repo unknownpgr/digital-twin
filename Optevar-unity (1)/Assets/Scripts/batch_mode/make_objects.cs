@@ -5,23 +5,26 @@ using UnityEngine.UI;
 using UnityEditor;
 using System;
 using UnityEngine.EventSystems;
+
 //scene에 새로운 객체를 생성할 때 사용하는 script
 public class make_objects : MonoBehaviour
 {
     object_button object_button1;//mode_num받아옴
     mode_change_UI mode_cha;
-    
+
     public GameObject ori_person;
     public GameObject ori_sensor;
     public GameObject ori_sensor_dir;
     public GameObject ori_exit;
     public GameObject area_num;
+
+
     public int sensorType = 0;
 
     GameObject new_object;
     GameObject ori_object;
     int set = 0;
-    
+
 
     public List<GameObject> persons_ob = new List<GameObject>();
     public List<EvacuaterNodeJson> person_list = new List<EvacuaterNodeJson>();
@@ -30,11 +33,11 @@ public class make_objects : MonoBehaviour
     public List<GameObject> sensor_ob = new List<GameObject>();
     public List<SensorNodeJson> sensor_list = new List<SensorNodeJson>();
     public int sensor_id = 0;
-    
+
     public List<GameObject> disaster_ob = new List<GameObject>();
     public List<DisasterNodeJson> disaster_list = new List<DisasterNodeJson>();
     public int disaster_id = 0;
-    
+
 
     public List<GameObject> exit_ob = new List<GameObject>();
     public List<ExitNodeJson> exit_list = new List<ExitNodeJson>();
@@ -44,7 +47,7 @@ public class make_objects : MonoBehaviour
 
     private GameObject chosen_object;
     private Vector3 mouse_pos;
-    
+
     public int final_age;
     public int final_speed;
 
@@ -66,6 +69,7 @@ public class make_objects : MonoBehaviour
     }
     void Start()
     {
+        Debug.Log("This is :" + gameObject);
         pb = GameObject.Find("objects_button").GetComponent<objects_batch>();
         all_objects = GameObject.Find("all_objects");
         mode_cha = GameObject.Find("batch_button").GetComponent<mode_change_UI>();
@@ -73,10 +77,8 @@ public class make_objects : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-        
     {
-
-        
+        // 아마도 Person button인 듯?
         if (Input.GetMouseButtonDown(0) && object_button1.mode_num == 1)
         {
             Ray cast_point2 = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -117,13 +119,13 @@ public class make_objects : MonoBehaviour
                         {
                             new_object.GetComponent<person_attribute>().one_person.nodeSpeed = final_speed;
                         }
-                        
+
                         new_object.GetComponent<person_attribute>().one_person.positions = new_object.transform.position;
                         new_object.GetComponent<person_attribute>().one_person.nodeId = person_id;
                         person_id++;
                         person_list.Add(new_object.GetComponent<person_attribute>().one_person);
                         persons_ob.Add(new_object);
-                        
+
                     }
                     else
                     {
@@ -147,7 +149,7 @@ public class make_objects : MonoBehaviour
                             double rdn = rd.NextDouble() - 0.5;
                             double rdn2 = rd2.NextDouble() - 0.5;
                             new_object.transform.position = new Vector3(hit.point.x + (float)rdn, hit.point.y, hit.point.z + (float)rdn2);
-                           
+
                             new_object.GetComponent<person_attribute>().one_person.positions = new_object.transform.position;
                             new_object.GetComponent<person_attribute>().one_person.nodeId = person_id;
                             person_id++;
@@ -158,12 +160,13 @@ public class make_objects : MonoBehaviour
 
 
                         }
-                       
+
                     }
 
                 }
             }
         }//sensor_button 클릭됨
+        // Direction button?
         else if (Input.GetMouseButtonDown(0) && object_button1.mode_num == 4)
         {
             Ray cast_point = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -175,11 +178,10 @@ public class make_objects : MonoBehaviour
                     ori_object = ori_sensor_dir;
                 else
                     ori_object = ori_sensor;
-                new_object = Instantiate(ori_object, new Vector3(9, 2, -10), Quaternion.identity);
+                new_object = Instantiate(ori_object, new Vector3(0, 0, 0), Quaternion.identity);
                 new_object.transform.SetParent(all_objects.transform);
                 new_object.tag = "sensor1";
                 new_object.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
-                
 
                 new_object.GetComponent<sensor_attribute>().one_sensor.positions = new_object.transform.position;
                 new_object.GetComponent<sensor_attribute>().one_sensor.nodeId = sensor_id.ToString();
@@ -188,7 +190,6 @@ public class make_objects : MonoBehaviour
 
                 sensor_list.Add(new_object.GetComponent<sensor_attribute>().one_sensor);
                 sensor_ob.Add(new_object);
-                
             }
         }//fire버튼 클릭됨
         else if (Input.GetMouseButtonDown(0) && object_button1.mode_num == 5)
@@ -207,7 +208,6 @@ public class make_objects : MonoBehaviour
                 disaster_id++;
                 disaster_list.Add(temp_disaster);
                 disaster_ob.Add(hit.collider.gameObject);
-
             }
 
 
@@ -244,19 +244,15 @@ public class make_objects : MonoBehaviour
             RaycastHit hit2;
             if (Physics.Raycast(cast_point2, out hit2, Mathf.Infinity) && hit2.collider.name != "Plane")
             {
-                
+
                 Ray cast_point = Camera.main.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
                 int layerMask = 1 << LayerMask.NameToLayer("building");
                 if (Physics.Raycast(cast_point, out hit, Mathf.Infinity, layerMask))
                 {
-
-                    
-
-                    
                     Debug.Log("area_position Num : " + area_positions.Count);
                     Debug.Log("area_index : " + pb.area_index);
-                    
+
                     GameObject new_area_num = Instantiate(area_num, new Vector3(hit.point.x, hit.point.y + 0.1f, hit.point.z), Quaternion.identity);
 
                     new_position = new_area_num.GetComponent<areasensor_attribute>().one_sensor;
@@ -291,7 +287,6 @@ public class make_objects : MonoBehaviour
                 {
                     set = 1;
                     chosen_object = hit1.collider.gameObject;
-                   
                 }
             }
 
@@ -301,10 +296,6 @@ public class make_objects : MonoBehaviour
             Destroy(chosen_object);
             set = 0;
         }
-
-
-
-
     }
     public void SetSenserType(int _a)
     {

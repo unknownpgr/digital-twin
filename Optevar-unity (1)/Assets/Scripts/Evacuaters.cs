@@ -5,10 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-
-
-
-
 public class Evacuaters
 {
     int number;//
@@ -83,7 +79,8 @@ public class Evacuaters
         {
             pathIdx = 0;
             return true; // carry
-        } else
+        }
+        else
         {
             //SetPath(pathIdx);
             return false; // not carry
@@ -159,14 +156,14 @@ public class Evacuater
     }
     public void SetParams(Vector3 startPos, CustomGrid _grid, Vector3 _direction)
     {
-        
+
         FrontNode = _grid.NodeFromWorldPosition(startPos);
         BackNode = FrontNode;
         direction = _direction;
 
         // Can GameObject implementate collision?
         //obj = GameObject.Instantiate(GameObject.Find("Weight"));
-        
+
         //transform.position = FrontNode.Position;
         FrontNode.weight++;
         //transform.forward = direction;
@@ -174,7 +171,7 @@ public class Evacuater
         //objTransform.localScale.z = length;
 
         // NodeNode
-        
+
 
         line = new List<Node>();
     }
@@ -234,11 +231,11 @@ public class Evacuater
             float t = GetNextT(dt);
             if (t < 1)
             {
-                
+
                 Node tmp = grid.LerpNode(path[pathIdx], path[pathIdx + 1], t);
                 if (tmp == FrontNode) currentDistance += dt * velocity;
 
-                else if (tmp.weight==0)
+                else if (tmp.weight == 0)
                 {
                     FrontNode.weight--;
                     FrontNode = tmp;
@@ -266,7 +263,7 @@ public class Evacuater
             }
             return 1;
         }
-        
+
         return 0;
         /*
         // 1. Init pre weights
@@ -297,7 +294,7 @@ public class Evacuater
         */
     }
 
-        
+
     List<Node> GetNodesAround(Node node)
     {
         List<Node> ret = new List<Node>();

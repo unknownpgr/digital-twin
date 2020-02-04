@@ -8,7 +8,7 @@ using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using LitJson;
 
-public class MQTTManager3: MonoBehaviour
+public class MQTTManager3 : MonoBehaviour
 {
     MqttClient client;
     MQTTClass MQTTConf;
@@ -23,7 +23,7 @@ public class MQTTManager3: MonoBehaviour
     Transform[] MQTTWindowTransforms;
     public InputField GUIText;
     public int msgID = 0;
-    private string[] MessageDataElement = new string[] { "messageId", "nodeId", "timestamp", "sensorType", "value","value1","value2", "areaId" };
+    private string[] MessageDataElement = new string[] { "messageId", "nodeId", "timestamp", "sensorType", "value", "value1", "value2", "areaId" };
     public void Awake()
     {
         MQTTWindow = GameObject.Find("MQTTWindow");
@@ -32,7 +32,7 @@ public class MQTTManager3: MonoBehaviour
     }
     public void Init()
     {
-        
+
         if (MQTTConf.brokerAddr != null && MQTTConf.userName != null && MQTTConf.password != null)
         {
             MQTTConf.clientId = Guid.NewGuid().ToString();
@@ -41,7 +41,7 @@ public class MQTTManager3: MonoBehaviour
             client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
             client.ConnectionClosed += Client_ConnectionClosed;
             byte[] qosLevels = { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE };
-            foreach(var t in MQTTConf.topic)
+            foreach (var t in MQTTConf.topic)
             {
                 client.Subscribe(new string[] { t }, qosLevels);
             }
@@ -135,7 +135,7 @@ public class MQTTManager3: MonoBehaviour
 
             DirectionOperation d = JsonMapper.ToObject<DirectionOperation>(msg);
             Debug.Log(d);
-            
+
             if (scenarioManager.SensorDictionary.ContainsKey(d.nodeId))
             {
                 scenarioManager.SensorDictionary[d.nodeId].sensor_Attribute.one_sensor.value1 =
@@ -147,18 +147,18 @@ public class MQTTManager3: MonoBehaviour
         {
             //"DT/Request/SensorData",  :: DEPRECATED
 
-            
+
         }
         else if (e.Topic == MQTTConf.topic[5])
         {
             //"mws/Request/Area",
 
-            
+
         }
         else if (e.Topic.Contains("mws/Response/Area/"))
         {
             // "mws/Response/Area/#"
-            
+
             MessageData md = Jsoning(msg);
             if (scenarioManager.areaNums.ContainsKey(md.areaId))
                 if (scenarioManager.areaNums[md.areaId] != (int)md.value)
@@ -180,11 +180,11 @@ public class MQTTManager3: MonoBehaviour
             //scenarioManager.sensorNodeJsons[md.nodeId].value1 = md.value;
             if (md.nodeId != null)
                 if (scenarioManager.SensorDictionary.ContainsKey(md.nodeId))
-                    {
-                        scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.value1 = md.value;
-                        scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.disaster = true;
-                        scenarioManager.isSensorUpdated = true;
-                    }
+                {
+                    scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.value1 = md.value;
+                    scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.disaster = true;
+                    scenarioManager.isSensorUpdated = true;
+                }
         }
         else if (e.Topic == "messageID")
         {
@@ -234,7 +234,7 @@ public class MQTTManager3: MonoBehaviour
         {
             Debug.LogError("Connnection error: " + e);
         }
-        
+
     }
 
     MessageData Jsoning(string msg)

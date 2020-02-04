@@ -9,16 +9,19 @@ public class object_button : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
-    public void mk_new_object(GameObject ori_object, string object_tag, Vector3 mouse_pos) {
-        if (mode_num == 1) {
+
+    public void mk_new_object(GameObject ori_object, string object_tag, Vector3 mouse_pos)
+    {
+        if (mode_num == 1)
+        {
             new_object = Instantiate(ori_object, new Vector3(9, 2, -10), Quaternion.identity);
             new_object.tag = object_tag;
             new_object.transform.position = new Vector3(mouse_pos.x, 2.5f, mouse_pos.z);

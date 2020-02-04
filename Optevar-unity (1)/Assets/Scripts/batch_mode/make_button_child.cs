@@ -7,7 +7,7 @@ public class make_button_child : MonoBehaviour
     person_inputfield mkbt;
     private void Awake()
     {
-        
+
     }
     void Start()
     {
@@ -17,7 +17,7 @@ public class make_button_child : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
     public void on_clicked_female_child()
     {
@@ -32,7 +32,7 @@ public class make_button_child : MonoBehaviour
         mkbt.final_speed = 20;
         mkbt.age.text = mkbt.final_age.ToString();//UI의 inputfield에 속성값 넣기
         mkbt.speed.text = mkbt.final_speed.ToString();
-        
+
     }
     public void on_clicked_female_adult()
     {
@@ -46,26 +46,26 @@ public class make_button_child : MonoBehaviour
         mkbt.final_age = 25;
         mkbt.final_speed = 60;
         mkbt.age.text = mkbt.final_age.ToString();
-        
+
         mkbt.speed.text = mkbt.final_speed.ToString();
-        
+
     }
     public void on_clicked_female_older()
     {
         mkbt.final_age = 10;
         mkbt.final_speed = 30;
         mkbt.age.text = mkbt.final_age.ToString();
-        
+
         mkbt.speed.text = mkbt.final_speed.ToString();
-        
+
     }
     public void on_clicked_male_older()
     {
         mkbt.final_age = 10;
         mkbt.final_speed = 40;
         mkbt.age.text = mkbt.final_age.ToString();
-        
+
         mkbt.speed.text = mkbt.final_speed.ToString();
-        
+
     }
 }

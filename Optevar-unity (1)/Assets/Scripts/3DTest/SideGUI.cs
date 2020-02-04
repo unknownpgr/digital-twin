@@ -61,7 +61,7 @@ public class SideGUI : MonoBehaviour
         }
         
     }
-    public void InitBuildingInfo()
+    public void InitBuildingInfo()//빌딩load한 후에 이 함수 실행되도록 바꿔야함
     {
 
         BuildingObject = GameObject.Find("Building");

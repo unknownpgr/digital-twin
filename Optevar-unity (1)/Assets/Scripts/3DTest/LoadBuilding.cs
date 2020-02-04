@@ -9,7 +9,7 @@ using UnityEngine.AI;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
-public class LoadBuilding:MonoBehaviour
+public class LoadBuilding : MonoBehaviour
 {
     string path = "Models/";
     GameObject building;
@@ -19,7 +19,7 @@ public class LoadBuilding:MonoBehaviour
         {
             building.AddComponent<NavMeshSurface>().RemoveData();
             Destroy(building);
-                }
+        }
 
 
         string fullPath = path + _s;
@@ -55,14 +55,14 @@ public class LoadBuilding:MonoBehaviour
             BuildingObjectManager tmp = obj.transform.GetChild(i).gameObject.AddComponent<BuildingObjectManager>();
             tmp.GetBounds();
         }
-        
-        
+
+
         // Set layer to 'building'
         RecursiveSetLayer(UnityEngine.LayerMask.NameToLayer("building"), obj);
         RecursiveSetCollider(obj);
         building = obj;
         return obj;
-        
+
     }
 
     void DeleteCams(GameObject _obj)

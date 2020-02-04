@@ -19,14 +19,14 @@ public class mode_change_UI : MonoBehaviour
     {
         ui_cont = GameObject.Find("Canvas").GetComponent<UI_control>();
         object_button = GameObject.Find("all_objects").GetComponent<object_button>();//mode_num
-       
+
         path = ui_cont.path;
         path_children = ui_cont.path.GetComponentsInChildren<Transform>();
-        
     }
+
     void Start()
     {
-        
+        Debug.Log("Gameobject : " + gameObject);
     }
 
     // Update is called once per frame
@@ -41,7 +41,7 @@ public class mode_change_UI : MonoBehaviour
 
         Transform[] simulation_UI_copy = ui_cont.simulation_UI;
         Transform[] path_children_copy = path_children;
-        
+
         for (int x = 0; x < ui_cont.simulation_UI.Length; x++)
         {
             if (simulation_UI_copy[x] != null)
@@ -50,23 +50,22 @@ public class mode_change_UI : MonoBehaviour
                 sm.SetDefault();
                 simulation_UI_copy[x].gameObject.SetActive(false);
             }
-            
+
         }
-       
+
 
         for (int x = 0; x < ui_cont.batch_UI.Length; x++)
         {
             if (ui_cont.batch_UI[x] != null)
             {
-                
-                if (ui_cont.batch_UI[x].name != "person_window"&&
-                    ui_cont.batch_UI[x].name != "save_window"&&
-                    ui_cont.batch_UI[x].name != "load_window"&&
+
+                if (ui_cont.batch_UI[x].name != "person_window" &&
+                    ui_cont.batch_UI[x].name != "save_window" &&
+                    ui_cont.batch_UI[x].name != "load_window" &&
                     ui_cont.batch_UI[x].name != "sensor_window"
-                    ) {
-
+                    )
+                {
                     ui_cont.batch_UI[x].gameObject.SetActive(true);
-
                 }
             }
         }
@@ -75,11 +74,11 @@ public class mode_change_UI : MonoBehaviour
             if (path_children_copy[x] != null)
             {
                 path_children_copy[x].gameObject.SetActive(false);
-                
+
             }
-           
+
         }
-        
+
 
 
     }
@@ -94,7 +93,8 @@ public class mode_change_UI : MonoBehaviour
         }
         Transform[] batch_UI_copy = ui_cont.batch_UI;
         Transform[] path_children_copy = path_children;
-        if (GameObject.Find("objects_button")) {
+        if (GameObject.Find("objects_button"))
+        {
             pb = GameObject.Find("objects_button").GetComponent<objects_batch>();
             if (pb.isActiveAndEnabled)
             {
@@ -108,7 +108,7 @@ public class mode_change_UI : MonoBehaviour
                 batch_UI_copy[x].gameObject.SetActive(false);
             }
         }
-        
+
         for (int x = 0; x < ui_cont.simulation_UI.Length; x++)
         {
             if (ui_cont.simulation_UI[x] != null)
@@ -130,7 +130,7 @@ public class mode_change_UI : MonoBehaviour
         sm.SetLists(this.scene, pb.GetSensorObjects());
         sm.InitMoniteringMode();
     }
-    
+
     public void active_disas_panel()
     {
         SceneManager.LoadScene("choose_disaster");

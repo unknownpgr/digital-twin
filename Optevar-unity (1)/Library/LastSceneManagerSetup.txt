@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/yujin_test/UI.unity
+- path: Assets/Scenes/build/Main - Copy.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

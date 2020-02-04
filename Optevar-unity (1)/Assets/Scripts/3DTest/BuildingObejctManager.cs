@@ -5,7 +5,7 @@ using UnityEngine;
 public class BuildingObjectManager : MonoBehaviour
 {
     Bounds bounds;
-    
+
     // 건물 객체의 BoundBox를 생성하여 반환한다.
     // 해당 BoundBox를 참고하여 그 부분에만 NavMesh Surface를 생성할 수 있다.
     public Bounds GetBounds()

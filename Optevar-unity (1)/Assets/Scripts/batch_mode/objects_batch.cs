@@ -19,7 +19,7 @@ public class objects_batch : MonoBehaviour
     GameObject sensor_window;
     Transform[] save_win_children;
     Transform[] load_win_children;
-    
+
     make_objects make_objects;
     //json다루기 위한 변수들
     JsonParser jp = new JsonParser();
@@ -66,7 +66,6 @@ public class objects_batch : MonoBehaviour
 
         all_objects = GameObject.Find("all_objects");
         make_objects = GameObject.Find("person_attri").GetComponent<make_objects>();
-
     }
 
 
@@ -77,7 +76,7 @@ public class objects_batch : MonoBehaviour
 
     public void objects_button_click()
     {
-        
+
         ob_index = ob_dropdown.GetComponent<Dropdown>().value;
         List<Dropdown.OptionData> ob_munu_options = ob_dropdown.GetComponent<Dropdown>().options;
         switch (ob_index)
@@ -123,7 +122,8 @@ public class objects_batch : MonoBehaviour
                 Dictionary<string, object> dics = new Dictionary<string, object>();
 
                 for (int i = 0; i < make_objects.sensor_ob.Count; i++)
-                    dics.Add(make_objects.sensor_ob[i].GetComponent<sensor_attribute>().one_sensor.nodeId, make_objects.sensor_ob[i].GetComponent<sensor_attribute>().one_sensor);
+                    dics.Add(make_objects.sensor_ob[i].GetComponent<sensor_attribute>().one_sensor.nodeId
+                        , make_objects.sensor_ob[i].GetComponent<sensor_attribute>().one_sensor);//이게 타입이 SensorNodeJson임
                 for (int i = 0; i < make_objects.area_nums.Count; i++)
                 {
                     if (dics.ContainsKey(make_objects.area_nums[i].GetComponent<areasensor_attribute>().one_sensor.areaId))
@@ -134,25 +134,39 @@ public class objects_batch : MonoBehaviour
                     dics.Add(make_objects.area_nums[i].GetComponent<areasensor_attribute>().one_sensor.areaId, make_objects.area_nums[i].GetComponent<areasensor_attribute>().one_sensor);
                 }
                 DBManager dbm = DBManager.GetComponent<DBManager>();
+                foreach (string d in dics.Keys)//<string, object>
+                {
+                    Debug.Log("센서타입 : " + dics[d].GetType());
+                    if (dics[d].GetType() == typeof(SensorNodeJson))// 이거 sensor_attribute로 되어있었음
+                        dbm.SensorSave((SensorNodeJson)dics[d]);//타입변환오류
+
+                    else if (dics[d].GetType() == typeof(areasensor_attribute))
+                        dbm.SensorSave((areasensor_attribute)dics[d]);
+                }
+                /*
                 foreach(string d in dics.Keys)
                 {
-                    if (d.GetType() == typeof(sensor_attribute))
+                    //Debug.Log("센서타입 : "+d.GetType());
+                    if (d.GetType() == typeof(sensor_attribute))// 이거 
                         dbm.SensorSave((sensor_attribute)dics[d]);
+
                     else if (d.GetType() == typeof(areasensor_attribute))
                         dbm.SensorSave((areasensor_attribute)dics[d]);
                 }
+                 */
                 break;
             case 8:
                 ob_dropdown.GetComponent<Dropdown>().value = 0;
                 clear();
                 break;
-            
+
 
         }
-        
+
     }
 
-    void clear() {
+    void clear()
+    {
         ob_button.mode_num = 0;
         total_array = new Scenario();
         for (int m = 0; m < make_objects.persons_ob.Count; m++)
@@ -190,13 +204,15 @@ public class objects_batch : MonoBehaviour
         make_objects.disaster_id = 0;
 
     }
-    public Scenario get_scenario() {
+    public Scenario get_scenario()
+    {
         total_array = new Scenario();
         if (make_objects.person_list != null)
         {
             total_array.evacuaterNodeJsons = make_objects.person_list.ToArray();
         }
-        else {
+        else
+        {
             total_array.evacuaterNodeJsons = null;
         }
         if (make_objects.sensor_list != null)
@@ -223,7 +239,7 @@ public class objects_batch : MonoBehaviour
         {
             total_array.exitNodeJsons = null;
         }
-        if (make_objects.area_positions!= null)
+        if (make_objects.area_positions != null)
         {
             total_array.areaPositionJsons = make_objects.area_positions.ToArray();
         }
@@ -233,7 +249,8 @@ public class objects_batch : MonoBehaviour
         }
         return total_array;
     }
-    void save_clicked() {
+    void save_clicked()
+    {
         jp.Save3<Scenario>(get_scenario(), save_file_name.text);
         Debug.Log(save_file_name.text);
         Debug.Log("save완료");
@@ -245,8 +262,8 @@ public class objects_batch : MonoBehaviour
         ob_button = GameObject.Find("all_objects").GetComponent<object_button>();
         win_ob = load_file_win.GetComponent<localFileTest_4>();
         string file_path = win_ob.get_clicked_file_name();
-        Debug.Log("file path : "+file_path);
-        
+        Debug.Log("file path : " + file_path);
+
         Scenario json_file = jp.Load3<Scenario>(file_path);
         clear();
         total_array = json_file;
@@ -285,7 +302,7 @@ public class objects_batch : MonoBehaviour
                 new_sensor = Instantiate(ori_sensor, json_file.sensorNodeJsons[m].positions, Quaternion.identity);//****************여기에 ori_person이 할당이 안되어있다?
                 new_sensor.tag = "sensor1";
             }
-                new_sensor.transform.SetParent(all_objects.transform);
+            new_sensor.transform.SetParent(all_objects.transform);
             SensorNodeJson temp_sensor = new SensorNodeJson();
             temp_sensor = json_file.sensorNodeJsons[m];
 
@@ -347,7 +364,7 @@ public class objects_batch : MonoBehaviour
         for (int m = 0; m < json_file.areaPositionJsons.Length; m++)
         {
             make_objects.area_positions.Add(json_file.areaPositionJsons[m]);
-            
+
             new_area_num = Instantiate(ori_area_num, json_file.areaPositionJsons[m].position, ori_area_num.transform.rotation);
             new_area_num.GetComponent<areasensor_attribute>().one_sensor = json_file.areaPositionJsons[m];
             new_area_num.transform.position = new Vector3(new_area_num.transform.position.x, new_area_num.transform.position.y + 0.1f, new_area_num.transform.position.z);
@@ -363,7 +380,8 @@ public class objects_batch : MonoBehaviour
 
     }
 
-    public void unactive_win(GameObject window, Transform[] win_children) {
+    public void unactive_win(GameObject window, Transform[] win_children)
+    {
         Transform[] window_copy = win_children;
         window_chilren_size = win_children.Length;
         for (int y = 0; y < window_chilren_size; y++)
@@ -371,7 +389,7 @@ public class objects_batch : MonoBehaviour
             window_copy[y].gameObject.SetActive(false);
         }
         ob_button.mode_num = 0;
-         
+
     }
     public void active_win(GameObject window, Transform[] win_children)
     {
@@ -388,7 +406,8 @@ public class objects_batch : MonoBehaviour
             win_ob.GetPathList();
         }
     }
-    public void close_all_windows() {
+    public void close_all_windows()
+    {
         /*
         if (person_window.activeSelf)
         {
