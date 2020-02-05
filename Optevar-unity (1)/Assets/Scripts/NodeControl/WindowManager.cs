@@ -9,12 +9,15 @@ public class WindowManager : MonoBehaviour
     private Vector3 WINDOW_HIDE_POSITION;
     private Vector3 WINODW_VISIBLE_POSITION = new Vector2(0, -100);
     private bool visibility = false;
-    private float movingTime = 0;
+    private float movingTime = 0;   // Used to window moving.(hide/show)
 
-    private RectTransform parantTransform;
-    private RectTransform rectTransform;
+    private RectTransform parantTransform;  // Rect transform of parent
+    private RectTransform rectTransform;    // Rect transform of this window
+
+    // Dictinoary of all window. Tuple of <window name, windowManager>
     private static Dictionary<string, WindowManager> windows = new Dictionary<string, WindowManager>();
 
+    // Used to window drag
     Vector2 mousePosition;
 
     // Start is called before the first frame update
@@ -27,7 +30,7 @@ public class WindowManager : MonoBehaviour
         rectTransform = gameObject.GetComponent<RectTransform>();
         parantTransform = transform.parent.GetComponent<RectTransform>();
 
-        WINDOW_HIDE_POSITION = new Vector2(0,rectTransform.sizeDelta.y+100);
+        WINDOW_HIDE_POSITION = new Vector2(0, rectTransform.sizeDelta.y + 100);
 
         // Move current window to given position
         rectTransform.anchoredPosition = WINDOW_HIDE_POSITION;
@@ -55,10 +58,20 @@ public class WindowManager : MonoBehaviour
             rectTransform.anchoredPosition = mousePosition + delta;
         });
 
+        // Add drag end event listener of window positioning
+        EventTrigger.Entry entryDrop = new EventTrigger.Entry();
+        entryDrop.eventID = EventTriggerType.EndDrag;
+        entryDrop.callback.AddListener((evetData) =>
+        {
+            WINODW_VISIBLE_POSITION = rectTransform.anchoredPosition;
+            WINDOW_HIDE_POSITION.x = rectTransform.anchoredPosition.x;
+        });
+
         // Add event listener
         EventTrigger trigger = transform.GetChild(0).Find("title").GetComponent<EventTrigger>();
         trigger.triggers.Add(entryDragging);
         trigger.triggers.Add(entryBeginDrag);
+        trigger.triggers.Add(entryDrop);
 
         // Add close event listener
         transform.GetChild(0).Find("close_button").GetComponent<Button>().onClick.AddListener(() =>
@@ -67,7 +80,7 @@ public class WindowManager : MonoBehaviour
              });
     }
 
-    // Half size of screen. used for mouse position convertign. I supoosed that screen size won't be changed.
+    // Half size of screen. used for mouse position convertign. I assumed that the screen size would not change.
     Vector2 align = new Vector2(Screen.width / 2, -Screen.height / 2);
     void Update()
     {
@@ -76,11 +89,14 @@ public class WindowManager : MonoBehaviour
 
         if (movingTime > 0)
         {
-            if (visibility) rectTransform.anchoredPosition = Vector2.Lerp(WINODW_VISIBLE_POSITION, WINDOW_HIDE_POSITION, movingTime);
-            else rectTransform.anchoredPosition = Vector2.Lerp(WINODW_VISIBLE_POSITION, WINDOW_HIDE_POSITION, 1 - movingTime);
-            movingTime -= Time.deltaTime;
+            float t;
+            if (visibility) t = movingTime;
+            else t = 1 - movingTime;
+            rectTransform.anchoredPosition = Vector2.Lerp(WINODW_VISIBLE_POSITION, WINDOW_HIDE_POSITION, SmoothMove(t));
+            movingTime -= Time.deltaTime * 0.5f;
         }
 
+        // Exponential approach. Easy to calculate but foo fast when hide.
         // rectTransform.anchoredPosition += (targetPosition - rectTransform.anchoredPosition) * Time.deltaTime * 4.0f;
     }
 
@@ -90,7 +106,7 @@ public class WindowManager : MonoBehaviour
         else return null;
     }
 
-    public static void CloaseAll()
+    public static void CloseAll()
     {
         foreach (string key in windows.Keys)
         {
@@ -117,6 +133,12 @@ public class WindowManager : MonoBehaviour
         }
     }
 
+    /*
+    Below is a function that:
+    1) f(0)=0, f(1)=1
+    2) f'(0)=f'(1)=f''(0)=f''(1)=0
+    Therefore smoothly move and accelerates.
+    */
     public static float SmoothMove(float t)
     {
         return t * t * t * (3 * t * (2 * t - 5) + 10);

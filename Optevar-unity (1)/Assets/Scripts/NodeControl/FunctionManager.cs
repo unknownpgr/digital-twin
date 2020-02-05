@@ -143,8 +143,6 @@ public class FunctionManager : MonoBehaviour
             case 0:
                 Popup("Fire sensor");
                 newNode = NodeManager.GetNode(NodeManager.NodeType.SENSOR_FIRE);
-                if (!newNode) Popup("Cannot creaet node.");
-                else MouseManager.NodePlace(newNode);
                 break;
 
             // Earthquake - Not important
@@ -161,11 +159,11 @@ public class FunctionManager : MonoBehaviour
             case 3:
                 Popup("Direction sign");
                 newNode = NodeManager.GetNode(NodeManager.NodeType.SIGN_DIRECTION);
-                if (!newNode) Popup("Cannot creaet node.");
-                else MouseManager.NodePlace(newNode);
                 break;
         }
-        WindowManager.CloaseAll();
+        if (!newNode) Popup("Cannot creaet node.");
+        else MouseManager.NodePlace(newNode);
+        WindowManager.CloseAll();
     }
 
     public void ButtonLoadSkpFiles(Dropdown dropdown)

@@ -14,25 +14,29 @@ public class MouseManager : MonoBehaviour
     static NodeManager placingNode;
     int placableLayer;
 
+    // Camera pan / rotation / zoom
     public float wheelConstant = 30f;
     float panningValue = 5f;
-
     float rotY, rotX = 0;
-    Transform transform;
-    mouse_button mb = new mouse_button();
+    private static Transform cameraTransform;
 
     private Camera camera;
+
+    private static GameObject targetMark;
 
     // Start is called before the first frame update
     void Start()
     {
         camera = Camera.main.GetComponent<Camera>();
-        transform = Camera.main.GetComponent<Transform>();
+        cameraTransform = Camera.main.GetComponent<Transform>();
 
-        rotX = transform.localEulerAngles.y;
-        rotY = -transform.localEulerAngles.x;
+        rotX = cameraTransform.localEulerAngles.y;
+        rotY = -cameraTransform.localEulerAngles.x;
 
         placableLayer = UnityEngine.LayerMask.NameToLayer("building");
+
+        targetMark = (GameObject)Instantiate((GameObject)Resources.Load("Prefabs/TargetMark"));
+        targetMark.transform.position = cameraTransform.position;
     }
 
     // Update is called once per frame
@@ -41,6 +45,7 @@ public class MouseManager : MonoBehaviour
         switch (mouseMode)
         {
             case MouseMode.NORMAL:
+                targetMark.transform.position = cameraTransform.position;
                 if (Input.GetMouseButtonDown(0))
                 {
                     Ray cast_point = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -53,7 +58,7 @@ public class MouseManager : MonoBehaviour
                     else
                     {
                         // Nothing clicked.
-                        // WindowManager.CloaseAll();
+                        // WindowManager.CloseAll();
                     }
                 }
                 break;
@@ -67,8 +72,8 @@ public class MouseManager : MonoBehaviour
 
     public static void NodePlace(NodeManager obj)
     {
-        Debug.Log("Place node");
         placingNode = obj;
+        placingNode.transform.position = cameraTransform.position;
         mouseMode = MouseMode.NODE_PLACING;
     }
 
@@ -85,7 +90,7 @@ public class MouseManager : MonoBehaviour
         // Panning
         if (Input.GetMouseButton(2))
         {
-            transform.position -= (transform.right.normalized * Input.GetAxis("Mouse X") + transform.up.normalized * Input.GetAxis("Mouse Y")) * panningValue;
+            cameraTransform.position -= (cameraTransform.right.normalized * Input.GetAxis("Mouse X") + cameraTransform.up.normalized * Input.GetAxis("Mouse Y")) * panningValue;
         }
 
         // Rotating
@@ -93,7 +98,7 @@ public class MouseManager : MonoBehaviour
         {
             rotX += Input.GetAxis("Mouse X") * 100.0f * Time.deltaTime;
             rotY += Input.GetAxis("Mouse Y") * 100.0f * Time.deltaTime;
-            transform.localEulerAngles = new Vector3(-rotY, rotX, 0);
+            cameraTransform.localEulerAngles = new Vector3(-rotY, rotX, 0);
         }
 
         wheelValue = Input.GetAxis("Mouse ScrollWheel") * wheelConstant;
@@ -113,11 +118,14 @@ public class MouseManager : MonoBehaviour
 
         if (isHit)
         {
-            placingNode.transform.position = hit.point;
+            // Move target marker to the hit point, but lift a little from surface.
+            targetMark.transform.position = hit.point + hit.normal * 0.1f;
+            // Set the direction of mark.
+            targetMark.transform.rotation = Quaternion.LookRotation(hit.normal, Vector3.one);
         }
         else
         {
-            placingNode.transform.position = transform.position;
+            targetMark.transform.position = cameraTransform.position;
         }
 
         // Place
@@ -125,9 +133,20 @@ public class MouseManager : MonoBehaviour
         {
             if (isHit)
             {
-                FunctionManager.Popup(placingNode.Type + " placed.");
+                // Place given node
+                placingNode.transform.position = hit.point;
+
+                // Check if given surface is wall
+                float angleCosine = Mathf.Abs(Vector3.Dot(Vector3.up, hit.normal));
+                if (angleCosine < 0.5f) FunctionManager.Popup("Warning : " + placingNode.Type + " placed on wall.");
+                else FunctionManager.Popup(placingNode.Type + " placed.");
+
+                // Change to normal mode
                 mouseMode = MouseMode.NORMAL;
                 placingNode = null;
+
+                // Uncomment here to continue placing.
+                // NodePlace(NodeManager.GetNode(NodeManager.NodeType.SENSOR_FIRE));
             }
             else
             {
