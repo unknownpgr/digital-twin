@@ -574,6 +574,7 @@ public class ScenarioManager3 : MonoBehaviour
                 tmp.Effect = tmp.gameObject.transform.GetChild(0).GetComponent<MeshRenderer>().material;
             else
                 tmp.Effect = null;
+            Debug.Log("add sensor : " + tmp);
             SensorDictionary.Add(sensorNodeJsons[i].nodeId, tmp);
            
 
@@ -602,24 +603,29 @@ public class ScenarioManager3 : MonoBehaviour
     {
         
     }
-    public bool SetSensorValue()
+    public bool SetSensorValue()///////////////////////////
     {
+        
         List<int> dangerFloors = new List<int>();
         int TargetFloor = 0;
         isDanger = false;
         bool ret = true;
-        
+
         foreach (string k in SensorDictionary.Keys)
         {
             ret &= SensorDictionary[k].SensorValue();
-            if (SensorDictionary[k].sensor_Attribute.one_sensor.disaster)
+            
+            if (SensorDictionary[k].sensor_Attribute.one_sensor.disaster)//DisasterEvent일 때
+            {
+                //scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.nodeType = md.sensorType;
                 switch (SensorDictionary[k].sensor_Attribute.one_sensor.nodeType)
                 {
                     case 33:
                         //fire
                         //if (SensorDictionary[k].sensor_Attribute.one_sensor.value1 > 70)
-                        
+
                         {
+                            Debug.Log("fire 33");
                             TargetFloor = 1;
                             LastUpdatedFloor = SideGUI.HeightToFloor(SensorDictionary[k].sensor_Attribute.one_sensor.positions);
                             WarnText.text = "화재 발생";
@@ -632,6 +638,7 @@ public class ScenarioManager3 : MonoBehaviour
                         //if (SensorDictionary[k].sensor_Attribute.one_sensor.value1 > 0)
                         {
                             // select floor
+                            Debug.Log("water 2");
                             TargetFloor = floor;
                             WarnText.text = "수재해 발생";
                             LastUpdatedFloor = SideGUI.HeightToFloor(SensorDictionary[k].sensor_Attribute.one_sensor.positions);
@@ -643,6 +650,7 @@ public class ScenarioManager3 : MonoBehaviour
                         //if (SensorDictionary[k].sensor_Attribute.one_sensor.value1 > 0)
                         {
                             // select floor
+                            Debug.Log("earthquake 3");
                             TargetFloor = 1;
                             WarnText.text = "지진 발생";
                             LastUpdatedFloor = SideGUI.HeightToFloor(SensorDictionary[k].sensor_Attribute.one_sensor.positions);
@@ -651,10 +659,15 @@ public class ScenarioManager3 : MonoBehaviour
 
                         break;
                     case 39:
-                        // 방향 지시
-                        break;
+                        {
+                            // 방향 지시
+                            Debug.Log("39 방향지시");
+                            break;
+                        }
                 }
+
             }
+        }
 
      
         if (isDanger)

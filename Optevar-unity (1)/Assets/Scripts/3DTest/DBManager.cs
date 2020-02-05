@@ -11,10 +11,11 @@ class DBClass{
     public string ipAddress = "localhost";
     public string db_id = "root";
     public string db_pw = "uostest";
-    public string db_name = "test";
-    public string sensor_table = "SensorTable";//table이름
-    public string sensor_value_table = "SensorValueTable";//table이름
-    public string area_table = "AreaTable";//table이름
+
+    public string db_name = "etrimws_test";
+    public string sensor_table = "tb_sensornode";//'tb_sensornode'
+    public string sensor_value_table = "tb_sensingvalue";
+    public string area_table = "AreaTable";//아직없음<-회의
 }
 
 public class DBManager : MonoBehaviour
@@ -41,7 +42,7 @@ public class DBManager : MonoBehaviour
         
         db = jsonParser.Load<DBClass>("dbconf");//dbcon.jsonf를 통해 load한다(이 파일 수정하기)
         if (db!=null) {
-            Debug.Log("읽어옴");
+            //Debug.Log("읽어옴");
         }
         string strConn = string.Format("server={0};uid={1};pwd={2};database={3};charset=utf8 ;",
                                db.ipAddress, db.db_id, db.db_pw, db.db_name);//연결형식
@@ -174,7 +175,7 @@ public class DBManager : MonoBehaviour
         }
     }
          */
-    public void SensorSave(areasensor_attribute sensor)//쿼리문으로 바꾸는과정
+    public void SensorSave(areasensor_attribute sensor)//이제 쿼리문 바뀐 테이블형식대로 싹다 바꿔야함
     {
         // area에 관한 DB 테이블이 현재 존재하지 않으므로 개발 필요.
         if (conn.Ping())
@@ -215,11 +216,16 @@ public class DBManager : MonoBehaviour
 
     public bool SensorLoad(string id, sensor_attribute sensor = null)
     {
-
-        string q = "" +
+        /*
+         string q = "" +
             "SELECT 'node_address','location'" +
             " FROM '" + db.sensor_table +
-            "' WHERE nodeId = " + id + ";" ;
+            "' WHERE 'node_address' = '" + id + "';" ;
+         */
+        string q = "" +
+            "SELECT node_address,location" +
+            " FROM " + db.sensor_table +
+            " WHERE node_address = '" + id + "';" ;
         bool ret = false;
         Debug.Log("load쿼리문 : "+q);
         if (conn.Ping())

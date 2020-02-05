@@ -32,7 +32,7 @@ public class MQTTManager3 : MonoBehaviour
     }
     public void Init()
     {
-
+        //Debug.Log("MQTTConf : "+ MQTTConf);
         if (MQTTConf.brokerAddr != null && MQTTConf.userName != null && MQTTConf.password != null)
         {
             MQTTConf.clientId = Guid.NewGuid().ToString();
@@ -88,13 +88,21 @@ public class MQTTManager3 : MonoBehaviour
         //scenarioManager.SetTargetNodes(null, (int)md.value);
 
 
-        if (e.Topic == MQTTConf.topic[0])
+        if (e.Topic == MQTTConf.topic[0])//DT/PeriodChange
         {
             //DT/PeriodChange
             Debug.Log(msg);
         }
-        else if (e.Topic == MQTTConf.topic[1])
+        else if (e.Topic == MQTTConf.topic[1])//mws/Notification/Periodic/SensingValueEvent
         {
+            /*
+             {
+             "nodeId" : "15", 
+             "timestamp" : "2019-07-08 13:27:56.25",
+             "sensorType" : 2, 
+             "value" : "14", 
+             }
+             */
             //"mws/Notification/Periodic/SensingValueEvent", wan
             MessageData md = Jsoning(msg);
             //scenarioManager.sensorNodeJsons[md.nodeId].value1 = md.value;
@@ -103,13 +111,26 @@ public class MQTTManager3 : MonoBehaviour
                 {
                     scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.value1 = md.value;
                     scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.disaster = false;
+                    scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.nodeType = md.sensorType;
 
                     //scenarioManager.sensorNodeJsons[md.nodeId].nodeType = md.sensorType;
                     //scenarioManager.TestSetSensorValue(md.nodeId, md.value, md.sensorType);
                     scenarioManager.isSensorUpdated = true;
                 }
         }
-        else if (e.Topic == MQTTConf.topic[2])
+        else if (e.Topic == MQTTConf.topic[2])//mws/Notification/Periodic/DisasterEvent
+        {
+            MessageData md = Jsoning(msg);
+            //scenarioManager.sensorNodeJsons[md.nodeId].value1 = md.value;
+            if (md.nodeId != null)
+                if (scenarioManager.SensorDictionary.ContainsKey(md.nodeId))
+                {
+                    scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.value1 = md.value;
+                    scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.disaster = true;
+                    scenarioManager.isSensorUpdated = true;
+                }
+        }
+        else if (e.Topic == MQTTConf.topic[3])//mws/Notification/Periodic/EvacueeEvent
         {
             //"mws/Notification/Periodic/EvacueeEvent", wan
             MessageData md = Jsoning(msg);
@@ -120,7 +141,8 @@ public class MQTTManager3 : MonoBehaviour
                     scenarioManager.isAreaChanged = true;
                 }
         }
-        else if (e.Topic == MQTTConf.topic[3])//ScenarioManager3에서 말고 여기서 unity system에 방향지시등 모양 시각화 표시하도록
+        else if (e.Topic == MQTTConf.topic[4])//mws/Set/Direction
+                                              //ScenarioManager3에서 말고 여기서 unity system에 방향지시등 모양 시각화 표시하도록
         {
             //"mws/Set/Direction": 대피명령
             /*
@@ -143,21 +165,19 @@ public class MQTTManager3 : MonoBehaviour
             }
             scenarioManager.isSensorUpdated = true;
         }
-        else if (e.Topic == MQTTConf.topic[4])
+        else if (e.Topic == MQTTConf.topic[5])//아직 없음 "mws/Set/Sound"
         {
-            //"DT/Request/SensorData",  :: DEPRECATED
 
 
         }
-        else if (e.Topic == MQTTConf.topic[5])
+        else if (e.Topic == MQTTConf.topic[6])//mws/Request/Area
         {
-            //"mws/Request/Area",
 
 
         }
-        else if (e.Topic.Contains("mws/Response/Area/"))
+        else if (e.Topic.Contains("mws/Response/Area/"))//mws/Response/Area/#
         {
-            // "mws/Response/Area/#"
+            
 
             MessageData md = Jsoning(msg);
             if (scenarioManager.areaNums.ContainsKey(md.areaId))
@@ -167,26 +187,13 @@ public class MQTTManager3 : MonoBehaviour
                     scenarioManager.isAreaChanged = true;
                 }
 
-        }
-        else if (e.Topic == MQTTConf.topic[7])
+        }/*
+        else if (e.Topic == MQTTConf.topic[7])//"DT/UpdateSensorPosition", :: DEPRECATED
         {
-            //"DT/UpdateSensorPosition", :: DEPRECATED
+            
 
-        }
-        else if (e.Topic == MQTTConf.topic[8])
-        {
-            //mws/Notification/Periodic/DisasterEvent
-            MessageData md = Jsoning(msg);
-            //scenarioManager.sensorNodeJsons[md.nodeId].value1 = md.value;
-            if (md.nodeId != null)
-                if (scenarioManager.SensorDictionary.ContainsKey(md.nodeId))
-                {
-                    scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.value1 = md.value;
-                    scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.disaster = true;
-                    scenarioManager.isSensorUpdated = true;
-                }
-        }
-        else if (e.Topic == "messageID")
+        }*/
+        else if (e.Topic == "messageID")//?
         {
             MessageData md = Jsoning(msg);
             this.msgID = (int)(md.value);

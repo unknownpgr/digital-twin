@@ -270,6 +270,7 @@
      <Compile Include="Assets\Scripts\Node.cs" />
      <Compile Include="Assets\Scripts\NodeControl\BuildingManager.cs" />
      <Compile Include="Assets\Scripts\NodeControl\FunctionManager.cs" />
+     <Compile Include="Assets\Scripts\NodeControl\GraphRenderer.cs" />
      <Compile Include="Assets\Scripts\NodeControl\MouseManager.cs" />
      <Compile Include="Assets\Scripts\NodeControl\NodeManager.cs" />
      <Compile Include="Assets\Scripts\NodeControl\Nodes\NodeDirection.cs" />

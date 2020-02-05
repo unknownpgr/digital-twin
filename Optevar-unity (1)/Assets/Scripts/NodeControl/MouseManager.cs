@@ -125,7 +125,7 @@ public class MouseManager : MonoBehaviour
         {
             if (isHit)
             {
-                FunctionManager.Popup(placingNode.GetType() + " placed.");
+                FunctionManager.Popup(placingNode.Type + " placed.");
                 mouseMode = MouseMode.NORMAL;
                 placingNode = null;
             }
@@ -140,7 +140,8 @@ public class MouseManager : MonoBehaviour
         {
             Destroy(placingNode);
             placingNode = null;
-            mouseMode = MouseMode.NODE_PLACING;
+            mouseMode = MouseMode.NORMAL;
+            FunctionManager.Popup("Canceled.");
         }
     }
 }

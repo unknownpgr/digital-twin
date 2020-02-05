@@ -136,7 +136,7 @@ public class objects_batch : MonoBehaviour
                 DBManager dbm = DBManager.GetComponent<DBManager>();
                 foreach (string d in dics.Keys)//<string, object>
                 {
-                    Debug.Log("센서타입 : " + dics[d].GetType());
+                    //Debug.Log("센서타입 : " + dics[d].GetType());
                     if (dics[d].GetType() == typeof(SensorNodeJson))// 이거 sensor_attribute로 되어있었음
                         dbm.SensorSave((SensorNodeJson)dics[d]);//타입변환오류
 
