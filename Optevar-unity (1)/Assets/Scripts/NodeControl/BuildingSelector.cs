@@ -71,7 +71,10 @@ public class BuildingSelector : MonoBehaviour
         FunctionManager.BuildingName = name;
 
         // ToDo : Check DB
-        SceneManager.LoadScene("PlacingMode");
+        bool dataExists = false;
+
+        if (dataExists) SceneManager.LoadScene("MonitoringMode");
+        else SceneManager.LoadScene("PlacingMode");
     }
 
     private string getBuildingName(string path)
