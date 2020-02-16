@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/build/Main - Copy.unity
+- path: Assets/Scenes/build/BuildingSelect.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

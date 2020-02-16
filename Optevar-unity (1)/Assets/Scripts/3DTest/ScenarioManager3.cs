@@ -64,7 +64,7 @@ public class Sensors
         
         switch (sensor_Attribute.one_sensor.nodeType)
         {
-            case 33:
+            case 33://16진수 21
                 //fire
                 Material.color = new Color(1, 1 - sensor_Attribute.one_sensor.value1 * 3 / 255f, 1 - sensor_Attribute.one_sensor.value1 * 3 / 255f);
                 //SetSensor(sensor_Attribute.one_sensor.value1 > 70);
@@ -82,7 +82,7 @@ public class Sensors
                 //SetSensor(sensor_Attribute.one_sensor.value1 > 0);
                 ret = SetSensor(sensor_Attribute.one_sensor.disaster);
                 break;
-            case 39:
+            case 39://기존 39
                 // 방향 지시
                 // 이때 value1는 방향을 나타낸다. 0 ~ 3: 나가는 방향 지시, 4 ~ 7: 들어오는 방향 지시.
                 DirectionSensorScript dir = gameObject.GetComponent<DirectionSensorScript>();
@@ -166,7 +166,7 @@ public class ScenarioManager3 : MonoBehaviour
     List<Object> CreatedForGUI = new List<Object>();
 
     // Scenario ScenarioFromJson;
-    public void Initiation()
+    public void Initiation()////////////////////
     {
         //Canvas initiation
         main_camera = Camera.main;
@@ -196,7 +196,7 @@ public class ScenarioManager3 : MonoBehaviour
         this.floorHeights = SideGUI.FloorHeights;
         MusicPlayer = this.gameObject.GetComponent<AudioSource>();
     }
-    public void SetDefault()
+    public void SetDefault()/////////////////////////////
     {
         InitAreaGUI();
         if (SensorDictionary != null)
@@ -250,7 +250,7 @@ public class ScenarioManager3 : MonoBehaviour
         this.areaJsons = new List<AreaPositions>();
         areaJsons.AddRange(scene.areaPositionJsons);
     }
-    public void SetLists(Scenario scene, List<GameObject> sensorList)
+    public void SetLists(Scenario scene, List<GameObject> sensorList)//센서 오브젝트들을 받아***
     {
         if (scene == null)
         {
@@ -583,12 +583,13 @@ public class ScenarioManager3 : MonoBehaviour
         }
     }
    
-    public void SetMQTTNum(int number, Vector3 startPosition)
+    public void SetMQTTNum(int number, Vector3 startPosition)//areaId, position 씬에 area별 사람 수 띄우기
     {
         GameObject ori_cube = GameObject.Find("area_cube");
         GameObject new_cube = Instantiate(ori_cube, startPosition, ori_cube.transform.rotation);
         new_cube.transform.position = new Vector3(startPosition.x, startPosition.y + .1f, startPosition.z - 1);
         new_cube.GetComponent<TextMesh>().text = number.ToString();
+        new_cube.transform.SetParent(GameObject.Find("all_objects").transform);
         areaNumObjs.Add(new_cube);
         Debug.Log("Done");
     }
@@ -603,7 +604,7 @@ public class ScenarioManager3 : MonoBehaviour
     {
         
     }
-    public bool SetSensorValue()///////////////////////////
+    public bool SetSensorValue()
     {
         
         List<int> dangerFloors = new List<int>();
@@ -613,19 +614,19 @@ public class ScenarioManager3 : MonoBehaviour
 
         foreach (string k in SensorDictionary.Keys)
         {
-            ret &= SensorDictionary[k].SensorValue();
-            
+            ret &= SensorDictionary[k].SensorValue();///////////////////////////
+
             if (SensorDictionary[k].sensor_Attribute.one_sensor.disaster)//DisasterEvent일 때
             {
                 //scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.nodeType = md.sensorType;
                 switch (SensorDictionary[k].sensor_Attribute.one_sensor.nodeType)
                 {
-                    case 33:
+                    case 33://16진수 21
                         //fire
                         //if (SensorDictionary[k].sensor_Attribute.one_sensor.value1 > 70)
 
                         {
-                            Debug.Log("fire 33");
+                            Debug.Log("fire 21");
                             TargetFloor = 1;
                             LastUpdatedFloor = SideGUI.HeightToFloor(SensorDictionary[k].sensor_Attribute.one_sensor.positions);
                             WarnText.text = "화재 발생";
@@ -658,7 +659,7 @@ public class ScenarioManager3 : MonoBehaviour
                         }
 
                         break;
-                    case 39:
+                    case 39://39
                         {
                             // 방향 지시
                             Debug.Log("39 방향지시");

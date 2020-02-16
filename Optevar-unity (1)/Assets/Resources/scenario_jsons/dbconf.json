@@ -4,6 +4,5 @@
   "db_pw": "uostest",
   "db_name": "etrimws_test",
   "sensor_table": "tb_sensornode",
-  "sensor_value_table": "tb_sensingvalue",
-  "area_table": "areaTable"
+  "sensor_value_table": "tb_sensingvalue"
 }

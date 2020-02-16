@@ -253,7 +253,6 @@
      <Compile Include="Assets\Scripts\batch_mode\objects_batch.cs" />
      <Compile Include="Assets\Scripts\batch_mode\person_attribute.cs" />
      <Compile Include="Assets\Scripts\batch_mode\person_inputfield.cs" />
-     <Compile Include="Assets\Scripts\batch_mode\question_button.cs" />
      <Compile Include="Assets\Scripts\batch_mode\sensor_attribute.cs" />
      <Compile Include="Assets\Scripts\batch_mode\win_close.cs" />
      <Compile Include="Assets\Scripts\CustomGrid.cs" />
@@ -269,6 +268,7 @@
      <Compile Include="Assets\Scripts\MQTTManager.cs" />
      <Compile Include="Assets\Scripts\Node.cs" />
      <Compile Include="Assets\Scripts\NodeControl\BuildingManager.cs" />
+     <Compile Include="Assets\Scripts\NodeControl\BuildingSelector.cs" />
      <Compile Include="Assets\Scripts\NodeControl\FunctionManager.cs" />
      <Compile Include="Assets\Scripts\NodeControl\GraphRenderer.cs" />
      <Compile Include="Assets\Scripts\NodeControl\MouseManager.cs" />
@@ -354,6 +354,7 @@
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap-Custom-Atlas.shader" />
      <None Include="Assets\Resources\scenario_jsons\scenaio1.json" />
      <None Include="Assets\Resources\jsons\33.json" />
+     <None Include="Assets\Resources\scenario_jsons\temp1.json" />
      <None Include="Assets\MarkLight\Views\UI\TabPanel.xml" />
      <None Include="Assets\MarkLight\Views\Cube.xml" />
      <None Include="Assets\MarkLight\Views\UI\ViewSwitcher.xml" />
@@ -364,6 +365,7 @@
      <None Include="Assets\Resources\scenario_jsons\test1234.json" />
      <None Include="Assets\MarkLight\Views\UI\Mask.xml" />
      <None Include="Assets\MarkLight\Views\StateAnimation.xml" />
+     <None Include="Assets\Resources\scenario_jsons\0210-ETRI.json" />
      <None Include="Assets\Resources\jsons\22.json" />
      <None Include="Assets\MarkLight\Views\Animate.xml" />
      <None Include="Assets\Resources\scenario_jsons\1125-kin.json" />

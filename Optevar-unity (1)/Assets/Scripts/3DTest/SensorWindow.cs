@@ -65,9 +65,9 @@ public class SensorWindow : MonoBehaviour
             case 33:
                 return "33(화재)";
             case 2:
-                return "2(지진)";
+                return "2(수재해)";
             case 3:
-                return "3(수재해)";
+                return "3(지진)";
             case 39:
                 return "39(방향지시등)";
             default:

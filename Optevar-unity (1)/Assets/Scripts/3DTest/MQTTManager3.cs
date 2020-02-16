@@ -35,7 +35,7 @@ public class MQTTManager3 : MonoBehaviour
         //Debug.Log("MQTTConf : "+ MQTTConf);
         if (MQTTConf.brokerAddr != null && MQTTConf.userName != null && MQTTConf.password != null)
         {
-            MQTTConf.clientId = Guid.NewGuid().ToString();
+            MQTTConf.clientId = Guid.NewGuid().ToString();//random string생성해 clientId입력
             Debug.Log("Connecting ... " + MQTTConf.brokerAddr + ", " + MQTTConf.clientId);
             Connect();
             client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
@@ -337,7 +337,7 @@ class MQTTClass
 }
 
 [SerializeField]
-class MessageData
+class MessageData//
 {
     public string messageId;
     public string nodeId;
@@ -379,7 +379,7 @@ class MessageData
     }
 }
 
-class DirectionOperation
+class DirectionOperation//
 {
     /*
              {

@@ -15,7 +15,7 @@ class DBClass{
     public string db_name = "etrimws_test";
     public string sensor_table = "tb_sensornode";//'tb_sensornode'
     public string sensor_value_table = "tb_sensingvalue";
-    public string area_table = "AreaTable";//아직없음<-회의
+    public string area_table = "AreaTable";//아직없음<-회의 "area_table": "areaTable"이거 추후 dbconf.json에 추가해야함
 }
 
 public class DBManager : MonoBehaviour
@@ -94,6 +94,48 @@ public class DBManager : MonoBehaviour
     public void SensorSave(SensorNodeJson sensor)//SensorNodeJson로??
     {
 
+        if (conn.Ping())//conn.State == System.Data.ConnectionState.Open)//
+        {
+
+            //UPDATE
+            string q = "" +
+                "UPDATE " + db.sensor_table +
+                " SET " +
+                "location = '(" +
+                sensor.positions.x.ToString("F2") + "," +
+                sensor.positions.y.ToString("F2") + "," +
+                sensor.positions.z.ToString("F2") + ")' " +
+                "WHERE node_address = '" +
+                sensor.nodeId + "';";
+            Debug.Log("save 쿼리문 : " + q);
+            MySqlCommand command = new MySqlCommand(q, conn);
+            command.ExecuteNonQuery();
+
+
+            //else// 새로운 센서추가할때<-- 안쓰임
+            //{
+                //INSERT
+                // 클라이언트에서 새로 만드는 경우는 없는걸로 가정함.
+                /*
+                string q = "" +
+                    "INSERT INTO " + db.sensor_table +
+                    " VALUES (" +
+                    sensor.one_sensor.nodeId + ", " +
+                    //sensor.one_sensor.nodeType + "," +
+                    sensor.one_sensor.positions.x.ToString("F2") + "," +
+                    sensor.one_sensor.positions.y.ToString("F2") + "," +
+                    sensor.one_sensor.positions.z.ToString("F2") + "');";
+                MySqlCommand command = new MySqlCommand(q, conn);
+                command.ExecuteNonQuery();
+                */
+            //}
+            //conn.close();
+        }
+    }
+    /*
+         public void SensorSave(SensorNodeJson sensor)//SensorNodeJson로??
+    {
+
         if (conn.Ping())
         {
             if (SensorLoad(sensor.nodeId))//존재하고있는지 확인
@@ -117,21 +159,11 @@ public class DBManager : MonoBehaviour
             {
                 //INSERT
                 // 클라이언트에서 새로 만드는 경우는 없는걸로 가정함.
-                /*
-                string q = "" +
-                    "INSERT INTO " + db.sensor_table +
-                    " VALUES (" +
-                    sensor.one_sensor.nodeId + ", " +
-                    //sensor.one_sensor.nodeType + "," +
-                    sensor.one_sensor.positions.x.ToString("F2") + "," +
-                    sensor.one_sensor.positions.y.ToString("F2") + "," +
-                    sensor.one_sensor.positions.z.ToString("F2") + "');";
-                MySqlCommand command = new MySqlCommand(q, conn);
-                command.ExecuteNonQuery();
-                */
-            }
+                
+}
         }
     }
+         */
     /*
      public void SensorSave(sensor_attribute sensor)
     {
@@ -178,25 +210,26 @@ public class DBManager : MonoBehaviour
     public void SensorSave(areasensor_attribute sensor)//이제 쿼리문 바뀐 테이블형식대로 싹다 바꿔야함
     {
         // area에 관한 DB 테이블이 현재 존재하지 않으므로 개발 필요.
-        if (conn.Ping())
+        if (conn.Ping())//conn.State == System.Data.ConnectionState.Open
         {
-            if (SensorLoad(sensor.one_sensor.areaId))
-            {
+            
+            //if (SensorLoad(sensor.one_sensor.areaId))
+            //{
                 //UPDATE
-                string q = "" +
-                    "UPDATE '" + db.area_table +
-                    "' SET " +
-                    "'location' = '(" +
-                    sensor.one_sensor.position.x.ToString("F2") + "," +
-                    sensor.one_sensor.position.y.ToString("F2") + "," +
-                    sensor.one_sensor.position.z.ToString("F2") + ")' " +
-                    "WHERE 'node_address' = " +
-                    sensor.one_sensor.areaId + ";";
-                MySqlCommand command = new MySqlCommand(q, conn);
-                command.ExecuteNonQuery();
-            }
-            else
-            {
+            string q = "" +
+                "UPDATE '" + db.area_table +
+                "' SET " +
+                "'location' = '(" +
+                sensor.one_sensor.position.x.ToString("F2") + "," +
+                sensor.one_sensor.position.y.ToString("F2") + "," +
+                sensor.one_sensor.position.z.ToString("F2") + ")' " +
+                "WHERE 'node_address' = " +
+                sensor.one_sensor.areaId + ";";
+            MySqlCommand command = new MySqlCommand(q, conn);
+            command.ExecuteNonQuery();
+            //}
+            //else
+            //{
                 //INSERT
                 // 클라이언트에서 새로 만드는 경우는 없는걸로 가정함.
                 /*
@@ -210,7 +243,7 @@ public class DBManager : MonoBehaviour
                 MySqlCommand command = new MySqlCommand(q, conn);
                 command.ExecuteNonQuery();
                 */
-            }
+            //}
         }
     }
 
@@ -228,13 +261,16 @@ public class DBManager : MonoBehaviour
             " WHERE node_address = '" + id + "';" ;
         bool ret = false;
         Debug.Log("load쿼리문 : "+q);
-        if (conn.Ping())
+        
+        if (conn.Ping())//conn.State == System.Data.ConnectionState.Open)// == true
         {
             MySqlCommand command = new MySqlCommand(q, conn);
             MySqlDataReader rdr = command.ExecuteReader();
             ret = false;
             string temp = RdrToStr(rdr);
             ret = (temp != string.Empty);
+
+            Debug.Log(temp);
 
             string[] tmp = temp.Split(';');
             if (sensor != null)
@@ -248,6 +284,7 @@ public class DBManager : MonoBehaviour
             Debug.Log("node_addr, type, loc : " + temp); // "2,33,(2.4,5.22,8)"  // node_addr, type, location
             // 이 값을 parsing해서 location에 따라 센서 설치하는거 구현해야함
         }
+        //conn.close();
         return ret;
     }
 

@@ -84,8 +84,11 @@ public class WindowManager : MonoBehaviour
     Vector2 align = new Vector2(Screen.width / 2, -Screen.height / 2);
     void Update()
     {
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(parantTransform, Input.mousePosition, GetComponentInParent<Canvas>().worldCamera, out mousePosition);
-        mousePosition += align;
+        if (visibility)
+        {
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(parantTransform, Input.mousePosition, GetComponentInParent<Canvas>().worldCamera, out mousePosition);
+            mousePosition += align;
+        }
 
         if (movingTime > 0)
         {
@@ -93,7 +96,7 @@ public class WindowManager : MonoBehaviour
             if (visibility) t = movingTime;
             else t = 1 - movingTime;
             rectTransform.anchoredPosition = Vector2.Lerp(WINODW_VISIBLE_POSITION, WINDOW_HIDE_POSITION, SmoothMove(t));
-            movingTime -= Time.deltaTime * 0.5f;
+            movingTime -= Time.deltaTime;
         }
 
         // Exponential approach. Easy to calculate but foo fast when hide.

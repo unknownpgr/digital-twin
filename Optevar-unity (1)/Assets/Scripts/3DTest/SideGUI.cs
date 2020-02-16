@@ -34,6 +34,9 @@ public class SideGUI : MonoBehaviour
         for (int i = floors; i > idx; i--)
             FloorObjects[i-1].gameObject.SetActive(false);
 
+        if (Created == null)
+            Created = GameObject.Find("all_objects");
+
         for (int i = 0; i < Created.transform.childCount; i++)
         {
             Bounds b = FloorBounds[idx - 1];
@@ -85,8 +88,8 @@ public class SideGUI : MonoBehaviour
             }
         }
         
-        if (Created == null)
-            Created = GameObject.Find("all_objects");
+        //if (Created == null)
+        //    Created = GameObject.Find("all_objects");
         SetGUI();
     }
     public void InitBuildingInfo(GameObject _building)
@@ -110,8 +113,8 @@ public class SideGUI : MonoBehaviour
                 FloorHeights.Add(FloorObjects[i].transform.position.y);
         }
 
-        if (Created == null)
-            Created = GameObject.Find("all_objects");
+        //if (Created == null)
+        //    Created = GameObject.Find("all_objects");
         SetGUI();
     }
 

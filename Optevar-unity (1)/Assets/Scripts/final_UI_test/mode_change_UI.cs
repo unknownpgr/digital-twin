@@ -127,8 +127,8 @@ public class mode_change_UI : MonoBehaviour
         sm = ui_cont.path.GetComponent<ScenarioManager3>();
         sm.Initiation();
         sm.image_panel.SetActive(false);
-        sm.SetLists(this.scene, pb.GetSensorObjects());
-        sm.InitMoniteringMode();
+        sm.SetLists(this.scene, pb.GetSensorObjects());//현재 씬의 센서 obj들 받아
+        sm.InitMoniteringMode();//시나리오모드시작
     }
 
     public void active_disas_panel()

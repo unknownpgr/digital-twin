@@ -7,20 +7,26 @@ public class MouseManager : MonoBehaviour
 {
     public enum MouseMode
     {
-        NORMAL, NODE_PLACING
+        NORMAL,         // Normal mode. User can do click object to see attribute or can use UI buttons.
+        NODE_PLACING    // Node placing mode. User only can place node. If they click UI, node placing will be canceled. 
     }
 
-    static MouseMode mouseMode = MouseMode.NORMAL;
-    static NodeManager placingNode;
+    // Do not directly set mouseMode. mouseMode only can be set by NodePlace and ToNormal function.
+    private static MouseMode mouseMode = MouseMode.NORMAL;
+    private static NodeManager placingNode;
     int placableLayer;
 
     // Camera pan / rotation / zoom
     public float wheelConstant = 30f;
     float panningValue = 5f;
     float rotY, rotX = 0;
+
+    // Camera / transfrom
+    private Camera camera;
     private static Transform cameraTransform;
 
-    private Camera camera;
+    // Camera moving. dest.y is some kind of flag. if dest.y>0, do tracking. or, do nothing.
+    Vector3 dest = Vector3.down;
 
     private static GameObject targetMark;
 
@@ -36,24 +42,33 @@ public class MouseManager : MonoBehaviour
         placableLayer = UnityEngine.LayerMask.NameToLayer("building");
 
         targetMark = (GameObject)Instantiate((GameObject)Resources.Load("Prefabs/TargetMark"));
-        targetMark.transform.position = cameraTransform.position;
+        targetMark.SetActive(false);
     }
 
     // Update is called once per frame
+    private float doubleClickTimer = 0;
+    private float doubleClickDuraction = 0.5f;
+    private bool doubleClick = false;
     void Update()
     {
+        if (doubleClickTimer > 0) doubleClickTimer -= Time.deltaTime;
         switch (mouseMode)
         {
             case MouseMode.NORMAL:
-                targetMark.transform.position = cameraTransform.position;
                 if (Input.GetMouseButtonDown(0))
                 {
+                    // Double clicked. initialize timer to prevent tirple-click.
+                    if (doubleClick = (doubleClickTimer > 0)) doubleClickTimer = 0;
+                    else doubleClickTimer = doubleClickDuraction;
+
                     Ray cast_point = Camera.main.ScreenPointToRay(Input.mousePosition);
                     RaycastHit hit;
                     if (Physics.Raycast(cast_point, out hit, Mathf.Infinity))
                     {
                         string tag = hit.collider.gameObject.tag;
-                        // Do something with clicked object
+                        // Do something with clicked object.
+                        // For example, go nearby there.
+                        if (doubleClick) dest = hit.point;
                     }
                     else
                     {
@@ -62,6 +77,7 @@ public class MouseManager : MonoBehaviour
                     }
                 }
                 break;
+
             case MouseMode.NODE_PLACING:
                 NodePlacing();
                 break;
@@ -73,18 +89,26 @@ public class MouseManager : MonoBehaviour
     public static void NodePlace(NodeManager obj)
     {
         placingNode = obj;
-        placingNode.transform.position = cameraTransform.position;
+        placingNode.SetActive(false);
         mouseMode = MouseMode.NODE_PLACING;
     }
 
     public static void ToNormalMode()
     {
+        targetMark.SetActive(false);
         Debug.Log("Normal mode");
-        placingNode = null;
+        // if placingNode is not null, it means node is not placed.
+        if (placingNode)
+        {
+            placingNode.Destroy();
+            FunctionManager.Popup("Node placing canceled.");
+            placingNode = null;
+        }
         mouseMode = MouseMode.NORMAL;
     }
 
     float wheelValue = 0f;
+    private Vector3 velocity = Vector3.zero;
     void CameraMove()
     {
         // Panning
@@ -101,11 +125,19 @@ public class MouseManager : MonoBehaviour
             cameraTransform.localEulerAngles = new Vector3(-rotY, rotX, 0);
         }
 
-        wheelValue = Input.GetAxis("Mouse ScrollWheel") * wheelConstant;
-        //Zoom
+        // Zoom
+        wheelValue = Input.GetAxis("Mouse ScrollWheel");
         if (wheelValue != 0)
         {
-            camera.fieldOfView -= wheelValue;
+            cameraTransform.position += cameraTransform.forward * wheelValue * wheelConstant;
+        }
+
+        // Tracking
+        if (dest.y > 0)
+        {
+            // If near enough, stop.
+            if ((cameraTransform.position - dest).magnitude < 10) dest.y = -1;
+            else cameraTransform.position = Vector3.SmoothDamp(cameraTransform.position, dest, ref velocity, 0.3f);
         }
     }
 
@@ -118,6 +150,7 @@ public class MouseManager : MonoBehaviour
 
         if (isHit)
         {
+            targetMark.SetActive(true);
             // Move target marker to the hit point, but lift a little from surface.
             targetMark.transform.position = hit.point + hit.normal * 0.1f;
             // Set the direction of mark.
@@ -125,7 +158,7 @@ public class MouseManager : MonoBehaviour
         }
         else
         {
-            targetMark.transform.position = cameraTransform.position;
+            targetMark.SetActive(false);
         }
 
         // Place
@@ -133,6 +166,9 @@ public class MouseManager : MonoBehaviour
         {
             if (isHit)
             {
+                // Activate node
+                placingNode.SetActive(true);
+
                 // Place given node
                 placingNode.transform.position = hit.point;
 
@@ -141,9 +177,9 @@ public class MouseManager : MonoBehaviour
                 if (angleCosine < 0.5f) FunctionManager.Popup("Warning : " + placingNode.Type + " placed on wall.");
                 else FunctionManager.Popup(placingNode.Type + " placed.");
 
-                // Change to normal mode
-                mouseMode = MouseMode.NORMAL;
+                // Change to normal mode. Initialize placing node to null.
                 placingNode = null;
+                ToNormalMode();
 
                 // Uncomment here to continue placing.
                 // NodePlace(NodeManager.GetNode(NodeManager.NodeType.SENSOR_FIRE));
@@ -157,10 +193,7 @@ public class MouseManager : MonoBehaviour
         // Cancel
         else if (Input.GetMouseButton(1))
         {
-            Destroy(placingNode);
-            placingNode = null;
-            mouseMode = MouseMode.NORMAL;
-            FunctionManager.Popup("Canceled.");
+            ToNormalMode();
         }
     }
 }

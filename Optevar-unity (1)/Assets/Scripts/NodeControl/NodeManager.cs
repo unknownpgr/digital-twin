@@ -79,7 +79,10 @@ abstract public class NodeManager : MonoBehaviour
         newNodeManager.nodeType = nodeType;
         newNodeManager.transform = newNode.GetComponent<Transform>();
         newNodeManager.nodeID = (int)(nodeType) + ":" + nodeNumber;
-        nodeNumber++; // Node number must increase. wheather node is created or not.
+        nodeNumber++; // Node number must increase. wheather node is removed or not.
+
+        // Add node to dictionary
+        nodes.Add(newNodeManager.nodeID, newNodeManager);
 
         //do additional initialization steps here
 
@@ -97,6 +100,24 @@ abstract public class NodeManager : MonoBehaviour
     {
         BinaryFormatter b = new BinaryFormatter();
         b.Serialize(stream, this);
+    }
+
+    public void SetActive(bool activation)
+    {
+        gameObject.SetActive(activation);
+    }
+
+    public void Destroy()
+    {
+        Destroy(gameObject);
+        nodes.Remove(nodeID);
+    }
+
+    public static void DestroyAll()
+    {
+        string[] keys = new string[nodes.Count];
+        nodes.Keys.CopyTo(keys, 0);
+        foreach (string key in keys) nodes[key].Destroy();
     }
 
     private void Start()

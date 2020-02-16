@@ -6,6 +6,10 @@ using System.IO;
 
 public class FunctionManager : MonoBehaviour
 {
+    // Building information
+    public static string BuildingPath;
+    public static string BuildingName;
+
     // Popup associated values
     private static Vector3 POPUP_SHOW = new Vector2(0, -100);
     private static Vector3 POPUP_HIDE = new Vector2(0, 200);
@@ -136,7 +140,7 @@ public class FunctionManager : MonoBehaviour
     public void ButtonSensorMode(int mode)
     {
         MouseManager.ToNormalMode();
-        NodeManager newNode;
+        NodeManager newNode = null;
         switch (mode)
         {
             // Fire
@@ -168,8 +172,6 @@ public class FunctionManager : MonoBehaviour
 
     public void ButtonLoadSkpFiles(Dropdown dropdown)
     {
-        MouseManager.ToNormalMode();
-
         List<string> skpFiles = new List<string>();
         skpFiles.Add("Default");
 
@@ -184,11 +186,20 @@ public class FunctionManager : MonoBehaviour
 
     public void ButtonLoadBuilding(Dropdown dropdown)
     {
+        MouseManager.ToNormalMode();
+
+        // Remove all existing nodes
+        NodeManager.DestroyAll();
         GameObject building = BuildingManager.LoadSkp(dropdown.options[dropdown.value].text);
         // batch_panel.transform.Find("multi_floor")
         // .Find("FloorBtns")
         // .GetComponent<SideGUI>()
         // .InitBuildingInfo(loadBuilding.LoadSkp(drops.options[drops.value].text));
         if (!building) Popup("That is not a valid building.");
+    }
+
+    public void ToNormalMode()
+    {
+        MouseManager.ToNormalMode();
     }
 }
