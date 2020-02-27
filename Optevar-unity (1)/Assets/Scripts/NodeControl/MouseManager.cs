@@ -30,6 +30,7 @@ public class MouseManager : MonoBehaviour
 
     private static GameObject targetMark;
 
+
     // Start is called before the first frame update
     void Start()
     {
@@ -43,6 +44,10 @@ public class MouseManager : MonoBehaviour
 
         targetMark = (GameObject)Instantiate((GameObject)Resources.Load("Prefabs/TargetMark"));
         targetMark.SetActive(false);
+
+        // Set camera position
+        cameraTransform.position = new Vector3(0, 100, -100);
+        cameraTransform.rotation = Quaternion.Euler(45, 0, 0);
     }
 
     // Update is called once per frame
@@ -95,6 +100,8 @@ public class MouseManager : MonoBehaviour
 
     public static void ToNormalMode()
     {
+        // Do nothing before initialization
+        if (!targetMark) return;
         targetMark.SetActive(false);
         Debug.Log("Normal mode");
         // if placingNode is not null, it means node is not placed.

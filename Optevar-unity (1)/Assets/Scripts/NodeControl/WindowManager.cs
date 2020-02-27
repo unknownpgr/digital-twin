@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 public class WindowManager : MonoBehaviour
 {
     private Vector3 WINDOW_HIDE_POSITION;
-    private Vector3 WINODW_VISIBLE_POSITION = new Vector2(0, -100);
+    public Vector3 WINODW_VISIBLE_POSITION = new Vector2(0, -100);
     private bool visibility = false;
     private float movingTime = 0;   // Used to window moving.(hide/show)
 

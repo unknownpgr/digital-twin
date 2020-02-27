@@ -11,10 +11,27 @@ using UnityEngine.SceneManagement;
 
 public class BuildingManager
 {
+    // There is always only one building, therefore use static.
+
+    private class Floor
+    {
+        public float Height;
+        public GameObject gameObject;
+        public Floor(GameObject gameObject)
+        {
+            this.gameObject = gameObject;
+            this.Height = GetBounds(gameObject).center.y;
+        }
+    }
+
     public static GameObject building;
+    private static int floorsCount;
+    public static int FloorsCount { get => floorsCount; }
+    public static List<GameObject> Floors = new List<GameObject>();
 
     public static GameObject LoadSkp(string fileName)
     {
+        if (fileName == null) return null;
         fileName = fileName.ToLower().Replace(".skp", "");
 
         // Remove existing bulding
@@ -58,11 +75,44 @@ public class BuildingManager
         Bounds bounds = GetBounds(building);
         Vector3 size = bounds.size;
 
-        // Move building to center of plane
-        size.y = 0;
+        // Move building to center of plane,
+        // and slightly lift to prevent plane duplication.
+        size.y = -0.01f;
         building.GetComponent<Transform>().position -= size / 2;
 
         BuildingManager.building = building;
+
+        // Set building floors
+        floorsCount = building.transform.childCount;
+
+        // If building has multiple floors
+        if (floorsCount > 1)
+        {
+            // Sort floor by height
+
+            // Convert gameobject to floor object and append to list
+            List<Floor> floors = new List<Floor>();
+            foreach (Transform floor in building.transform)
+            {
+                floors.Add(new Floor(floor.gameObject));
+            }
+
+            // Sort by height
+            floors.Sort(delegate (Floor c1, Floor c2)
+            {
+                if (c1.Height > c2.Height) return 1;
+                if (c1.Height < c2.Height) return -1;
+                return 0;
+            });
+
+            // Add to Floors
+            foreach (Floor floor in floors)
+            {
+                Debug.Log("H = " + floor.Height);
+                Floors.Add(floor.gameObject);
+            }
+        }
+
         return building;
     }
 

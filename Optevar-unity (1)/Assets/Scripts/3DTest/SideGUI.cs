@@ -19,7 +19,7 @@ public class SideGUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public void HideFloor(int idx)
@@ -28,11 +28,11 @@ public class SideGUI : MonoBehaviour
         Debug.Log(idx);
         Debug.Log(FloorHeights[idx - 1]);
         for (int i = 0; i < floors; i++)
-        
+
             FloorObjects[i].SetActive(true);
-        
+
         for (int i = floors; i > idx; i--)
-            FloorObjects[i-1].gameObject.SetActive(false);
+            FloorObjects[i - 1].gameObject.SetActive(false);
 
         if (Created == null)
             Created = GameObject.Find("all_objects");
@@ -40,7 +40,8 @@ public class SideGUI : MonoBehaviour
         for (int i = 0; i < Created.transform.childCount; i++)
         {
             Bounds b = FloorBounds[idx - 1];
-            if (b.Contains(Created.transform.GetChild(i).transform.position)) {
+            if (b.Contains(Created.transform.GetChild(i).transform.position))
+            {
                 Created.transform.GetChild(i).gameObject.SetActive(true);
             }
             else
@@ -62,7 +63,7 @@ public class SideGUI : MonoBehaviour
                 Created.transform.GetChild(i).gameObject.SetActive(true);
                 */
         }
-        
+
     }
     public void InitBuildingInfo()//빌딩load한 후에 이 함수 실행되도록 바꿔야함
     {
@@ -87,7 +88,7 @@ public class SideGUI : MonoBehaviour
                 FloorBounds.Add(FloorObjects[i].GetComponent<BuildingObjectManager>().GetBounds());
             }
         }
-        
+
         //if (Created == null)
         //    Created = GameObject.Find("all_objects");
         SetGUI();
@@ -128,7 +129,6 @@ public class SideGUI : MonoBehaviour
             {
                 gameObject.transform.GetChild(i).gameObject.SetActive(false);
             }
-            
         }
     }
 

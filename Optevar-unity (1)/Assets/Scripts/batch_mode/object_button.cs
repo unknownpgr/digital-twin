@@ -18,6 +18,8 @@ public class object_button : MonoBehaviour
     {
         if (GameObject.Find("FloorBtns"))
         {
+                    Debug.Log("Obj:"+gameObject);
+
             SideGUI = GameObject.Find("FloorBtns").GetComponent<SideGUI>();
             SideGUI.InitBuildingInfo();// this.building);
             //SideGUI.HideFloor(sm.LastUpdatedFloor);

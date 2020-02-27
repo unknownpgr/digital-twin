@@ -11,7 +11,7 @@ public class GraphRenderer : MonoBehaviour
 
     void Start()
     {
-        graph = GameObject.Find("Graph");
+        graph = GameObject.Find("graph");
         graphTransform = graph.GetComponent<RectTransform>();
     }
 
