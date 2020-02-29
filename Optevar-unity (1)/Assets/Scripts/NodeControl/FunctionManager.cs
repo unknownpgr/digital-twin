@@ -14,14 +14,11 @@ public class FunctionManager : MonoBehaviour
     // Popup associated values
     private static Vector3 POPUP_SHOW = new Vector2(0, -100);
     private static Vector3 POPUP_HIDE = new Vector2(0, 200);
-    private GameObject popup;                    // Popup message box
+    private GameObject popup;                   // Popup message box
     private RectTransform popupTransform;       // Transform
     private static Text popupText;              // Text
-    private static float popupLifetime = 0;           // Popup lifetime. hide if 0
+    private static float popupLifetime = 0;     // Popup lifetime. hide if 0
     public static float POPUP_DURATION = 5;
-
-    // Buttons on top bar
-    public GameObject ButtonNode;
 
     // Dictionary of uis
     public Canvas canvas;
@@ -32,7 +29,7 @@ public class FunctionManager : MonoBehaviour
     void Start()
     {
         // Initialize UI.
-        RecursiveRegisterChild(canvas.transform);
+        RecursiveRegisterChild(canvas.transform, uis);
         // Now ui can be accessed with it's name.
 
         // Initialize popup
@@ -60,8 +57,11 @@ public class FunctionManager : MonoBehaviour
             // If building has multiple floors
             if (BuildingManager.FloorsCount > 1)
             {
+                // Get exsisting floor button
                 GameObject floorButton = uis["button_floor"].gameObject;
                 Transform plainFloors = uis["panel_floor"];
+
+                // Create floor buttons
                 GameObject newButton;
                 for (int i = 0; i < BuildingManager.FloorsCount; i++)
                 {
@@ -69,13 +69,14 @@ public class FunctionManager : MonoBehaviour
                     newButton.transform.SetParent(plainFloors, false);
                     newButton.transform.localPosition = Vector3.zero;
                     newButton.transform.GetChild(0).GetComponent<Text>().text = "F" + (i + 1);
+
+                    // I must be copied, or always it would be FloorsCount-1.
                     int k = i;
-                    newButton.GetComponent<Button>().onClick.AddListener(delegate
-                    {
-                        OnSetFloor(k);
-                    });
+                    newButton.GetComponent<Button>().onClick.AddListener(() => { OnSetFloor(k); });
                     floorButtons.Add(newButton);
                 }
+
+                // Destroy old button
                 Destroy(floorButton);
             }
             else
@@ -99,13 +100,10 @@ public class FunctionManager : MonoBehaviour
         }
     }
 
-    void RecursiveRegisterChild(Transform parent)
+    public static void RecursiveRegisterChild(Transform parent, Dictionary<string, Transform> dict)
     {
-        if (!uis.ContainsKey(parent.name)) uis.Add(parent.name, parent);
-        foreach (Transform child in parent)
-        {
-            RecursiveRegisterChild(child);
-        }
+        if (!dict.ContainsKey(parent.name)) dict.Add(parent.name, parent);
+        foreach (Transform child in parent) RecursiveRegisterChild(child, dict);
     }
 
     // Update is called once per frame
@@ -140,44 +138,11 @@ public class FunctionManager : MonoBehaviour
 
     //=======[ Callback functions ]=========================================================
 
+    // Called when sensor create button clicked
     public void OnCreateSensor()
     {
         MouseManager.ToNormalMode();
         WindowManager sensorWindow = WindowManager.GetWindow("window_sensor");
         sensorWindow.SetVisible(true);
-    }
-
-    // Sensor mode selection button on sensor window
-    public void ButtonSensorMode(int mode)
-    {
-        MouseManager.ToNormalMode();
-        NodeManager newNode = null;
-        switch (mode)
-        {
-            // Fire
-            case 0:
-                Popup("Fire sensor");
-                newNode = NodeManager.GetNode(NodeManager.NodeType.SENSOR_FIRE);
-                break;
-
-            // Earthquake - Not important
-            case 1:
-                Popup("This function is not implemented yet.");
-                break;
-
-            // Flood - Not important
-            case 2:
-                Popup("This function is not implemented yet.");
-                break;
-
-            // Direction
-            case 3:
-                Popup("Direction sign");
-                newNode = NodeManager.GetNode(NodeManager.NodeType.SIGN_DIRECTION);
-                break;
-        }
-        if (!newNode) Popup("Cannot creaet node.");
-        else MouseManager.NodePlace(newNode);
-        WindowManager.CloseAll();
     }
 }
