@@ -6,37 +6,27 @@ using UnityEngine.EventSystems;
 
 public class WindowManager : MonoBehaviour
 {
-    // Dictinoary of all window. Tuple of <window name, windowManager>
-    private static Dictionary<string, WindowManager> windows = new Dictionary<string, WindowManager>();
-
-    public string WindowName = "Test_Window";
-    public Vector3 WINODW_VISIBLE_POSITION = new Vector2(0, -100);
-
-    // Private fields
-    private Dictionary<string, Transform> elements = new Dictionary<string, Transform>();
-    private GameObject head;
-
     private Vector3 WINDOW_HIDE_POSITION;
+    public Vector3 WINODW_VISIBLE_POSITION = new Vector2(0, -100);
     private bool visibility = false;
     private float movingTime = 0;   // Used to window moving.(hide/show)
 
     private RectTransform parantTransform;  // Rect transform of parent
     private RectTransform rectTransform;    // Rect transform of this window
 
+    // Dictinoary of all window. Tuple of <window name, windowManager>
+    private static Dictionary<string, WindowManager> windows = new Dictionary<string, WindowManager>();
+
     // Used to window drag
-    private Vector2 mousePosition;
+    Vector2 mousePosition;
 
     // Start is called before the first frame update
     void Start()
     {
-        FunctionManager.RecursiveRegisterChild(transform, elements);
-        Debug.Log("Window assigned : " + WindowName);
-        elements["text_title"].GetComponent<Text>().text = WindowName;
-
-        if (!Application.IsPlaying(gameObject)) return;
-
+        Debug.Log("Window assigned : " + gameObject.name);
 
         // Load transforms
+        Transform transform = gameObject.GetComponent<Transform>();
         rectTransform = gameObject.GetComponent<RectTransform>();
         parantTransform = transform.parent.GetComponent<RectTransform>();
 
@@ -57,6 +47,7 @@ public class WindowManager : MonoBehaviour
         entryBeginDrag.callback.AddListener((eventData) =>
         {
             delta = rectTransform.anchoredPosition - mousePosition;
+            Debug.Log(delta);
         });
 
         // Add drag event listener for window moving
@@ -77,16 +68,19 @@ public class WindowManager : MonoBehaviour
         });
 
         // Add event listener
-        EventTrigger trigger = elements["header"].GetComponent<EventTrigger>();
+        EventTrigger trigger = transform.GetChild(0).Find("title").GetComponent<EventTrigger>();
         trigger.triggers.Add(entryDragging);
         trigger.triggers.Add(entryBeginDrag);
         trigger.triggers.Add(entryDrop);
 
         // Add close event listener
-        elements["button_close"].GetComponent<Button>().onClick.AddListener(() => { SetVisible(false); });
+        transform.GetChild(0).Find("close_button").GetComponent<Button>().onClick.AddListener(() =>
+             {
+                 SetVisible(false);
+             });
     }
 
-    // Half size of screen. used for mouse position convertion. I assumed that the screen size would not change.
+    // Half size of screen. used for mouse position convertign. I assumed that the screen size would not change.
     Vector2 align = new Vector2(Screen.width / 2, -Screen.height / 2);
     void Update()
     {
