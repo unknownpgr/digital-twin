@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class MouseManager : MonoBehaviour
 {
     public enum MouseMode
     {
-        NORMAL,         // Normal mode. User can do click object to see attribute or can use UI buttons.
-        NODE_PLACING    // Node placing mode. User only can place node. If they click UI, node placing will be canceled. 
+        NORMAL,         // Normal mode. User can click object to see attribute or can use UI buttons.
+        NODE_PLACING,   // Node placing mode. User only can place node. If they click UI, node placing will be canceled.
+        NODE_MOVING,    // Node moving mode
+        NODE_EDITING    // Node editing mode
     }
 
     // Do not directly set mouseMode. mouseMode only can be set by NodePlace and ToNormal function.
@@ -19,10 +22,9 @@ public class MouseManager : MonoBehaviour
     // Camera pan / rotation / zoom
     public float wheelConstant = 30f;
     float panningValue = 5f;
-    float rotY, rotX = 0;
+    float rotY, rotX;
 
-    // Camera / transfrom
-    private Camera camera;
+    // Camera transfrom
     private static Transform cameraTransform;
 
     // Camera moving. dest.y is some kind of flag. if dest.y>0, do tracking. or, do nothing.
@@ -34,7 +36,6 @@ public class MouseManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        camera = Camera.main.GetComponent<Camera>();
         cameraTransform = Camera.main.GetComponent<Transform>();
 
         rotX = cameraTransform.localEulerAngles.y;
@@ -48,39 +49,38 @@ public class MouseManager : MonoBehaviour
         // Set camera position
         cameraTransform.position = new Vector3(0, 100, -100);
         cameraTransform.rotation = Quaternion.Euler(45, 0, 0);
+        rotX = 0;
+        rotY = -45;
     }
 
     // Update is called once per frame
     private float doubleClickTimer = 0;
     private float doubleClickDuraction = 0.5f;
-    private bool doubleClick = false;
     void Update()
     {
+        // Detect double click
         if (doubleClickTimer > 0) doubleClickTimer -= Time.deltaTime;
+
+        bool isMouseOnUI = EventSystems.EventSystem.IsPointerOverGameObject();
+        bool isClicked = Input.GetMouseButtonDown(0);
+        bool isDoubleClicked = false;
+        GameObject target;
+        if (isClicked)
+        {
+            // Check doubleclick
+            if (isDoubleClicked = (doubleClickTimer > 0)) doubleClickTimer = 0;
+            else doubleClickTimer = doubleClickDuraction;
+
+            // Get clicked item
+            Ray cast_point = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(cast_point, out hit, Mathf.Infinity)) target = hit.collider.gameObject;
+        }
+
         switch (mouseMode)
         {
             case MouseMode.NORMAL:
-                if (Input.GetMouseButtonDown(0))
-                {
-                    // Double clicked. initialize timer to prevent tirple-click.
-                    if (doubleClick = (doubleClickTimer > 0)) doubleClickTimer = 0;
-                    else doubleClickTimer = doubleClickDuraction;
-
-                    Ray cast_point = Camera.main.ScreenPointToRay(Input.mousePosition);
-                    RaycastHit hit;
-                    if (Physics.Raycast(cast_point, out hit, Mathf.Infinity))
-                    {
-                        string tag = hit.collider.gameObject.tag;
-                        // Do something with clicked object.
-                        // For example, go nearby there.
-                        if (doubleClick) dest = hit.point;
-                    }
-                    else
-                    {
-                        // Nothing clicked.
-                        // WindowManager.CloseAll();
-                    }
-                }
+                if (isDoubleClicked) dest = hit.point;
                 break;
 
             case MouseMode.NODE_PLACING:
