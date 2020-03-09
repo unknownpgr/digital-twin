@@ -25,6 +25,9 @@ public class FunctionManager : MonoBehaviour
     private static Dictionary<string, Transform> uis = new Dictionary<string, Transform>();
     private List<GameObject> floorButtons = new List<GameObject>();
 
+    // Text of Date And Time UI
+    public Text dateText;
+    public Text timeText;
 
     // Start is called before the first frame update
     void Start()
@@ -71,7 +74,7 @@ public class FunctionManager : MonoBehaviour
                     newButton.transform.localPosition = Vector3.zero;
                     newButton.transform.GetChild(0).GetComponent<Text>().text = "F" + (i + 1);
 
-                    // I must be copied, or always it would be FloorsCount-1.
+                    // var i must be copied, or always it would be FloorsCount-1 as it is used from inline functions that share context.
                     int k = i;
                     newButton.GetComponent<Button>().onClick.AddListener(() => { OnSetFloor(k); });
                     floorButtons.Add(newButton);
@@ -87,11 +90,30 @@ public class FunctionManager : MonoBehaviour
             }
         }
 
-        // 여기에 센서들의 배열을 윈도우에 집어넣는 것을 구현하세요. 방법은 마음대로.
-        // 중요한 것은 센서가 클릭되면, 콜백 메서드가 호출이 돼야 한다.
-        // public void OnSensorSelected()
-        // 이거
-        // 센서들의 배열은 NodeManager.nodes dictionary를 읽으면 된다.
+
+        // GameObject sensorButton = uis["button_sensor_ID"].gameObject;
+        GameObject sensorButton = uis["button_floor"].gameObject;
+        // Transform sensorPanel = uis["panel_sensor"];
+        Transform sensorPanel = uis["panel_floor"];
+
+        GameObject newSensorBtn;
+
+        foreach (string nodeString in NodeManager.__TEST__GetTestNodes(5))
+        {
+            NodeManager.Instantiate(nodeString);
+        }
+
+        foreach (string physicalID in NodeManager.GetNodeNames())
+        {
+            Debug.Log(physicalID);
+            newSensorBtn = Instantiate(sensorButton);
+            newSensorBtn.transform.SetParent(sensorPanel, false);
+            newSensorBtn.transform.localPosition = Vector3.zero;
+            newSensorBtn.transform.GetChild(0).GetComponent<Text>().text = physicalID;
+            newSensorBtn.GetComponent<Button>().onClick.AddListener(() => OnSensorSelected(physicalID));
+        }
+
+        Destroy(sensorButton);
     }
 
     // floor starts from 0. 1st floor = 0
@@ -107,6 +129,8 @@ public class FunctionManager : MonoBehaviour
         }
     }
 
+
+    // Recursively stored for later access from the dictionary.
     public static void RecursiveRegisterChild(Transform parent, Dictionary<string, Transform> dict)
     {
         if (!dict.ContainsKey(parent.name)) dict.Add(parent.name, parent);
@@ -133,6 +157,8 @@ public class FunctionManager : MonoBehaviour
             popupTransform.anchoredPosition = Vector2.Lerp(POPUP_HIDE, POPUP_SHOW, WindowManager.SmoothMove(t));
             popupLifetime -= Time.deltaTime;
         }
+
+        UpdateDateAndTime();
     }
 
     // Show popup message
@@ -141,6 +167,17 @@ public class FunctionManager : MonoBehaviour
         if (popupLifetime > 0) popupLifetime = POPUP_DURATION - 1.0f;
         else popupLifetime = POPUP_DURATION;        // Set lifetime to 5 sec
         popupText.text = text;                      // Set text fo popup message
+    }
+
+    // Update date and time Text
+    private void UpdateDateAndTime()
+    {
+        return;
+        System.DateTime dateTime = System.DateTime.Now;
+
+        dateText.text =
+            dateTime.ToString("yyyy") + "/" + dateTime.ToString("MM") + "/" + dateTime.ToString("dd");
+        timeText.text = dateTime.ToString("hh시 mm분 ss초");
     }
 
     //=======[ Callback functions ]=========================================================
@@ -153,12 +190,10 @@ public class FunctionManager : MonoBehaviour
         sensorWindow.SetVisible(true);
     }
 
-    public void OnSensorSelected()
+    public void OnSensorSelected(string nodeID)
     {
-        // 이 Dictionary를 사용
-        // NodeManager.nodes["노드 이름"];
-        // 어쨌건 이 함수 안에서 무슨 버튼이 눌렸는지는 알아야 된다.
-        NodeManager sensor;
+        NodeManager sensor = NodeManager.GetNodeByName(nodeID);
+        Debug.Log(nodeID);
     }
 
 }

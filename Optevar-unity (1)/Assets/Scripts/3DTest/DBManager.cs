@@ -59,7 +59,6 @@ public class DBManager : MonoBehaviour
         
         Debug.Log("DB Loaded.");
     }
-    
     public void SensorValueSelect(Text _nodeId, Text _start, Text _end)
     {
         //select * from products where registdate between '2013-03-01' and '2013-03-04'

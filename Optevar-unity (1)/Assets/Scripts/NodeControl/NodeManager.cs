@@ -6,6 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System;
 using System.Reflection;
 using System.Linq;
+using System.Runtime.Serialization.Json;
 
 /*
 Node :
@@ -83,8 +84,8 @@ abstract public class NodeManager
     private string physicalID;
     public string PhysicalID { get => physicalID; }
 
-    // Name of node type. default is class name.
-    public virtual string NodeType { get => GetType().Name; }
+    // Name of node type. default is class name. It is just for display. do not use this as more than a string such as key.
+    public virtual string DisplayName { get => GetType().Name; }
 
     // Position of node.
     public Vector3 Position
@@ -144,13 +145,10 @@ abstract public class NodeManager
         Vector3 position = jsonDict[KEY_POSITION].ToVector3();
         Dictionary<string, string> properties = jsonDict[KEY_PROPERTY].Jsonfy();
 
-        // Create NodeManager instance of given type and set common property
+        // Create NodeManager instance
         initiatable = true;
         NodeManager nodeManager = (NodeManager)Activator.CreateInstance(nodeType);
         initiatable = false;
-        nodeManager.physicalID = physicalID;
-        nodeManager.Position = position;
-        nodeManager.DictToProperty(properties);
 
         // Load prefab
         GameObject prefab = (GameObject)Resources.Load("Prefabs/" + nodeManager.prefabName);
@@ -161,11 +159,26 @@ abstract public class NodeManager
         nodeManager.gameObject.transform.position = position;
         nodeManager.Init();
 
+        // Set other properties
+        nodeManager.physicalID = physicalID;
+        nodeManager.Position = position;
+        nodeManager.DictToProperty(properties);
+
+        nodes.Add(physicalID, nodeManager);
+
+        string nodeInfo =
+        "\n===[ Node Information ]===============" +
+        "\n    Physical ID = " + physicalID +
+        "\n    Type = " + nodeType +
+        "\n    Position = " + position +
+        "\n======================================\n";
+        Debug.Log(nodeInfo);
+
         return nodeManager;
     }
 
     // Get node by it's name
-    public static NodeManager GetNode(string nodeName)
+    public static NodeManager GetNodeByName(string nodeName)
     {
         if (!nodes.ContainsKey(nodeName)) return null;
         return nodes[nodeName];
@@ -238,21 +251,49 @@ abstract public class NodeManager
     {
         return Stringfy();
     }
+
+    //===[ Function for test ]===========================================================================
+
+    public static string[] __TEST__GetTestNodes(int n)
+    {
+        string[] r = new string[n];
+        string[] types = nodeTypes.Keys.ToArray();
+        for (int i = 0; i < n; i++)
+        {
+            Dictionary<string, string> t = new Dictionary<string, string>();
+            t[KEY_NODE_TYPE] = types[i % nodeTypes.Count] + ""; ;
+            t[KEY_PHYSICAL_ID] = "ID_TEST_" + i;
+            t[KEY_POSITION] = new Vector3(i, i, i) + "";
+            t[KEY_PROPERTY] = new Dictionary<string, string>().Stringfy(); ;
+            r[i] = t.Stringfy();
+            Debug.Log(r[i]);
+        }
+        return r;
+    }
 }
+
 
 // Extension for jsonfy
 static class JSONExtension
 {
     public static string Stringfy(this Dictionary<string, string> dictionary)
     {
-        var kvs = dictionary.Select(kvp => string.Format("\"{0}\":\"{1}\"", kvp.Key, string.Concat(",", kvp.Value)));
-        return string.Concat("{", string.Join(",", kvs), "}");
+        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(Dictionary<string, string>));
+        using (MemoryStream ms = new MemoryStream())
+        {
+            serializer.WriteObject(ms, dictionary);
+            return System.Text.Encoding.Default.GetString(ms.ToArray());
+        }
     }
 
     public static Dictionary<string, string> Jsonfy(this string json)
     {
-        string[] keyValueArray = json.Replace("{", string.Empty).Replace("}", string.Empty).Replace("\"", string.Empty).Split(',');
-        return keyValueArray.ToDictionary(item => item.Split(':')[0], item => item.Split(':')[1]);
+        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(Dictionary<string, string>));
+        using (MemoryStream ms = new MemoryStream(System.Text.ASCIIEncoding.ASCII.GetBytes(json)))
+        {
+            Dictionary<string, string> dict = (Dictionary<string, string>)serializer.ReadObject(ms);
+            return dict;
+        }
     }
 
     public static Vector3 ToVector3(this string sVector)

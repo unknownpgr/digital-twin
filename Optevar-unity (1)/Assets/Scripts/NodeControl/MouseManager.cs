@@ -106,7 +106,7 @@ public class MouseManager : MonoBehaviour
         Debug.Log("Normal mode");
 
         // if placingNode is not null, it means node is not placed.
-        if (placingNode == null)
+        if (placingNode != null)
         {
             placingNode.Destroy();
             FunctionManager.Popup("Node placing canceled.");
@@ -181,8 +181,8 @@ public class MouseManager : MonoBehaviour
 
                 // Check if given surface is wall
                 float angleCosine = Mathf.Abs(Vector3.Dot(Vector3.up, hit.normal));
-                if (angleCosine < 0.5f) FunctionManager.Popup("Warning : " + placingNode.NodeType + " placed on wall.");
-                else FunctionManager.Popup(placingNode.NodeType + " placed.");
+                if (angleCosine < 0.5f) FunctionManager.Popup("Warning : " + placingNode.DisplayName + " placed on wall.");
+                else FunctionManager.Popup(placingNode.DisplayName + " placed.");
 
                 // Change to normal mode. Initialize placing node to null.
                 placingNode = null;

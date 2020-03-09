@@ -13,7 +13,7 @@ public class WindowManager : MonoBehaviour
     public Vector3 WINODW_VISIBLE_POSITION = new Vector2(0, -100);
 
     // Private fields
-    private Dictionary<string, Transform> elements = new Dictionary<string, Transform>();
+    public Dictionary<string, Transform> Elements = new Dictionary<string, Transform>();
     private GameObject head;
 
     private Vector3 WINDOW_HIDE_POSITION;
@@ -29,9 +29,9 @@ public class WindowManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        FunctionManager.RecursiveRegisterChild(transform, elements);
+        FunctionManager.RecursiveRegisterChild(transform, Elements);
         Debug.Log("Window assigned : " + WindowName);
-        elements["text_title"].GetComponent<Text>().text = WindowName;
+        Elements["text_title"].GetComponent<Text>().text = WindowName;
 
         if (!Application.IsPlaying(gameObject)) return;
 
@@ -77,13 +77,13 @@ public class WindowManager : MonoBehaviour
         });
 
         // Add event listener
-        EventTrigger trigger = elements["header"].GetComponent<EventTrigger>();
+        EventTrigger trigger = Elements["header"].GetComponent<EventTrigger>();
         trigger.triggers.Add(entryDragging);
         trigger.triggers.Add(entryBeginDrag);
         trigger.triggers.Add(entryDrop);
 
         // Add close event listener
-        elements["button_close"].GetComponent<Button>().onClick.AddListener(() => { SetVisible(false); });
+        Elements["button_close"].GetComponent<Button>().onClick.AddListener(() => { SetVisible(false); });
     }
 
     // Half size of screen. used for mouse position convertion. I assumed that the screen size would not change.
