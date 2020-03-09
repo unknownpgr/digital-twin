@@ -40,7 +40,7 @@ public class objects_batch : MonoBehaviour
     private int person_num = 0;
     Scenario total_array = new Scenario();
 
-    public int area_index = 0;
+    public int area_index = 1;
 
     public InputField save_file_name;
     public Button file_save_button;
@@ -115,7 +115,8 @@ public class objects_batch : MonoBehaviour
                 break;
             case 6:
                 // DB Load
-
+                DBManager db = DBManager.GetComponent<DBManager>();
+                db.SensorLoad();
                 break;
             case 7:
                 // DB Save
@@ -197,7 +198,7 @@ public class objects_batch : MonoBehaviour
         make_objects.exit_id = 0;
 
         make_objects.area_positions.Clear();
-        area_index = 0;
+        area_index = 1;
 
         make_objects.disaster_ob.Clear();
         make_objects.disaster_list.Clear();

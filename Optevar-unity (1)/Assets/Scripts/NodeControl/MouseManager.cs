@@ -61,7 +61,7 @@ public class MouseManager : MonoBehaviour
         // Detect double click
         if (doubleClickTimer > 0) doubleClickTimer -= Time.deltaTime;
 
-        bool isMouseOnUI = EventSystems.EventSystem.IsPointerOverGameObject();
+        bool isMouseOnUI = true;// EventSystems.EventSystem.IsPointerOverGameObject();
         bool isClicked = Input.GetMouseButtonDown(0);
         bool isDoubleClicked = false;
         GameObject target;
@@ -72,15 +72,15 @@ public class MouseManager : MonoBehaviour
             else doubleClickTimer = doubleClickDuraction;
 
             // Get clicked item
-            Ray cast_point = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
+            Ray cast_point = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(cast_point, out hit, Mathf.Infinity)) target = hit.collider.gameObject;
         }
 
         switch (mouseMode)
         {
             case MouseMode.NORMAL:
-                if (isDoubleClicked) dest = hit.point;
+                // if (isDoubleClicked) dest = hit.point;
                 break;
 
             case MouseMode.NODE_PLACING:
@@ -104,12 +104,12 @@ public class MouseManager : MonoBehaviour
         if (!targetMark) return;
         targetMark.SetActive(false);
         Debug.Log("Normal mode");
+
         // if placingNode is not null, it means node is not placed.
-        if (placingNode)
+        if (placingNode == null)
         {
             placingNode.Destroy();
             FunctionManager.Popup("Node placing canceled.");
-            placingNode = null;
         }
         mouseMode = MouseMode.NORMAL;
     }
@@ -177,12 +177,12 @@ public class MouseManager : MonoBehaviour
                 placingNode.SetActive(true);
 
                 // Place given node
-                placingNode.transform.position = hit.point;
+                placingNode.Position = hit.point;
 
                 // Check if given surface is wall
                 float angleCosine = Mathf.Abs(Vector3.Dot(Vector3.up, hit.normal));
-                if (angleCosine < 0.5f) FunctionManager.Popup("Warning : " + placingNode.Type + " placed on wall.");
-                else FunctionManager.Popup(placingNode.Type + " placed.");
+                if (angleCosine < 0.5f) FunctionManager.Popup("Warning : " + placingNode.NodeType + " placed on wall.");
+                else FunctionManager.Popup(placingNode.NodeType + " placed.");
 
                 // Change to normal mode. Initialize placing node to null.
                 placingNode = null;

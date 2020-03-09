@@ -5563,7 +5563,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.00012207031}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &66382618
@@ -30577,7 +30577,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.0004193186}
+  m_AnchoredPosition: {x: 0, y: 0.00013813828}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &604605124
@@ -94489,7 +94489,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70a1207b88b2ee5448f19e6d051e7d36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  question_img: {fileID: 2034450119}
 --- !u!114 &2085497759
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -68,6 +68,8 @@ public class MQTTManager3 : MonoBehaviour
         this.areaNums = areaNums;
     }
 
+
+    // 여기가 Event listener
     private void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
     {
         string msg = System.Text.Encoding.UTF8.GetString(e.Message);
@@ -87,21 +89,16 @@ public class MQTTManager3 : MonoBehaviour
         //MessageData md = Jsoning(msg);
         //scenarioManager.SetTargetNodes(null, (int)md.value);
 
-
-        if (e.Topic == MQTTConf.topic[0])//DT/PeriodChange
+        if (e.Topic == MQTTConf.topic[0])//mws/Notification/Periodic/SensingValueEvent
         {
-            //DT/PeriodChange
-            Debug.Log(msg);
-        }
-        else if (e.Topic == MQTTConf.topic[1])//mws/Notification/Periodic/SensingValueEvent
-        {
+            print(MQTTConf.topic[0]);
             /*
-             {
-             "nodeId" : "15", 
-             "timestamp" : "2019-07-08 13:27:56.25",
-             "sensorType" : 2, 
-             "value" : "14", 
-             }
+                {
+                "nodeId":"00010000",
+                "timestamp":"2020-02-21T02:23:03.321Z",
+                "sensorType":33,
+                "value":-10
+                }
              */
             //"mws/Notification/Periodic/SensingValueEvent", wan
             MessageData md = Jsoning(msg);
@@ -118,10 +115,18 @@ public class MQTTManager3 : MonoBehaviour
                     scenarioManager.isSensorUpdated = true;
                 }
         }
-        else if (e.Topic == MQTTConf.topic[2])//mws/Notification/Periodic/DisasterEvent
+        else if (e.Topic == MQTTConf.topic[1])//mws/Notification/Periodic/DisasterEvent
         {
+            print(MQTTConf.topic[1]);
+            /*
+             {
+             "nodeId":"00010000",
+             "timestamp":"1970-01-17T12:02:24Z",
+             "sensorType":33,
+             "value":-10
+             }
+             */
             MessageData md = Jsoning(msg);
-            //scenarioManager.sensorNodeJsons[md.nodeId].value1 = md.value;
             if (md.nodeId != null)
                 if (scenarioManager.SensorDictionary.ContainsKey(md.nodeId))
                 {
@@ -130,29 +135,37 @@ public class MQTTManager3 : MonoBehaviour
                     scenarioManager.isSensorUpdated = true;
                 }
         }
-        else if (e.Topic == MQTTConf.topic[3])//mws/Notification/Periodic/EvacueeEvent
+        else if (e.Topic == MQTTConf.topic[2])//mws/Notification/Periodic/EvacueeEvent
         {
-            //"mws/Notification/Periodic/EvacueeEvent", wan
+
+            /*
+            room1 ( 00001000, 000020000)
+            room2 ( 00001000, 000030000)
+            일때, 
+            00001000의 센싱이 발생할 때, 아래와 같이 두번의 mqtt event가 발생한다.
+            {
+            "areaId":"room2",
+            "timestamp":"2020-02-21T02:56:17.355Z",
+            "value":1
+            }
+            { "areaId":"room1","timestamp":"2020-02-21T02:56:17.353Z","value":2}
+            */
             MessageData md = Jsoning(msg);
-            if (scenarioManager.areaNums.ContainsKey(md.areaId))
-                if (scenarioManager.areaNums[md.areaId] != (int)md.value)
+            if (scenarioManager.areaNums.ContainsKey(md.areaId.Replace("room", "")))//(md.areaId))
+                if (scenarioManager.areaNums[md.areaId.Replace("room", "")] != (int)md.value)
                 {
-                    scenarioManager.areaNums[md.areaId] = (int)md.value;
+                    scenarioManager.areaNums[md.areaId.Replace("room", "")] = (int)md.value;
                     scenarioManager.isAreaChanged = true;
                 }
         }
-        else if (e.Topic == MQTTConf.topic[4])//mws/Set/Direction
+        else if (e.Topic == MQTTConf.topic[3])//**mws/Set/Direction
                                               //ScenarioManager3에서 말고 여기서 unity system에 방향지시등 모양 시각화 표시하도록
         {
-            //"mws/Set/Direction": 대피명령
             /*
              {
-             "messageID" : 42, 
-             "nodeID" : 15, 
-             "argument" : {
-             "direction" : "left",
-             "duration" : "10"
-             }    
+             "nodeId": "00001000",
+             "direction": "up"
+             }
             */
 
             DirectionOperation d = JsonMapper.ToObject<DirectionOperation>(msg);
@@ -161,23 +174,37 @@ public class MQTTManager3 : MonoBehaviour
             if (scenarioManager.SensorDictionary.ContainsKey(d.nodeId))
             {
                 scenarioManager.SensorDictionary[d.nodeId].sensor_Attribute.one_sensor.value1 =
-                    d.GetDirection();
+                    d.GetDirection();//string형*
             }
             scenarioManager.isSensorUpdated = true;
         }
-        else if (e.Topic == MQTTConf.topic[5])//아직 없음 "mws/Set/Sound"
+        else if (e.Topic == MQTTConf.topic[4])//**아직 없음 "mws/Set/Sound"
         {
-
+            /*
+              {
+              "nodeId": "00001000",
+              "sound": "on"
+              }   
+            */
 
         }
-        else if (e.Topic == MQTTConf.topic[6])//mws/Request/Area
-        {
-
+        else if (e.Topic == MQTTConf.topic[5])//**mws/Request/Area    from DT to mws
+        {//"미들웨어에게 특정 지역의 계산된 인원수 값을 요청한다.특정 지역의 계산된 인원수 값을 요청한다."
+            /*
+             { 
+             "areaId": "room1" 
+             }    
+             */
 
         }
-        else if (e.Topic.Contains("mws/Response/Area/"))//mws/Response/Area/#
-        {
-            
+        else if (e.Topic.Contains("mws/Response/Area/"))//mws/Response/Area/room1   from mws to DT
+        {//토픽의 wild card로 특정 지역 area ID를 지정한다. 특정 지역의 계산된 인원수 값을 응답한다.
+            //****추가수정필요
+            /*
+             {
+             "peopleCount":2
+             }
+             */
 
             MessageData md = Jsoning(msg);
             if (scenarioManager.areaNums.ContainsKey(md.areaId))
@@ -205,14 +232,14 @@ public class MQTTManager3 : MonoBehaviour
         client.Publish(_topic, Encoding.UTF8.GetBytes(msg),
             MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
     }
-
+    /*
     public void PubPeriod(int value)
     {
         string msg = "{";
         msg += "'timestamp':'" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "',";
         msg += "'value':'" + value.ToString() + "'}";
         Publish("DT/PeriodChange", msg);
-    }
+    }*/
     public void PubDirectionOperation(string nodeId, string dir)//{"nodeId":"4","direction":"down"}MQTT신호 보내기
     {
         DirectionOperation d = new DirectionOperation();

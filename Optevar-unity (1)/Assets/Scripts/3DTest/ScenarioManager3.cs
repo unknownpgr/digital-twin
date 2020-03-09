@@ -1,27 +1,18 @@
-﻿
-
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.AI;
 using System.Linq;
 
-static class Constants
-{
-
-}
-
-
 public class Sensors
 {
-    
+
     public GameObject gameObject { get; set; }
     public NavMeshObstacle navMeshObstacle { get; set; }
     public sensor_attribute sensor_Attribute { get; set; }
     public Material Material { get; set; }
-  
+
     public Material Effect { get; set; }
 
     bool preDanger = false;
@@ -31,7 +22,7 @@ public class Sensors
     {
         navMeshObstacle.carving = false;
         Material.color = Color.white;
-        Effect.color = new Color (Effect.color.r, Effect.color.g, Effect.color.b, noTrans);
+        Effect.color = new Color(Effect.color.r, Effect.color.g, Effect.color.b, noTrans);
     }
 
     bool SetSensor(bool _thres)
@@ -61,7 +52,7 @@ public class Sensors
     public bool SensorValue()
     {
         bool ret = true;
-        
+
         switch (sensor_Attribute.one_sensor.nodeType)
         {
             case 33://16진수 21
@@ -114,7 +105,7 @@ public class ScenarioManager3 : MonoBehaviour
     // For experiment
     public string expName = "";
     public float stdVelo = 4f;
-    
+
 
     //MQTT, Json Interface elements
     public List<EvacuaterNodeJson> evacuaterNodeJsons;
@@ -185,11 +176,11 @@ public class ScenarioManager3 : MonoBehaviour
         }
         if (SideGUI == null)
             SideGUI = GameObject.Find("FloorBtns").GetComponent<SideGUI>();
-        
+
         if (WarnText == null)
             WarnText = GameObject.Find("WarnText").GetComponent<Text>();
         InitGrid();
-        
+
         InitMQTT();
         isDanger = false;
         SideGUI.InitBuildingInfo(this.building);
@@ -200,8 +191,8 @@ public class ScenarioManager3 : MonoBehaviour
     {
         InitAreaGUI();
         if (SensorDictionary != null)
-        foreach (string i in SensorDictionary.Keys)
-            SensorDictionary[i].Init();
+            foreach (string i in SensorDictionary.Keys)
+                SensorDictionary[i].Init();
         if (mQTTManager != null)
             mQTTManager.Close();
     }
@@ -221,7 +212,7 @@ public class ScenarioManager3 : MonoBehaviour
             Destroy(areaNumObjs[i]);
         areaNumObjs.Clear();
     }
-    
+
     // Batch mode interface에서 Monitering mode로 넘어올 때 호출해주면 됨.
     public void SetLists(List<EvacuaterNodeJson> evacuaterNodeJsons, List<SensorNodeJson> sensorNodeJsons,
         List<ExitNodeJson> exitNodeJsons, List<AreaPositions> areaJsons)
@@ -230,7 +221,7 @@ public class ScenarioManager3 : MonoBehaviour
         this.sensorNodeJsons = sensorNodeJsons;
         this.exitNodeJsons = exitNodeJsons;
         this.areaJsons = areaJsons;
-        
+
     }
     public void SetLists(Scenario scene)
     {
@@ -284,7 +275,7 @@ public class ScenarioManager3 : MonoBehaviour
         }
         if (building == null)
             building = GameObject.Find("Building");
-        NavMeshTriangulation tri = NavMesh.CalculateTriangulation();   
+        NavMeshTriangulation tri = NavMesh.CalculateTriangulation();
         InitBuildingInfo();
         grid.CreateGrid(tri.vertices, floor);
 
@@ -292,9 +283,8 @@ public class ScenarioManager3 : MonoBehaviour
     void InitBuildingInfo()
     {
         floor = building.transform.childCount;
-
-
     }
+
     public void InitMoniteringMode()
     {
 
@@ -312,7 +302,7 @@ public class ScenarioManager3 : MonoBehaviour
         simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
         simulationManager.SetGrid(grid);
         //simulationManager = null;
-        
+
     }
 
 
@@ -332,18 +322,19 @@ public class ScenarioManager3 : MonoBehaviour
                 simulationManager.isSimEnd = false;
                 return;
             }
-           
+
         }
         if (isSensorUpdated)
         {
             // 위험 지역이 변화했을 때만 initEvacs == true;
             // 센서값이 수정되더라도 시뮬레이션을 꼭 돌리지 않아도 되는 경우가 있기 때문에 SetSensorValue() 에서 처리
-            if (!SetSensorValue()) {
+            if (!SetSensorValue())
+            {
                 simulationManager.initEvacs = false;
                 simulationManager.isSimEnd = false;
                 return;
             }
-            
+
         }
         if (isDanger)
             OnDanger();
@@ -351,7 +342,7 @@ public class ScenarioManager3 : MonoBehaviour
             OffDanger();
         // if문 아래는 시뮬레이션 과정으로, 한 번 반복할 때 하나의 경로에 대한 시뮬레이션을 진행함.
         // 추후 쓰레드를 활용한 모듈로 분리하여 최적화할 수 있음.
-        
+
         if (isSimulating && !simulationManager.isSimEnd)
         {
             Debug.Log(simulationManager.isSimEnd);
@@ -361,7 +352,7 @@ public class ScenarioManager3 : MonoBehaviour
                 InitSimulation();
             }
             if (simulationManager.EvacuatersList.Count > 0)
-                
+
                 if (simulationManager.Progress())
                 {
                     // 모든 경로에 대해 시뮬레이션이 완료됨. isSimEnd = true.
@@ -373,7 +364,7 @@ public class ScenarioManager3 : MonoBehaviour
                     simulationManager.PrintOut(expName);
                     simulationManager.initEvacs = false;
                     ScreenShot(simulationManager.delayList[simulationManager.delayList.Count - 1]);
-                    
+
                 }
 
                 else
@@ -387,7 +378,7 @@ public class ScenarioManager3 : MonoBehaviour
         if (!this.image_panel.activeSelf)
         {
             // Off -> On으로 전환되었을 때
-            mQTTManager.PubPeriod(10);
+            //mQTTManager.PubPeriod(10);
             this.image_panel.SetActive(true);
             // 60초 후 자동 재 검색
             if (IsInvoking("ReSearch"))
@@ -410,7 +401,7 @@ public class ScenarioManager3 : MonoBehaviour
     {
         if (this.image_panel.activeSelf)
         {
-            mQTTManager.PubPeriod(360);
+            //mQTTManager.PubPeriod(360);
             this.image_panel.SetActive(false);
             grid.InitWeight();
             grid.ViewMinPath = false;
@@ -418,7 +409,8 @@ public class ScenarioManager3 : MonoBehaviour
         }
         if (MusicPlayer != null) MusicPlayer.Stop();
     }
-    void Siren() {
+    void Siren()
+    {
         //MusicPlayer.loop = true;
         if (!MusicPlayer.isPlaying)
             MusicPlayer.Play();
@@ -429,7 +421,7 @@ public class ScenarioManager3 : MonoBehaviour
         // Init simulation manager
         SideGUI.HideFloor(LastUpdatedFloor);
         //SideGUI.HideFloor(1);
-        
+
         simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
         simulationManager.SetGrid(grid);
         grid.ResetFinalPaths();
@@ -486,7 +478,7 @@ public class ScenarioManager3 : MonoBehaviour
         paths.Clear();
         simulationManager.initEvacs = true;
     }
-    
+
     void InitMQTT()
     {
         if (this.mQTTManager == null)
@@ -504,21 +496,14 @@ public class ScenarioManager3 : MonoBehaviour
     {
         //TODO
         // Set targets and sensors and calc & store 'default shortest paths'.
-        
+
     }
     void SetGrid(List<ExitNodeJson> _targets)
     {
         //TODO
         // Set targets and sensors and calc & store 'default shortest paths'.
-        
-    }
-    
-    void MQTTMsg()
-    {
 
     }
-
-
 
     public void SetTargetNodes(List<ExitNodeJson> _targets)
     {
@@ -529,6 +514,7 @@ public class ScenarioManager3 : MonoBehaviour
             Targets.Add(grid.GetNodeFromPosition(_targets[i].positions));
         }
     }
+
     public void SetTargetNodes(List<ExitNodeJson> _targets, int _floor)
     {
         if (_targets == null) _targets = this.exitNodeJsons;
@@ -540,6 +526,7 @@ public class ScenarioManager3 : MonoBehaviour
                 Targets.Add(grid.GetNodeFromPosition(_targets[i].positions));
         }
     }
+
     public void SetArea(List<AreaPositions> _area)
     {
         areaNums = new Dictionary<string, int>();
@@ -551,6 +538,7 @@ public class ScenarioManager3 : MonoBehaviour
             areaVelos.Add(_area[i].areaId, 4);
         }
     }
+
     public void SetSensorNodes()
     {
         SensorDictionary = new Dictionary<string, Sensors>();
@@ -576,13 +564,9 @@ public class ScenarioManager3 : MonoBehaviour
                 tmp.Effect = null;
             Debug.Log("add sensor : " + tmp);
             SensorDictionary.Add(sensorNodeJsons[i].nodeId, tmp);
-           
-
-
-
         }
     }
-   
+
     public void SetMQTTNum(int number, Vector3 startPosition)//areaId, position 씬에 area별 사람 수 띄우기
     {
         GameObject ori_cube = GameObject.Find("area_cube");
@@ -602,11 +586,11 @@ public class ScenarioManager3 : MonoBehaviour
     }
     public void SetSensorValue(int idx, float value)
     {
-        
+
     }
     public bool SetSensorValue()
     {
-        
+
         List<int> dangerFloors = new List<int>();
         int TargetFloor = 0;
         isDanger = false;
@@ -618,6 +602,7 @@ public class ScenarioManager3 : MonoBehaviour
 
             if (SensorDictionary[k].sensor_Attribute.one_sensor.disaster)//DisasterEvent일 때
             {
+
                 //scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.nodeType = md.sensorType;
                 switch (SensorDictionary[k].sensor_Attribute.one_sensor.nodeType)
                 {
@@ -670,13 +655,13 @@ public class ScenarioManager3 : MonoBehaviour
             }
         }
 
-     
+
         if (isDanger)
             SetTargetNodes(null, TargetFloor);
         else
             ret = true;
         this.isSensorUpdated = false;
-        
+
         return ret;
     }
 
@@ -708,14 +693,15 @@ public class ScenarioManager3 : MonoBehaviour
         StartCoroutine(screen_pixels());
         sub_camera.enabled = false;
         paths.Add(temp_path);
-        
+
         if (pathSize == paths.Count)
         {
             for (int i = 0; i < CreatedForGUI.Count; i++)
                 Destroy(CreatedForGUI[i]);
             CreatedForGUI.Clear();
 
-            paths.Sort(delegate (screenshot_attr x, screenshot_attr y) {
+            paths.Sort(delegate (screenshot_attr x, screenshot_attr y)
+            {
                 if (x.time > y.time) return 1;
                 else if (x.time < y.time) return -1;
                 return 0;
@@ -739,10 +725,10 @@ public class ScenarioManager3 : MonoBehaviour
                     CreatedForGUI.Add(new_image_ob.gameObject);
                     CreatedForGUI.Add(new_text.gameObject);
                 }
-                
+
                 new_image_ob.transform.SetParent(content.transform);
                 new_image_ob.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, image_ob1.rectTransform.rect.width);
-                new_image_ob.transform.localPosition = new Vector3(image_ob1.transform.localPosition.x, - (35) * r, image_ob1.transform.localPosition.z);
+                new_image_ob.transform.localPosition = new Vector3(image_ob1.transform.localPosition.x, -(35) * r, image_ob1.transform.localPosition.z);
                 new_image_ob.transform.rotation = image_ob1.transform.rotation;
                 new_image_ob.transform.localScale = image_ob1.transform.localScale;
                 new_image_ob.GetComponent<Image>().sprite = Sprite.Create(paths[r].scrshot, new Rect(0, 0, Screen.width, Screen.height), new Vector2(0.5f, 0.5f));
@@ -754,8 +740,8 @@ public class ScenarioManager3 : MonoBehaviour
                 new_text.transform.localScale = time_text.transform.localScale;
 
                 new_text.GetComponent<Text>().text = "Time : " + paths[r].time.ToString();
-                
-                
+
+
             }
 
         }
@@ -824,7 +810,8 @@ public class ScenarioManager3 : MonoBehaviour
         {
             if (tmp.x > 0) ret = "right";
             else ret = "left";
-        } else
+        }
+        else
         {
             if (tmp.z > 0) ret = "up";
             else ret = "down";

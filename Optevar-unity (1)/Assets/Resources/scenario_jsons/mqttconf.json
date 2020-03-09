@@ -5,7 +5,6 @@
   "userName": "12451test",
   "password": "test",
   "topic": [
-    "DT/PeriodChange",
     "mws/Notification/Periodic/SensingValueEvent",
 	"mws/Notification/Periodic/DisasterEvent",
     "mws/Notification/Periodic/EvacueeEvent",

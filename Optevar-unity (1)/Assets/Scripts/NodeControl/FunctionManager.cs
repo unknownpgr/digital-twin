@@ -18,12 +18,13 @@ public class FunctionManager : MonoBehaviour
     private RectTransform popupTransform;       // Transform
     private static Text popupText;              // Text
     private static float popupLifetime = 0;     // Popup lifetime. hide if 0
-    public static float POPUP_DURATION = 5;
+    public static float POPUP_DURATION = 5;     // Popup default lifetime.
 
     // Dictionary of uis
     public Canvas canvas;
     private static Dictionary<string, Transform> uis = new Dictionary<string, Transform>();
     private List<GameObject> floorButtons = new List<GameObject>();
+
 
     // Start is called before the first frame update
     void Start()
@@ -85,6 +86,12 @@ public class FunctionManager : MonoBehaviour
                 uis["scrollview_floors"].gameObject.SetActive(false);
             }
         }
+
+        // 여기에 센서들의 배열을 윈도우에 집어넣는 것을 구현하세요. 방법은 마음대로.
+        // 중요한 것은 센서가 클릭되면, 콜백 메서드가 호출이 돼야 한다.
+        // public void OnSensorSelected()
+        // 이거
+        // 센서들의 배열은 NodeManager.nodes dictionary를 읽으면 된다.
     }
 
     // floor starts from 0. 1st floor = 0
@@ -145,4 +152,13 @@ public class FunctionManager : MonoBehaviour
         WindowManager sensorWindow = WindowManager.GetWindow("window_sensor");
         sensorWindow.SetVisible(true);
     }
+
+    public void OnSensorSelected()
+    {
+        // 이 Dictionary를 사용
+        // NodeManager.nodes["노드 이름"];
+        // 어쨌건 이 함수 안에서 무슨 버튼이 눌렸는지는 알아야 된다.
+        NodeManager sensor;
+    }
+
 }

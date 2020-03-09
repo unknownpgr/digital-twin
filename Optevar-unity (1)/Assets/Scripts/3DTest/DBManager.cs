@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+using System;
 
 
 [SerializeField]
@@ -12,7 +12,7 @@ class DBClass{
     public string db_id = "root";
     public string db_pw = "uostest";
 
-    public string db_name = "etrimws_test";
+    public string db_name = "";
     public string sensor_table = "tb_sensornode";//'tb_sensornode'
     public string sensor_value_table = "tb_sensingvalue";
     public string area_table = "AreaTable";//아직없음<-회의 "area_table": "areaTable"이거 추후 dbconf.json에 추가해야함
@@ -59,6 +59,7 @@ public class DBManager : MonoBehaviour
         
         Debug.Log("DB Loaded.");
     }
+    
     public void SensorValueSelect(Text _nodeId, Text _start, Text _end)
     {
         //select * from products where registdate between '2013-03-01' and '2013-03-04'
@@ -112,181 +113,81 @@ public class DBManager : MonoBehaviour
             command.ExecuteNonQuery();
 
 
-            //else// 새로운 센서추가할때<-- 안쓰임
-            //{
-                //INSERT
-                // 클라이언트에서 새로 만드는 경우는 없는걸로 가정함.
-                /*
-                string q = "" +
-                    "INSERT INTO " + db.sensor_table +
-                    " VALUES (" +
-                    sensor.one_sensor.nodeId + ", " +
-                    //sensor.one_sensor.nodeType + "," +
-                    sensor.one_sensor.positions.x.ToString("F2") + "," +
-                    sensor.one_sensor.positions.y.ToString("F2") + "," +
-                    sensor.one_sensor.positions.z.ToString("F2") + "');";
-                MySqlCommand command = new MySqlCommand(q, conn);
-                command.ExecuteNonQuery();
-                */
-            //}
-            //conn.close();
         }
+        //conn.Close()
     }
-    /*
-         public void SensorSave(SensorNodeJson sensor)//SensorNodeJson로??
-    {
-
-        if (conn.Ping())
-        {
-            if (SensorLoad(sensor.nodeId))//존재하고있는지 확인
-            {
-                //UPDATE
-                string q = "" +
-                    "UPDATE '" + db.sensor_table +
-                    "' SET " +
-                    "'location' = '(" +
-                    sensor.positions.x.ToString("F2") + "," +
-                    sensor.positions.y.ToString("F2") + "," +
-                    sensor.positions.z.ToString("F2") + "') " +
-                    "WHERE 'node_address' = " +
-                    sensor.nodeId + ";";
-                Debug.Log("save 쿼리문 : " + q);
-                MySqlCommand command = new MySqlCommand(q, conn);
-                command.ExecuteNonQuery();
-            }
-
-            else// 새로운 센서추가할때<-- 안쓰임
-            {
-                //INSERT
-                // 클라이언트에서 새로 만드는 경우는 없는걸로 가정함.
-                
-}
-        }
-    }
-         */
-    /*
-     public void SensorSave(sensor_attribute sensor)
-    {
-        Debug.Log("동작시작");
-        if (conn.Ping())
-        {
-            Debug.Log("연결됨");
-            if (SensorLoad(sensor.one_sensor.nodeId))
-            {
-                //UPDATE
-                string q = "" +
-                    "UPDATE '" + db.sensor_table +
-                    "' SET " +
-                    "'location' = '(" +
-                    sensor.one_sensor.positions.x.ToString("F2") + "," +
-                    sensor.one_sensor.positions.y.ToString("F2") + "," +
-                    sensor.one_sensor.positions.z.ToString("F2") + "') " +
-                    "WHERE 'node_address' = " +
-                    sensor.one_sensor.nodeId + ";";
-                Debug.Log("save 쿼리문 : " + q);
-                MySqlCommand command = new MySqlCommand(q, conn);
-                command.ExecuteNonQuery();
-            }
-            else
-            {
-                //INSERT
-                // 클라이언트에서 새로 만드는 경우는 없는걸로 가정함.
-                
-                //string q = "" +
-                //    "INSERT INTO " + db.sensor_table +
-                //    " VALUES (" +
-                //    sensor.one_sensor.nodeId + ", " +
-                //    //sensor.one_sensor.nodeType + "," +
-                //    sensor.one_sensor.positions.x.ToString("F2") + "," +
-                //    sensor.one_sensor.positions.y.ToString("F2") + "," +
-                //    sensor.one_sensor.positions.z.ToString("F2") + "');";
-                //MySqlCommand command = new MySqlCommand(q, conn);
-                //command.ExecuteNonQuery();
-                
-}
-        }
-    }
-         */
-    public void SensorSave(areasensor_attribute sensor)//이제 쿼리문 바뀐 테이블형식대로 싹다 바꿔야함
+    //area의 location도 tb_sensornode에 포함된다는 가정하에
+    public void SensorSave(areasensor_attribute sensor)
     {
         // area에 관한 DB 테이블이 현재 존재하지 않으므로 개발 필요.
         if (conn.Ping())//conn.State == System.Data.ConnectionState.Open
         {
-            
+
             //if (SensorLoad(sensor.one_sensor.areaId))
             //{
-                //UPDATE
+            //UPDATE
             string q = "" +
-                "UPDATE '" + db.area_table +
-                "' SET " +
-                "'location' = '(" +
+                "UPDATE " + db.sensor_table +
+                " SET " +
+                "location = '(" +
                 sensor.one_sensor.position.x.ToString("F2") + "," +
                 sensor.one_sensor.position.y.ToString("F2") + "," +
                 sensor.one_sensor.position.z.ToString("F2") + ")' " +
-                "WHERE 'node_address' = " +
-                sensor.one_sensor.areaId + ";";
+                "WHERE node_address = '" +
+                sensor.one_sensor.areaId + "';";
+            Debug.Log("save 쿼리문 : " + q);
             MySqlCommand command = new MySqlCommand(q, conn);
             command.ExecuteNonQuery();
-            //}
-            //else
-            //{
-                //INSERT
-                // 클라이언트에서 새로 만드는 경우는 없는걸로 가정함.
-                /*
-                string q = "" +
-                    "INSERT INTO " + db.sensor_table +
-                    " VALUES (" +
-                    sensor.one_sensor.areaId + ", " +
-                    sensor.one_sensor.position.x + "," +
-                    sensor.one_sensor.position.y + "," +
-                    sensor.one_sensor.position.z + ");";
-                MySqlCommand command = new MySqlCommand(q, conn);
-                command.ExecuteNonQuery();
-                */
-            //}
+            
         }
     }
 
-    public bool SensorLoad(string id, sensor_attribute sensor = null)
+    public string SensorLoad()
     {
-        /*
-         string q = "" +
-            "SELECT 'node_address','location'" +
-            " FROM '" + db.sensor_table +
-            "' WHERE 'node_address' = '" + id + "';" ;
-         */
+        string temp = "";
         string q = "" +
             "SELECT node_address,location" +
-            " FROM " + db.sensor_table +
-            " WHERE node_address = '" + id + "';" ;
-        bool ret = false;
+            " FROM " + db.sensor_table + ";";
+        
+        /*
+        string q = "" +
+            "SELECT COUNT(*)" +
+            " FROM " + db.sensor_table + ";";
+        */
+        //bool ret = false;
         Debug.Log("load쿼리문 : "+q);
         
         if (conn.Ping())//conn.State == System.Data.ConnectionState.Open)// == true
         {
             MySqlCommand command = new MySqlCommand(q, conn);
             MySqlDataReader rdr = command.ExecuteReader();
-            ret = false;
-            string temp = RdrToStr(rdr);
-            ret = (temp != string.Empty);
+            //ret = false;
+            temp = RdrToStr(rdr);
+            //ret = (temp != string.Empty);
 
-            Debug.Log(temp);
+            Debug.Log("센서 data : "+temp);
+            /*
+            <string>
+            13000001;(41.52,15.75,17.83)
+            13000002;(63.42,15.75,17.74)
+            13000003;(41.55,15.75,9.10)
+            13000004;(63.38,15.75,9.10)
+            13000005;(24.20,15.75,8.13)
+            13000006;(29.53,15.75,30.66)
+            13000007;(7.39,15.75,12.44)
+            현재 : 
+            sensor_node_ID;sensor_node_location
+            
+            최종 : 
+            sensor_node_ID;sensor_node_type;sensor_node_location
+             */
 
-            string[] tmp = temp.Split(';');
-            if (sensor != null)
-            {
-                sensor.one_sensor.nodeId = (tmp[0]);
-                //sensor.one_sensor.nodeType = int.Parse(tmp[1]);
-                string[] pos = tmp[1].Split(',');
-                sensor.one_sensor.positions = new Vector3(
-                    float.Parse(pos[0]), float.Parse(pos[1]), float.Parse(tmp[2]));
-            }
-            Debug.Log("node_addr, type, loc : " + temp); // "2,33,(2.4,5.22,8)"  // node_addr, type, location
-            // 이 값을 parsing해서 location에 따라 센서 설치하는거 구현해야함
         }
+
         //conn.close();
-        return ret;
+        return temp;
     }
+    
 
     public bool SensorLoad(int id, areasensor_attribute sensor)
     {
@@ -318,58 +219,29 @@ public class DBManager : MonoBehaviour
         }
         return ret;
     }
-    /*
-    public bool SensorLoad(int id, areasensor_attribute sensor)
-    {
-        // area에 관한 DB 테이블이 현재 존재하지 않으므로 개발 필요.
-        string q = "" +
-            "SELECT 'node_address','location'" +
-            " FROM '" + db.area_table +
-            "' WHERE nodeId = " + id.ToString() + ";";
-        bool ret = false;
-        Debug.Log(q);
-        if (conn.Ping())
-        {
-            MySqlCommand command = new MySqlCommand(q, conn);
-            MySqlDataReader rdr = command.ExecuteReader();
-            ret = false;
-            string temp = RdrToStr(rdr);
-            ret = (temp != string.Empty);
 
-            string[] tmp = temp.Split(';');
-            if (sensor != null)
-            {
-                sensor.one_sensor.areaId = (tmp[0]);
-                string[] pos = tmp[1].Split(',');
-                sensor.one_sensor.position = new Vector3(
-                    float.Parse(pos[0]), float.Parse(pos[1]), float.Parse(tmp[2]));
-            }
-            Debug.Log(temp);
-        }
-        return ret;
-    }
-     */
 
     string RdrToStr(MySqlDataReader rdr)
     {
         string temp = string.Empty;
-        if (!rdr.Read())
-        {
-            temp = "No return";
-        }
-        else
+        try
         {
             while (rdr.Read())
             {
                 for (int i = 0; i < rdr.FieldCount; i++)
                 {
-                    if (i != rdr.FieldCount - 1)
+                    if (i != rdr.FieldCount-1)
                         temp += rdr[i] + ";";    // parser 넣어주기
-                    else if (i == rdr.FieldCount - 1)
+                    else if (i == rdr.FieldCount-1)
                         temp += rdr[i] + "\n";
                 }
             }
         }
+        catch(Exception e)
+        {
+            temp = "No return";
+        }
+        //}
         return temp;
     }
 }
