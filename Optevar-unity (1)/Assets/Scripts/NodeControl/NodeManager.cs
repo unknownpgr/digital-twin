@@ -9,6 +9,9 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 
 /*
+
+아래 1~8번까지는 개발을 하면서 NodeManager가 가져야 하는 속성들을 생각나는 대로 나열한 것으로, 순서에 의미는 없다.
+
 Node :
 
 1. Node는 게임 상에서 설치 가능하고, 속성을 가지며, 이동 가능한 모든 객체를 말한다.
@@ -19,7 +22,7 @@ Node :
 gameobject등으로부터 직접적으로 수정되어서는 안 된다.
 예컨대 Node의 위치를 바꾸려면 NodeManager에 그러한 함수를 넣어야 하며, gameobject.transform.Position등으로 접근하여 수정해서는 안 된다.
 
-3. Node는 각 Node와 연결된 단 하나의 Gameobject를 가진다. 이 gameobject는 prefab등이어서는 안 되며,
+3. Node는 각 Node와 연결된 단 하나의 Gameobject를 가진다. 이 gameobject는 resource에서 로드되어 아직 Initiated된 prefab등이어서는 안 되며,
 반드시 initiated되어 실제로 game space상에 존재하는 object여야만 한다.
 이 gameObject는 생성, 제거를 포함하여 NodeManager script에 의하여 자동으로 관리되며, 임의로 생성하거나 삭제하는 등의 조작을 가해서는 안 된다.
 
@@ -27,40 +30,47 @@ gameobject등으로부터 직접적으로 수정되어서는 안 된다.
 이는 abstract class를 사용하여 반드시 구현하도록 강제될 것이다.
 NodeManager은 prefab을 생성한 후 자기 자신을 prefab에 할당할 것이다. 따라서 prefab은 NodeManager script를 포함해서는 안 된다.
 
-5. 노드는 단 하나의 유일한 Physical ID를 가진다. 이는 절대로 중복되지 않는다.
-노드를 가져오기 위해서는 GetNode함수를 사용할 수 있다. 오직 physical ID를 사용해서만 node를 가져올 수 있다.
+5. Node는 단 하나의 유일한 Physical ID를 가진다. 이는 절대로 중복되지 않는다.
+Node를 가져오기 위해서는 GetNode함수를 사용할 수 있다. 오직 physical ID를 사용해서만 node를 가져올 수 있다.
 
-6. 노드를 생성하기 위해서는 오직 NodeManager.Instantiate 함수만을 사용할 수 있다.
+6. Node를 생성하기 위해서는 오직 NodeManager.Instantiate 함수만을 사용할 수 있다.
 
 7. Node의 Physical ID는 한 번 할당하면 절대로 변경할 수 없다.
 
 8. 이 코드를 보면, 이 코드의 유일한 Dependancy는 MonoBehavior과 NodeManager 자기 자신이다. 그러므로 NodeManager 외부에서 어떤 변화가 있더라도 NodeManager는 Reusable하다.
 
-Node를 캡슐화를 잘 하면서 Jsonfy-Inflate할 방법은 없는가?
-Serialize를 하면 이 고생을 할 이유가 전연 없겠으나, 그러지 말라고 하니..
-일단 노드에 NodeManager class단에서는 알 수는 없는, 특정 Property들이 저장되어야 한다는 것은 자명하다.
-또한 그런 property들은 string, int enum vector3등 다양한 type임에 분명하다.
-또 노드를 Instantiate할 때에는 이 값들을 어째야 하는가? 알 수 없다.
-
-먼저 정리를 해 보자.
-
-일단 노드를 생성하는 방법에는 두 가지가 있다.
-첫 번째는 노드들 그냥 생성하는 방법이다. 노드가 가져야 할 property들은 기본값으로 초기화된다.
-두 번째는 노드를 property와 함께 생성하는 방법이다.
+< 노드의 Save / Load 에 관하여 >
+Node를 생성하는 방법에는 두 가지가 있다.
+첫 번째는 Node들 그냥 생성하는 방법이다. Node가 가져야 할 property들은 기본값으로 초기화된다.
+두 번째는 Node를 property와 함께 생성하는 방법이다.
 
 우리는 두 번째 방법만을 먼저 고려할 것인데, 왜냐하면 첫 번째 방법은 두 번째 방법으로부터 파생될 수 있기 때문이다.
-노드를 property와 함께 생성하는 것은 매우 어려운데, 왜냐 하면 그 property가 정확히 무엇인지 알 수 없기 때문이다.
-한 가지 확실한 것은, 노드가 가진 모든 프로퍼티는 string으로 변환하능하며, string으로부터 복원가능해야만 한다.
-또한 노드가 가진 프로퍼티가 전부 하나의 dictionary에 저장될 수 있다고 생각해서도 안 되는데, 왜냐하면 각 프로퍼티의 타입이 매우 크게 다를 수 있기 때문이다.
-이 경우 직접 프로퍼티의 변환을 구현하는 것에 비하여 드는 노력이 크다.
+또한 Node를 property와 함께 생성하는 것은 매우 어려운데, 왜냐하면 그 property가 정확히 무엇인지 알 수 없기 때문이다.
+그러나 한 가지 확실한 것은, Node가 가진 모든 Property는 string으로 변환하능하며, string으로부터 복원가능해야만 한다는 것이다.
+다만 Node가 가진 Property가 전부 하나의 dictionary에 저장될 수 있다고 생각해서도 안 되는데, 왜냐하면 각 Property의 타입이 크게 다를 수 있기 때문이다.
+이 경우 하나의 Dictionary에 모든 변수를 담으려 하면, 직접 Property->Dictionary 변환을 구현하는 것에 비하여 드는 노력이 크다.
+
+따라서 다음과 같은 방법을 사용할 수 있다.
 
 저장 시:
 abstract class에서는 class type, position, physical ID등 공통되는 속성에 대한 jsonfy를 진행하고, 
 derived class에서는 센서마다 다른 property를 string-based dictionary에 담아서 반환한다.
+그러면 abstract class에서는 공통 속성과 derived class-dependent한 속성을 전부 하나의 json에 담아 반환한다.
 
 로드 시:
 abstract class에 jsonfy된 객체를 넘기면 abstract class가 이를 파싱하여 
-해당 class의 객체를 생성하고, 객체에 상기한 공통되는 속성을 지정한다. 이후 class의 Init함수를 사용하여 
+해당 class의 객체를 생성하고, 객체에 상기한 공통되는 속성을 지정한다. 이후 derived class에서 다시 dependent한 속성을 받아 복원한다.
+
+
+* 이때 객체를 바로 Serialize할 수 있으나, 그렇게 하지 않고 Dictionary를 거쳐 Serialize하는 것은 추후 옵션이 변경될 경우를 고려한 것이다.
+어떠한 저장 매체를 사용하던지, class를 바로 Serialize하지 않는 경우에는 반드시 string형식으로의 변환이 필요하다.
+이때 dictionary를 사용한다면 DB든 CSV이든 다른 매체로의 변경이 편리하다.
+따라서 어차피 Dictionary<string,string>으로 일시적으로 변환하는 것이 어렵지 않은 바, 추후 변경할 것을 고려하여 그렇게 구현하였다.
+
+-----
+
+또한 NodeManager는 abstract class로서, 반드시 child class를 생성해야만 하나, 여러 기법들을 사용하여
+어떤 child class를 생성하든 NodeManager에 dependency가 없어 NodeManager를 수정할 필요가 없는 점에 유의하라.
 */
 
 abstract public class NodeManager
@@ -84,7 +94,9 @@ abstract public class NodeManager
     private string physicalID;
     public string PhysicalID { get => physicalID; }
 
-    // Name of node type. default is class name. It is just for display. do not use this as more than a string such as key.
+    // Name of node type. default is class name. It is just for display.
+    // Do not use DisplayName as more than a string, such as dictionary key.
+    // As a dictionary key, use the PhysicalID instead.
     public virtual string DisplayName { get => GetType().Name; }
 
     // Position of node.
@@ -157,14 +169,13 @@ abstract public class NodeManager
         // Attach gameObject to nodeManager
         nodeManager.gameObject = (GameObject)GameObject.Instantiate(prefab);
         nodeManager.gameObject.transform.position = position;
-        nodeManager.Init();
 
         // Set other properties
         nodeManager.physicalID = physicalID;
         nodeManager.Position = position;
         nodeManager.DictToProperty(properties);
-
         nodes.Add(physicalID, nodeManager);
+        nodeManager.Init();
 
         string nodeInfo =
         "\n===[ Node Information ]===============" +

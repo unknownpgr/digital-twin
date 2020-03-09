@@ -90,11 +90,8 @@ public class FunctionManager : MonoBehaviour
             }
         }
 
-
-        // GameObject sensorButton = uis["button_sensor_ID"].gameObject;
-        GameObject sensorButton = uis["button_floor"].gameObject;
-        // Transform sensorPanel = uis["panel_sensor"];
-        Transform sensorPanel = uis["panel_floor"];
+        GameObject sensorButton = uis["button_sensor_ID"].gameObject;
+        Transform sensorPanel = uis["panel_sensor"];
 
         GameObject newSensorBtn;
 
@@ -172,7 +169,6 @@ public class FunctionManager : MonoBehaviour
     // Update date and time Text
     private void UpdateDateAndTime()
     {
-        return;
         System.DateTime dateTime = System.DateTime.Now;
 
         dateText.text =
