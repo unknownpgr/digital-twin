@@ -283,7 +283,7 @@ abstract public class NodeManager
             t[KEY_PHYSICAL_ID] = "ID_TEST_" + i;
             t[KEY_POSITION] = new Vector3(i, i, i) + "";
             t[KEY_PROPERTY] = new Dictionary<string, string>().Stringfy(); ;
-            t[KEY_INIT] = ((i % 2 == 0) ? 0 : 1) + "";
+            t[KEY_INIT] = ((i % 2 == 0) ? true : false) + "";
             r[i] = t.Stringfy();
             Debug.Log(r[i]);
         }
