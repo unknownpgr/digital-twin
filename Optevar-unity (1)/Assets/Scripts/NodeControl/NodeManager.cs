@@ -80,6 +80,7 @@ abstract public class NodeManager
     private const string KEY_PHYSICAL_ID = "PhysicalID";
     private const string KEY_POSITION = "Position";
     private const string KEY_PROPERTY = "Property";
+    private const string KEY_INIT = "Init";
 
     //===[ Private-Static fields ]===========================================================================
 
@@ -104,6 +105,15 @@ abstract public class NodeManager
     {
         get => gameObject.transform.position;
         set { gameObject.transform.position = value; }
+    }
+
+    // Whether the node has been initialized
+    // You cannot de-initialize node.
+    private bool isInitialized = false;
+    public bool IsInitialized
+    {
+        get => isInitialized;
+        set { if (value) isInitialized = value; }
     }
 
     // ===[ Protected = child-only properties of node ]==========================================================================
@@ -156,9 +166,10 @@ abstract public class NodeManager
         Type nodeType = nodeTypes[jsonDict[KEY_NODE_TYPE]];
         Vector3 position = jsonDict[KEY_POSITION].ToVector3();
         Dictionary<string, string> properties = jsonDict[KEY_PROPERTY].Jsonfy();
+        bool isInitialized = bool.Parse(jsonDict[KEY_INIT]);
 
         // Create NodeManager instance
-        initiatable = true;
+        initiatable = true; // Don't care about this. it prevents to create node with new keyword.
         NodeManager nodeManager = (NodeManager)Activator.CreateInstance(nodeType);
         initiatable = false;
 
@@ -173,17 +184,12 @@ abstract public class NodeManager
         // Set other properties
         nodeManager.physicalID = physicalID;
         nodeManager.Position = position;
+        nodeManager.isInitialized = isInitialized;
         nodeManager.DictToProperty(properties);
         nodes.Add(physicalID, nodeManager);
-        nodeManager.Init();
 
-        string nodeInfo =
-        "\n===[ Node Information ]===============" +
-        "\n    Physical ID = " + physicalID +
-        "\n    Type = " + nodeType +
-        "\n    Position = " + position +
-        "\n======================================\n";
-        Debug.Log(nodeInfo);
+        // Call initialize function
+        nodeManager.Init();
 
         return nodeManager;
     }
@@ -253,6 +259,7 @@ abstract public class NodeManager
         json.Add(KEY_NODE_TYPE, GetType().Name);
         json.Add(KEY_POSITION, Position.ToString());
         json.Add(KEY_PROPERTY, propertyString);
+        json.Add(KEY_INIT, isInitialized + "");
 
         return json.Stringfy();
     }
@@ -276,6 +283,7 @@ abstract public class NodeManager
             t[KEY_PHYSICAL_ID] = "ID_TEST_" + i;
             t[KEY_POSITION] = new Vector3(i, i, i) + "";
             t[KEY_PROPERTY] = new Dictionary<string, string>().Stringfy(); ;
+            t[KEY_INIT] = ((i % 2 == 0) ? 0 : 1) + "";
             r[i] = t.Stringfy();
             Debug.Log(r[i]);
         }

@@ -29,6 +29,17 @@ public class FunctionManager : MonoBehaviour
     public Text dateText;
     public Text timeText;
 
+    // Program mode
+    private static bool isPlacingMode = true;
+    public static bool IsPlacingMode
+    {
+        get { return isPlacingMode; }
+    }
+    public static bool IsMonitoringMode
+    {
+        get { return !isPlacingMode; }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -90,16 +101,18 @@ public class FunctionManager : MonoBehaviour
             }
         }
 
-        GameObject sensorButton = uis["button_sensor_ID"].gameObject;
-        Transform sensorPanel = uis["panel_sensor"];
-
-        GameObject newSensorBtn;
-
+        // Load node data from database
+        // 이 코드 대신에 DB에서 로드하는 코드가 들어가야만 한다.
+        // 만약 노드가 제대로 초기화되지 않았다면, 먼저 deactivate한 후 버튼 색을 다르게 표시해볼 수 있다.
         foreach (string nodeString in NodeManager.__TEST__GetTestNodes(5))
         {
             NodeManager.Instantiate(nodeString);
         }
 
+        // Initialize buttons and create existing node
+        GameObject sensorButton = uis["button_sensor_ID"].gameObject;
+        Transform sensorPanel = uis["panel_sensor"];
+        GameObject newSensorBtn;
         foreach (string physicalID in NodeManager.GetNodeNames())
         {
             Debug.Log(physicalID);
@@ -138,6 +151,31 @@ public class FunctionManager : MonoBehaviour
     float t;
     void Update()
     {
+        UpdatePopup();
+        UpdateDateAndTime();
+    }
+
+    // Show popup message
+    public static void Popup(string text)
+    {
+        if (popupLifetime > 0) popupLifetime = POPUP_DURATION - 1.0f;
+        else popupLifetime = POPUP_DURATION;        // Set lifetime to 5 sec
+        popupText.text = text;                      // Set text fo popup message
+    }
+
+    // Update date and time Text
+    private void UpdateDateAndTime()
+    {
+        // 매 프레임마다 이런 함수를 호출하면  심할 수 있다. 코루틴을 사용하여 고쳐봅시다.
+        // 스레드도 괜찮다.
+        System.DateTime dateTime = System.DateTime.Now;
+        dateText.text =
+            dateTime.ToString("yyyy") + "/" + dateTime.ToString("MM") + "/" + dateTime.ToString("dd");
+        timeText.text = dateTime.ToString("hh시 mm분 ss초");
+    }
+
+    private void UpdatePopup()
+    {
         if (popupLifetime > 0)
         {
             // Showing
@@ -154,26 +192,6 @@ public class FunctionManager : MonoBehaviour
             popupTransform.anchoredPosition = Vector2.Lerp(POPUP_HIDE, POPUP_SHOW, WindowManager.SmoothMove(t));
             popupLifetime -= Time.deltaTime;
         }
-
-        UpdateDateAndTime();
-    }
-
-    // Show popup message
-    public static void Popup(string text)
-    {
-        if (popupLifetime > 0) popupLifetime = POPUP_DURATION - 1.0f;
-        else popupLifetime = POPUP_DURATION;        // Set lifetime to 5 sec
-        popupText.text = text;                      // Set text fo popup message
-    }
-
-    // Update date and time Text
-    private void UpdateDateAndTime()
-    {
-        System.DateTime dateTime = System.DateTime.Now;
-
-        dateText.text =
-            dateTime.ToString("yyyy") + "/" + dateTime.ToString("MM") + "/" + dateTime.ToString("dd");
-        timeText.text = dateTime.ToString("hh시 mm분 ss초");
     }
 
     //=======[ Callback functions ]=========================================================
@@ -192,4 +210,23 @@ public class FunctionManager : MonoBehaviour
         Debug.Log(nodeID);
     }
 
+    public void OnModeChange()
+    {
+        WindowManager.CloseAll();
+
+        if (IsPlacingMode)
+        {
+            // Placing mode to monitoring mode
+            uis["text_mode"].GetComponent<Text>().text = "모니터링 모드";
+            uis["layout_buttons"].gameObject.SetActive(false);
+        }
+        else
+        {
+            // Monitoring mode to placing mode
+            uis["text_mode"].GetComponent<Text>().text = "배치 모드";
+            uis["layout_buttons"].gameObject.SetActive(true);
+        }
+
+        isPlacingMode = !isPlacingMode;
+    }
 }

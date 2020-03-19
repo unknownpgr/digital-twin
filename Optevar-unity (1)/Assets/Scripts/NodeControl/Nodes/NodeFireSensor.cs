@@ -22,6 +22,8 @@ public class NodeFireSensor : NodeManager
 
     // 별 의미는 없는, 사이즈를 결정하는 변수이다. 예시로 들고자 넣었다.
     private float sensorSize;
+    private float temp;
+    private float smoke;
 
     // 3. 다음으로 구현해야 하는 것은 Init 함수이다. 이 역시 필수적으로 구현해야만 한다.(abstract)
     // Init함수는 constructor와 같은 역할을 한다고 보면 된다.

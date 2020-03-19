@@ -25,7 +25,7 @@ class PrintableValue
     }
     public int[] GetSumPrints(float maxTimeStamp, float delta)
     {
-        
+
         int[] ret = new int[(int)(maxTimeStamp / delta)];
         int idx = 0;
         bool isEnd = false;
@@ -62,10 +62,8 @@ public class SimulationManager3 : ScriptableObject
     public List<float> delayList = new List<float>();
 
     string savePath;
-    
-    PriorityQueue simQ;
-    
 
+    PriorityQueue simQ;
 
     // Set variables
     public void SetGrid(Grid3 grid)
@@ -73,10 +71,10 @@ public class SimulationManager3 : ScriptableObject
         this.grid = grid;
     }
 
-   // Simulate
-   // 1. Set evacuaters.
-   // 2. Update sensor data.
-   // 3. Simulate.
+    // Simulate
+    // 1. Set evacuaters.
+    // 2. Update sensor data.
+    // 3. Simulate.
 
     public void AddEvacuater(Vector3 area, int nums, List<Node3[]> paths)
     {
@@ -144,52 +142,52 @@ public class SimulationManager3 : ScriptableObject
     }
     */
 
-   
-   // Return path-time list.
 
-        /*DEPRECATED
-    void Calc(Evacuaters Evacs)
+    // Return path-time list.
+
+    /*DEPRECATED
+void Calc(Evacuaters Evacs)
+{
+    //Debug.Log("Position of StartNode: " + grid.NodeFromWorldPosition(StartPos.position).gridX + ", " + grid.NodeFromWorldPosition(StartPos.position).gridY);
+    //grid.ResetFinalPaths();
+    //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+    //sw.Start();
+    List<Node[]> tmpL = new List<Node[]>();
+    for (int i = 0; i < grid.TargetNodes.Count; i++)
     {
-        //Debug.Log("Position of StartNode: " + grid.NodeFromWorldPosition(StartPos.position).gridX + ", " + grid.NodeFromWorldPosition(StartPos.position).gridY);
-        //grid.ResetFinalPaths();
-        //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-        //sw.Start();
-        List<Node[]> tmpL = new List<Node[]>();
-        for (int i = 0; i < grid.TargetNodes.Count; i++)
-        {
-            tmpL.Add(grid.GetStoredPathFromPosition(Evacs.GetPosition(), i));
+        tmpL.Add(grid.GetStoredPathFromPosition(Evacs.GetPosition(), i));
 
-        }
-        Evacs.SetPaths(tmpL.ToArray());
-        //grid.AddPath(Evacs.GetPath(0));
-        //sw.Stop();
-
-        //perform += sw.ElapsedMilliseconds;
-        //performCount++;
-        //Debug.Log(sw.ElapsedMilliseconds.ToString() + "ms");
-        //Debug.Log("Perform: " + perform / performCount);
     }
-    void Calc(Evacuaters Evacs, int exitNodeIdx)
-    {
-        //Debug.Log("Position of StartNode: " + grid.NodeFromWorldPosition(StartPos.position).gridX + ", " + grid.NodeFromWorldPosition(StartPos.position).gridY);
-        //grid.ResetFinalPaths();
-        //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-        //sw.Start();
-        List<Node[]> tmpL = new List<Node[]>();
-        tmpL.Add(grid.GetStoredPathFromPosition(Evacs.GetPosition(), exitNodeIdx));
-        Evacs.SetPaths(tmpL.ToArray());
-        grid.AddPath(Evacs.GetPath(0));
-        //sw.Stop();
+    Evacs.SetPaths(tmpL.ToArray());
+    //grid.AddPath(Evacs.GetPath(0));
+    //sw.Stop();
 
-        //perform += sw.ElapsedMilliseconds;
-        //performCount++;
-        //Debug.Log(sw.ElapsedMilliseconds.ToString() + "ms");
-        //Debug.Log("Perform: " + perform / performCount);
-    }
-    */
+    //perform += sw.ElapsedMilliseconds;
+    //performCount++;
+    //Debug.Log(sw.ElapsedMilliseconds.ToString() + "ms");
+    //Debug.Log("Perform: " + perform / performCount);
+}
+void Calc(Evacuaters Evacs, int exitNodeIdx)
+{
+    //Debug.Log("Position of StartNode: " + grid.NodeFromWorldPosition(StartPos.position).gridX + ", " + grid.NodeFromWorldPosition(StartPos.position).gridY);
+    //grid.ResetFinalPaths();
+    //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+    //sw.Start();
+    List<Node[]> tmpL = new List<Node[]>();
+    tmpL.Add(grid.GetStoredPathFromPosition(Evacs.GetPosition(), exitNodeIdx));
+    Evacs.SetPaths(tmpL.ToArray());
+    grid.AddPath(Evacs.GetPath(0));
+    //sw.Stop();
 
-        
-        
+    //perform += sw.ElapsedMilliseconds;
+    //performCount++;
+    //Debug.Log(sw.ElapsedMilliseconds.ToString() + "ms");
+    //Debug.Log("Perform: " + perform / performCount);
+}
+*/
+
+
+
     // Progress():
     // Check Evacuater start?
     // Y...NextRoute()
@@ -205,8 +203,8 @@ public class SimulationManager3 : ScriptableObject
             //grid.ResetFinalPaths();
             for (int o = 0; o < EvacuatersList.Count; o++)
             {
-            //    EvacuatersList[o].SetPath(0);
-            //    grid.AddPath(EvacuatersList[o].GetPath(0));
+                //    EvacuatersList[o].SetPath(0);
+                //    grid.AddPath(EvacuatersList[o].GetPath(0));
 
             }
             Moves();
@@ -217,7 +215,7 @@ public class SimulationManager3 : ScriptableObject
             return NextRoute();
         }
     }
-    
+
     void Moves()
     {
         float t = 0f;
@@ -259,7 +257,7 @@ public class SimulationManager3 : ScriptableObject
             {
                 Evacuaters3 tmpEvac = (Evacuaters3)simQ.Dequeue();
                 if (simQ.Count() == 0)
-                    tmpEvac.Update(t, t+0.01f);
+                    tmpEvac.Update(t, t + 0.01f);
                 else
                     tmpEvac.Update(t, ((Evacuaters3)simQ.Peek()).NextActingTime);
                 if (t < tmpEvac.NextActingTime)
@@ -272,7 +270,7 @@ public class SimulationManager3 : ScriptableObject
                     for (int i = 0; i < EvacuatersList.Count; i++)
                         evacNumList[i].Add(EvacuatersList[i].curNum);
                 }
-                
+
                 //
 
                 if (tmpEvac.WaitingTime > 0f) // 한 대피 그룹의 대피 완료 조건
@@ -345,7 +343,7 @@ public class SimulationManager3 : ScriptableObject
             grid.Liner();
         }
     }
-    
+
 
     // 일정 시간의 움직임을 업데이트함
     int MoveInvoke(float time)
@@ -452,7 +450,7 @@ public class SimulationManager3 : ScriptableObject
             for (int i = 0; i < lastRank; i++)
                 tmps += "P" + (i + 1).ToString() + "Sum,";
             tmps += "\n";
-            
+
             //Add data
             int[][] tmpData = new int[lastRank][];
             for (int j = 0; j < lastRank; j++)
@@ -462,10 +460,10 @@ public class SimulationManager3 : ScriptableObject
             }
             for (int i = 0; i < (int)(tmpMax / delta); i++)
             {
-                tmps += (i*delta).ToString("N1") + ",";
+                tmps += (i * delta).ToString("N1") + ",";
                 for (int j = 0; j < lastRank; j++)
                 {
-                    tmps += tmpData[j][i].ToString() + ","; 
+                    tmps += tmpData[j][i].ToString() + ",";
                 }
                 tmps += "\n";
             }
@@ -502,7 +500,7 @@ public class SimulationManager3 : ScriptableObject
         for (int i = 0; i < tmpMax; i++) tmps2 += (i * 0.1) + ",";
         tmps = tmps2 + '\n' + tmps;
         */
-        
+
     }
 
     int CompSimQ(object a, object b)
