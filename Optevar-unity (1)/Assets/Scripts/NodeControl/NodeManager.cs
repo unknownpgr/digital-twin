@@ -208,7 +208,7 @@ abstract public class NodeManager
         {
             if (node.GetType() == nodeType)
             {
-                node.Add(node);
+                nodes.Add(node);
             }
         }
         return nodes;

@@ -9,9 +9,10 @@ using UnityEngine.AI;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
-public class BuildingManager
+public static class BuildingManager
 {
     // There is always only one building, therefore use static.
+    // Building is therefore singletone.
 
     private class Floor
     {
@@ -151,7 +152,7 @@ public class BuildingManager
     }
 
     // Set NavMesh. used for routing
-    public void SetNavMesh()
+    public static void SetNavMesh()
     {
         // Bake NavMesh in runtime
         if (building == null) return;
