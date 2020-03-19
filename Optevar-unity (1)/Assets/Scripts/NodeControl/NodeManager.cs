@@ -201,6 +201,19 @@ abstract public class NodeManager
         return nodes[nodeName];
     }
 
+    public static List<NodeManager> GetNodesByType(Type nodeType)
+    {
+        List<NodeManager> nodes = new List<NodeManager>();
+        foreach (NodeManager node in nodes)
+        {
+            if (node.GetType() == nodeType)
+            {
+                node.Add(node);
+            }
+        }
+        return nodes;
+    }
+
     // Return the list of name(=physical id) of every node.
     public static string[] GetNodeNames()
     {
