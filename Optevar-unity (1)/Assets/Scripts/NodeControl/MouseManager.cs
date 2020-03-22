@@ -36,6 +36,7 @@ public class MouseManager : MonoBehaviour
     {
         public static bool IsLeftClicked { get; private set; }
         public static bool IsRightClicked { get; private set; }
+        public static bool IsWheelClicked { get; private set; }
         public static bool IsDoubleClicked { get; private set; }
         public static bool IsHit { get; private set; }
         public static bool IsOverUI { get; private set; }
@@ -55,14 +56,14 @@ public class MouseManager : MonoBehaviour
             if (doubleClickTimer > 0) doubleClickTimer -= Time.deltaTime;
 
             IsLeftClicked = Input.GetMouseButtonDown(0);
+            IsWheelClicked = Input.GetMouseButton(2);
             IsRightClicked = Input.GetMouseButton(1);
             IsDoubleClicked = false;
-
             IsOverUI = EventSystem.current.IsPointerOverGameObject();
 
+            // Check doubleclick
             if (IsLeftClicked)
             {
-                // Check doubleclick
                 if (IsDoubleClicked = (doubleClickTimer > 0)) doubleClickTimer = 0;
                 else doubleClickTimer = doubleClickDuraction;
             }
@@ -143,7 +144,7 @@ public class MouseManager : MonoBehaviour
     void NodePlacing()
     {
         bool isPlaceable = false;
-        if (MouseState.IsHit) isPlaceable = (MouseState.Target.layer == placableLayer) && EventSystem.current.currentSelectedGameObject == null;
+        if (MouseState.IsHit) isPlaceable = (MouseState.Target.layer == placableLayer) && !MouseState.IsOverUI;
 
         if (isPlaceable)
         {
@@ -194,14 +195,17 @@ public class MouseManager : MonoBehaviour
     private Vector3 velocity = Vector3.zero;
     private void CameraMove()
     {
+        // Do not move the camera when mouse is over UI.
+        if (MouseState.IsOverUI) return;
+
         // Panning
-        if (Input.GetMouseButton(2))
+        if (MouseState.IsWheelClicked)
         {
             cameraTransform.position -= (cameraTransform.right.normalized * Input.GetAxis("Mouse X") + cameraTransform.up.normalized * Input.GetAxis("Mouse Y")) * panningValue;
         }
 
         // Rotating
-        if (Input.GetMouseButton(1))
+        if (MouseState.IsRightClicked)
         {
             rotX += Input.GetAxis("Mouse X") * 100.0f * Time.deltaTime;
             rotY += Input.GetAxis("Mouse Y") * 100.0f * Time.deltaTime;

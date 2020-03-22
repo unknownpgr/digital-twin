@@ -135,7 +135,7 @@ abstract public class NodeManager
         .Where(t => t.IsSubclassOf(typeof(NodeManager))))
         {
             nodeTypes.Add(t.Name, t);
-            Debug.Log("Node type : " + t.Name);
+            // Debug.Log("Node type : " + t.Name);
         }
     }
 
@@ -300,7 +300,6 @@ abstract public class NodeManager
             t[KEY_PROPERTY] = new Dictionary<string, string>().Stringfy(); ;
             t[KEY_INIT] = ((i % 2 == 0) ? true : false) + "";
             r[i] = t.Stringfy();
-            Debug.Log(r[i]);
         }
         return r;
     }

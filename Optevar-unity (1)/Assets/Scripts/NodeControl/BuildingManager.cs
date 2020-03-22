@@ -57,8 +57,6 @@ public static class BuildingManager
         // Rewrite meta file
         File.WriteAllText(metaFilePath, value, Encoding.UTF8);
 
-        Debug.Log(filePath);
-
         // Load building model
         GameObject model = (GameObject)Resources.Load(filePath);
         if (model == null) return null;
@@ -103,13 +101,13 @@ public static class BuildingManager
             {
                 if (c1.Height > c2.Height) return 1;
                 if (c1.Height < c2.Height) return -1;
-                return 0;
+                throw new Exception("Same height floor");
             });
 
             // Add to Floors
             foreach (Floor floor in floors)
             {
-                Debug.Log("H = " + floor.Height);
+                // Debug.Log("H = " + floor.Height);
                 Floors.Add(floor.gameObject);
             }
         }

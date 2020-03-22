@@ -5563,7 +5563,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -0.0038348897}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &66382618
@@ -30577,7 +30577,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.00013813828}
+  m_AnchoredPosition: {x: 0, y: 0.0003351226}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &604605124
@@ -41407,327 +41407,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -0.5}
   m_SizeDelta: {x: -20, y: -13}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &815105657
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 815105658}
-  - component: {fileID: 815105661}
-  - component: {fileID: 815105660}
-  - component: {fileID: 815105659}
-  m_Layer: 0
-  m_Name: EventSystem_2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &815105658
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 815105657}
-  m_LocalRotation: {x: -0.38465264, y: -0, z: -0, w: 0.92306143}
-  m_LocalPosition: {x: -788.94916, y: -1053.6003, z: 1789.4525}
-  m_LocalScale: {x: 86.60255, y: 86.602554, z: 86.602554}
-  m_Children: []
-  m_Father: {fileID: 1044137560}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &815105659
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 815105657}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1077351063, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
---- !u!114 &815105660
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 815105657}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -619905303, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
-  m_DragThreshold: 5
---- !u!114 &815105661
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 815105657}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62927ca247eef584bb4732c67bbc2c46, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Id: 
-  Style: 
-  BasedOn: 
-  Theme: Flat
-  BaseDirectory: 
-  UnitSize: {x: 0, y: 0, z: 0}
-  LayoutParent: {fileID: 0}
-  Parent: {fileID: 0}
-  Content: {fileID: 815105661}
-  State:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: State
-    IsMapped: 0
-    _isSet: 1
-    _internalValue: Default
-  IsActive:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: IsActive
-    IsMapped: 0
-    _isSet: 1
-    _internalValue: 1
-  HideFlags:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: HideFlags
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: 0
-  GameObject: {fileID: 815105657}
-  Transform: {fileID: 815105658}
-  Position:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: Position
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: {x: 0, y: 0, z: 0}
-  Rotation:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: Rotation
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: {x: 0, y: 0, z: 0, w: 0}
-  Scale:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: Scale
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: {x: 0, y: 0, z: 0}
-  Cancel:
-    Name: Cancel
-    TriggeredByEventSystem: 1
-    EventTriggerType: 16
-    IsDisabled: 0
-  Deselect:
-    Name: Deselect
-    TriggeredByEventSystem: 1
-    EventTriggerType: 10
-    IsDisabled: 0
-  Drop:
-    Name: Drop
-    TriggeredByEventSystem: 1
-    EventTriggerType: 6
-    IsDisabled: 0
-  Move:
-    Name: Move
-    TriggeredByEventSystem: 1
-    EventTriggerType: 11
-    IsDisabled: 0
-  Click:
-    Name: Click
-    TriggeredByEventSystem: 1
-    EventTriggerType: 4
-    IsDisabled: 0
-  BeginDrag:
-    Name: BeginDrag
-    TriggeredByEventSystem: 1
-    EventTriggerType: 13
-    IsDisabled: 0
-  EndDrag:
-    Name: EndDrag
-    TriggeredByEventSystem: 1
-    EventTriggerType: 14
-    IsDisabled: 0
-  Drag:
-    Name: Drag
-    TriggeredByEventSystem: 1
-    EventTriggerType: 5
-    IsDisabled: 0
-  InitializePotentialDrag:
-    Name: InitializePotentialDrag
-    TriggeredByEventSystem: 1
-    EventTriggerType: 12
-    IsDisabled: 0
-  MouseDown:
-    Name: MouseDown
-    TriggeredByEventSystem: 1
-    EventTriggerType: 2
-    IsDisabled: 0
-  MouseEnter:
-    Name: MouseEnter
-    TriggeredByEventSystem: 1
-    EventTriggerType: 0
-    IsDisabled: 0
-  MouseExit:
-    Name: MouseExit
-    TriggeredByEventSystem: 1
-    EventTriggerType: 1
-    IsDisabled: 0
-  MouseUp:
-    Name: MouseUp
-    TriggeredByEventSystem: 1
-    EventTriggerType: 3
-    IsDisabled: 0
-  Scroll:
-    Name: Scroll
-    TriggeredByEventSystem: 1
-    EventTriggerType: 7
-    IsDisabled: 0
-  Select:
-    Name: Select
-    TriggeredByEventSystem: 1
-    EventTriggerType: 9
-    IsDisabled: 0
-  Submit:
-    Name: Submit
-    TriggeredByEventSystem: 1
-    EventTriggerType: 15
-    IsDisabled: 0
-  UpdateSelected:
-    Name: UpdateSelected
-    TriggeredByEventSystem: 1
-    EventTriggerType: 8
-    IsDisabled: 0
-  Item:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: Item
-    IsMapped: 0
-    _isSet: 0
-  IsTemplate:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: IsTemplate
-    IsMapped: 0
-    _isSet: 0
-    _internalValue: 0
-  Activated:
-    Name: Activated
-    TriggeredByEventSystem: 0
-    EventTriggerType: 0
-    IsDisabled: 0
-  Deactivated:
-    Name: Deactivated
-    TriggeredByEventSystem: 0
-    EventTriggerType: 0
-    IsDisabled: 0
-  IsDestroyed:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: IsDestroyed
-    IsMapped: 0
-    _isSet: 0
-    _internalValue: 0
-  IsDynamic:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: IsDynamic
-    IsMapped: 0
-    _isSet: 0
-    _internalValue: 0
-  PropagateChildLayoutChanges:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: PropagateChildLayoutChanges
-    IsMapped: 0
-    _isSet: 1
-    _internalValue: 0
-  ViewTypeName: EventSystem
-  ViewXumlName: EventSystem
-  ViewFieldBindings: []
-  ViewActionEntries: []
-  ViewFieldStateValues: []
-  SetViewFieldNames: []
-  ValueConverterContext:
-    BaseDirectory: 
-    UnitSize: {x: 50, y: 50, z: 50}
-  FirstSelectedGameObject:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: FirstSelectedGameObject
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: {fileID: 0}
-  CurrentSelectedGameObject:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: CurrentSelectedGameObject
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: {fileID: 0}
-  PixelDragThreshold:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: PixelDragThreshold
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: 0
-  SendNavigationEvents:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: SendNavigationEvents
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: 0
-  UnityEventSystem: {fileID: 815105660}
-  HorizontalAxis:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: HorizontalAxis
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: 
-  VerticalAxis:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: VerticalAxis
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: 
-  SubmitButton:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: SubmitButton
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: 
-  CancelButton:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: CancelButton
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: 
-  InputActionsPerSecond:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: InputActionsPerSecond
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: 0
-  AllowActivationOnMobileDevice:
-    ParentView: {fileID: 815105661}
-    ViewFieldPath: AllowActivationOnMobileDevice
-    IsMapped: 1
-    _isSet: 0
-    _internalValue: 0
-  StandaloneInputModule: {fileID: 815105659}
 --- !u!1 &816657544
 GameObject:
   m_ObjectHideFlags: 0
@@ -47598,7 +47277,6 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 815105658}
   - {fileID: 1594390955}
   m_Father: {fileID: 1148903931}
   m_RootOrder: 0
@@ -66721,8 +66399,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1380500694}
   m_HandleRect: {fileID: 1380500693}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.00009045583
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -72268,7 +71946,7 @@ RectTransform:
   - {fileID: 2067304647}
   - {fileID: 536533222}
   m_Father: {fileID: 1044137560}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}

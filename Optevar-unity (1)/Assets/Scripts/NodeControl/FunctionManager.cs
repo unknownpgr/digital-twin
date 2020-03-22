@@ -64,6 +64,7 @@ public class FunctionManager : MonoBehaviour
 
         // Load builing
         GameObject building = BuildingManager.LoadSkp(BuildingName);
+
         if (!building) Popup("That is not a valid building.");
         else
         {
@@ -78,7 +79,7 @@ public class FunctionManager : MonoBehaviour
 
                 // Create floor buttons
                 GameObject newButton;
-                for (int i = 0; i < BuildingManager.FloorsCount; i++)
+                for (int i = BuildingManager.FloorsCount - 1; i >= 0; i--)
                 {
                     newButton = Instantiate(floorButton);
                     newButton.transform.SetParent(plainFloors, false);
@@ -115,7 +116,6 @@ public class FunctionManager : MonoBehaviour
         foreach (string physicalID in NodeManager.GetNodeIDs())
         {
             NodeManager nm = NodeManager.GetNodeByID(physicalID);
-            Debug.Log(physicalID);
             newSensorBtn = Instantiate(sensorButton);
             newSensorBtn.transform.SetParent(sensorPanel, false);
             newSensorBtn.transform.localPosition = Vector3.zero;
