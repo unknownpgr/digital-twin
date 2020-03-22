@@ -112,11 +112,6 @@ public class MouseManager : MonoBehaviour
                 break;
         }
 
-        if (MouseState.IsLeftClicked)
-        {
-            FunctionManager.self.OnSensorStateUpdated();
-        }
-
         CameraMove();
     }
 
@@ -125,7 +120,6 @@ public class MouseManager : MonoBehaviour
         placingNode = obj;
         mouseMode = MouseMode.NODE_PLACING;
         placingNode.State = NodeManager.NodeState.STATE_PLACING;
-        FunctionManager.self.OnSensorStateUpdated();
     }
 
     public static void ToNormalMode()
@@ -144,7 +138,6 @@ public class MouseManager : MonoBehaviour
         }
 
         mouseMode = MouseMode.NORMAL;
-        FunctionManager.self.OnSensorStateUpdated();
     }
 
     private void NodePlacing()

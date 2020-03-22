@@ -136,6 +136,9 @@ public class FunctionManager : MonoBehaviour
             sensorButtons.Add(nm.PhysicalID, newSensorBtn);
         }
         Destroy(sensorButton);
+
+        // Add callback listener
+        NodeManager.OnNodeStateChanged += OnSensorStateUpdated;
         OnSensorStateUpdated();
     }
 
@@ -256,7 +259,7 @@ public class FunctionManager : MonoBehaviour
                 case NodeManager.NodeState.STATE_PLACING:
                     color = new Color(.7f, .7f, .7f);
                     break;
-                default:
+                default: // NodeManager.NodeState.STATE_UNINITIALIZED
                     color = new Color(1, .7f, .7f);
                     break;
             }

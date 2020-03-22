@@ -124,6 +124,7 @@ abstract public class NodeManager
             state = value;
             if (state == NodeState.STATE_INITIALIZED) gameObject.SetActive(true);
             else gameObject.SetActive(false);
+            if (OnNodeStateChanged != null) OnNodeStateChanged();
         }
     }
 
@@ -134,6 +135,11 @@ abstract public class NodeManager
 
     // Related gameobject
     protected GameObject gameObject;
+
+    //===[ Callbacks ]===========================================================================
+
+    public delegate void Del();
+    public static Del OnNodeStateChanged;
 
     //===[ Constructors ]===========================================================================
 
