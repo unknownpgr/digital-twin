@@ -32,12 +32,53 @@ public class MouseManager : MonoBehaviour
 
     private static GameObject targetMark;
 
+    public static class MouseState
+    {
+        public static bool IsLeftClicked { get; private set; }
+        public static bool IsRightClicked { get; private set; }
+        public static bool IsDoubleClicked { get; private set; }
+        public static bool IsHit { get; private set; }
+        public static bool IsOverUI { get; private set; }
+        public static bool IsOverGameObject { get; private set; }
+        private static RaycastHit hit;
+        public static RaycastHit Hit { get => hit; private set { } }
+        public static GameObject Target { get => hit.collider.gameObject; }
+        public static Vector3 Point { get => hit.point; private set { } }
+        public static Vector3 Normal { get => hit.normal; private set { } }
+
+        public static float doubleClickDuraction = .5f;
+        private static float doubleClickTimer = 0;
+
+        public static void UpdateMouseState()
+        {
+            // Detect double click
+            if (doubleClickTimer > 0) doubleClickTimer -= Time.deltaTime;
+
+            IsLeftClicked = Input.GetMouseButtonDown(0);
+            IsRightClicked = Input.GetMouseButton(1);
+            IsDoubleClicked = false;
+
+            IsOverUI = EventSystem.current.IsPointerOverGameObject();
+
+            if (IsLeftClicked)
+            {
+                // Check doubleclick
+                if (IsDoubleClicked = (doubleClickTimer > 0)) doubleClickTimer = 0;
+                else doubleClickTimer = doubleClickDuraction;
+            }
+
+            // Get clicked item
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            IsHit = Physics.Raycast(ray, out hit, Mathf.Infinity);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         cameraTransform = Camera.main.GetComponent<Transform>();
 
+        // Initialize rotation to current rotation
         rotX = cameraTransform.localEulerAngles.y;
         rotY = -cameraTransform.localEulerAngles.x;
 
@@ -54,29 +95,11 @@ public class MouseManager : MonoBehaviour
     }
 
     // Update is called once per frame
-    private float doubleClickTimer = 0;
-    private float doubleClickDuraction = 0.5f;
     void Update()
     {
-        // Detect double click
-        if (doubleClickTimer > 0) doubleClickTimer -= Time.deltaTime;
+        MouseState.UpdateMouseState();
 
-        bool isMouseOnUI = true;// EventSystems.EventSystem.IsPointerOverGameObject();
-        bool isClicked = Input.GetMouseButtonDown(0);
-        bool isDoubleClicked = false;
-        GameObject target;
-        if (isClicked)
-        {
-            // Check doubleclick
-            if (isDoubleClicked = (doubleClickTimer > 0)) doubleClickTimer = 0;
-            else doubleClickTimer = doubleClickDuraction;
-
-            // Get clicked item
-            RaycastHit hit;
-            Ray cast_point = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(cast_point, out hit, Mathf.Infinity)) target = hit.collider.gameObject;
-        }
-
+        // Mouse mode state machine
         switch (mouseMode)
         {
             case MouseMode.NORMAL:
@@ -100,6 +123,8 @@ public class MouseManager : MonoBehaviour
 
     public static void ToNormalMode()
     {
+        // Do not modify any UI elementes except targetMrk here.
+
         // Do nothing before initialization
         if (!targetMark) return;
         targetMark.SetActive(false);
@@ -111,12 +136,63 @@ public class MouseManager : MonoBehaviour
             placingNode.Destroy();
             FunctionManager.Popup("Node placing canceled.");
         }
+
         mouseMode = MouseMode.NORMAL;
+    }
+
+    void NodePlacing()
+    {
+        bool isPlaceable = false;
+        if (MouseState.IsHit) isPlaceable = (MouseState.Target.layer == placableLayer) && EventSystem.current.currentSelectedGameObject == null;
+
+        if (isPlaceable)
+        {
+            // Show targetMark
+            targetMark.SetActive(true);
+            // Move target marker to the hit point, but lift a little from surface.
+            targetMark.transform.position = MouseState.Point + MouseState.Normal * 0.1f;
+            // Set the direction of mark.
+            targetMark.transform.rotation = Quaternion.LookRotation(MouseState.Normal, Vector3.one);
+        }
+        else targetMark.SetActive(false);
+
+        // Place
+        if (MouseState.IsLeftClicked)
+        {
+            if (isPlaceable)
+            {
+                // Activate node
+                placingNode.SetActive(true);
+
+                // Place given node
+                placingNode.Position = MouseState.Point;
+
+                // Check if given surface is wall
+                float angleCosine = Mathf.Abs(Vector3.Dot(Vector3.up, MouseState.Normal));
+                if (angleCosine < 0.5f) FunctionManager.Popup("Warning : " + placingNode.DisplayName + " placed on wall.");
+                else FunctionManager.Popup(placingNode.DisplayName + " placed.");
+
+                // Change to normal mode. Initialize placing node to null.
+                placingNode = null;
+
+                ToNormalMode();
+            }
+            else
+            {
+                FunctionManager.Popup("Cannot place node here.");
+            }
+        }
+
+        // Cancel
+        else if (MouseState.IsRightClicked)
+        {
+            ToNormalMode();
+        }
     }
 
     float wheelValue = 0f;
     private Vector3 velocity = Vector3.zero;
-    void CameraMove()
+    private void CameraMove()
     {
         // Panning
         if (Input.GetMouseButton(2))
@@ -145,62 +221,6 @@ public class MouseManager : MonoBehaviour
             // If near enough, stop.
             if ((cameraTransform.position - dest).magnitude < 10) dest.y = -1;
             else cameraTransform.position = Vector3.SmoothDamp(cameraTransform.position, dest, ref velocity, 0.3f);
-        }
-    }
-
-    void NodePlacing()
-    {
-        Ray cast_point = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        bool isHit = Physics.Raycast(cast_point, out hit, Mathf.Infinity);
-        if (isHit) isHit = (hit.collider.gameObject.layer == placableLayer);
-
-        if (isHit)
-        {
-            targetMark.SetActive(true);
-            // Move target marker to the hit point, but lift a little from surface.
-            targetMark.transform.position = hit.point + hit.normal * 0.1f;
-            // Set the direction of mark.
-            targetMark.transform.rotation = Quaternion.LookRotation(hit.normal, Vector3.one);
-        }
-        else
-        {
-            targetMark.SetActive(false);
-        }
-
-        // Place
-        if (Input.GetMouseButton(0))
-        {
-            if (isHit)
-            {
-                // Activate node
-                placingNode.SetActive(true);
-
-                // Place given node
-                placingNode.Position = hit.point;
-
-                // Check if given surface is wall
-                float angleCosine = Mathf.Abs(Vector3.Dot(Vector3.up, hit.normal));
-                if (angleCosine < 0.5f) FunctionManager.Popup("Warning : " + placingNode.DisplayName + " placed on wall.");
-                else FunctionManager.Popup(placingNode.DisplayName + " placed.");
-
-                // Change to normal mode. Initialize placing node to null.
-                placingNode = null;
-                ToNormalMode();
-
-                // Uncomment here to continue placing.
-                // NodePlace(NodeManager.GetNode(NodeManager.NodeType.SENSOR_FIRE));
-            }
-            else
-            {
-                FunctionManager.Popup("Cannot place node here.");
-            }
-        }
-
-        // Cancel
-        else if (Input.GetMouseButton(1))
-        {
-            ToNormalMode();
         }
     }
 }

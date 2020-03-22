@@ -113,7 +113,7 @@ abstract public class NodeManager
     public bool IsInitialized
     {
         get => isInitialized;
-        set { if (value) isInitialized = value; }
+        set { isInitialized = value; }
     }
 
     // ===[ Protected = child-only properties of node ]==========================================================================
@@ -180,6 +180,7 @@ abstract public class NodeManager
         // Attach gameObject to nodeManager
         nodeManager.gameObject = (GameObject)GameObject.Instantiate(prefab);
         nodeManager.gameObject.transform.position = position;
+        nodeManager.gameObject.SetActive(isInitialized);
 
         // Set other properties
         nodeManager.physicalID = physicalID;
@@ -194,11 +195,11 @@ abstract public class NodeManager
         return nodeManager;
     }
 
-    // Get node by it's name
-    public static NodeManager GetNodeByName(string nodeName)
+    // Get node by it's phyiscal ID
+    public static NodeManager GetNodeByID(string nodeID)
     {
-        if (!nodes.ContainsKey(nodeName)) return null;
-        return nodes[nodeName];
+        if (!nodes.ContainsKey(nodeID)) return null;
+        return nodes[nodeID];
     }
 
     public static List<NodeManager> GetNodesByType(Type nodeType)
@@ -214,8 +215,8 @@ abstract public class NodeManager
         return nodes;
     }
 
-    // Return the list of name(=physical id) of every node.
-    public static string[] GetNodeNames()
+    // Return the list of physical id of every node.
+    public static string[] GetNodeIDs()
     {
         return nodes.Keys.ToArray();
     }
@@ -278,9 +279,10 @@ abstract public class NodeManager
     }
 
     //===[ Default method override ]===========================================================================
+
     public override sealed string ToString()
     {
-        return Stringfy();
+        return this.Stringfy();
     }
 
     //===[ Function for test ]===========================================================================

@@ -85,7 +85,7 @@ public class FunctionManager : MonoBehaviour
                     newButton.transform.localPosition = Vector3.zero;
                     newButton.transform.GetChild(0).GetComponent<Text>().text = "F" + (i + 1);
 
-                    // var i must be copied, or always it would be FloorsCount-1 as it is used from inline functions that share context.
+                    // var i must be copied, orit would be always FloorsCount-1 as it is used from inline functions that share context.
                     int k = i;
                     newButton.GetComponent<Button>().onClick.AddListener(() => { OnSetFloor(k); });
                     floorButtons.Add(newButton);
@@ -103,26 +103,26 @@ public class FunctionManager : MonoBehaviour
 
         // Load node data from database
         // 이 코드 대신에 DB에서 로드하는 코드가 들어가야만 한다.
-        // 만약 노드가 제대로 초기화되지 않았다면, 먼저 deactivate한 후 버튼 색을 다르게 표시해볼 수 있다.
         foreach (string nodeString in NodeManager.__TEST__GetTestNodes(5))
         {
             NodeManager.Instantiate(nodeString);
         }
 
-        // Initialize buttons and create existing node
+        // Initialize sensor buttons and create existing node
         GameObject sensorButton = uis["button_sensor_ID"].gameObject;
         Transform sensorPanel = uis["panel_sensor"];
         GameObject newSensorBtn;
-        foreach (string physicalID in NodeManager.GetNodeNames())
+        foreach (string physicalID in NodeManager.GetNodeIDs())
         {
+            NodeManager nm = NodeManager.GetNodeByID(physicalID);
             Debug.Log(physicalID);
             newSensorBtn = Instantiate(sensorButton);
             newSensorBtn.transform.SetParent(sensorPanel, false);
             newSensorBtn.transform.localPosition = Vector3.zero;
-            newSensorBtn.transform.GetChild(0).GetComponent<Text>().text = physicalID;
+            newSensorBtn.transform.GetChild(0).GetComponent<Text>().text = nm.DisplayName;
+            newSensorBtn.GetComponent<Image>().color = nm.IsInitialized ? new Color(1, 1, 1) : new Color(1, .8f, .8f);
             newSensorBtn.GetComponent<Button>().onClick.AddListener(() => OnSensorSelected(physicalID));
         }
-
         Destroy(sensorButton);
     }
 
@@ -199,15 +199,21 @@ public class FunctionManager : MonoBehaviour
     // Called when sensor create button clicked
     public void OnCreateSensor()
     {
-        MouseManager.ToNormalMode();
         WindowManager sensorWindow = WindowManager.GetWindow("window_sensor");
         sensorWindow.SetVisible(true);
     }
 
     public void OnSensorSelected(string nodeID)
     {
-        NodeManager sensor = NodeManager.GetNodeByName(nodeID);
-        Debug.Log(nodeID);
+        NodeManager node = NodeManager.GetNodeByID(nodeID);
+        if (node.IsInitialized)
+        {
+            Popup("Sensor already initialized");
+        }
+        else
+        {
+            MouseManager.NodePlace(node);
+        }
     }
 
     public void OnModeChange()
