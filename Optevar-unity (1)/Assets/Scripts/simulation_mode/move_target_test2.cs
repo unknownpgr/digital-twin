@@ -17,7 +17,6 @@ public class move_target_test2 : MonoBehaviour
     float minTime = 100000f;
     float tmpTime = 0f;
     float accum = 0;
-    int preIdx = 0;
     List<Evacuaters> EvacuatersList;
     bool IsEvacs;
     int pathIdx;
@@ -35,7 +34,7 @@ public class move_target_test2 : MonoBehaviour
 
     /****************/
     float time;
-    
+
     public Camera sub_camera;
     public Camera main_camera;
     private Texture2D scrshot_tecture;
@@ -114,7 +113,7 @@ public class move_target_test2 : MonoBehaviour
                     }
                     Moves();
 
-                    
+
 
                     mouseInterfaceFlag = 2;
                 }
@@ -122,7 +121,7 @@ public class move_target_test2 : MonoBehaviour
                 //{
                 //    while (!NextRoute())
                 //    {
-                        //NextRoute();
+                //NextRoute();
                 //    }
                 //}
 
@@ -160,15 +159,15 @@ public class move_target_test2 : MonoBehaviour
         }
     }
     /****************/
-    
+
     IEnumerator screen_pixels()
     {
-        
+
 
         sub_camera.enabled = true;
         image_panel.active = true;
         //scrshot_tecture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, true);
-        
+
         temp_path.scrshot = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, true);
 
         yield return new WaitForEndOfFrame();
@@ -280,7 +279,7 @@ public class move_target_test2 : MonoBehaviour
             int t = 1;
             tmps += t + "," + tmpF[0] + ",";
 
-            
+
 
             for (int i = 0; i < tmpP.Count; i++)
             {
@@ -320,7 +319,8 @@ public class move_target_test2 : MonoBehaviour
 
                 //Debug.Log("총수" + paths.Count);
 
-                paths.Sort(delegate (screenshot_attr x, screenshot_attr y) {
+                paths.Sort(delegate (screenshot_attr x, screenshot_attr y)
+                {
                     if (x.time > y.time) return 1;
                     else if (x.time < y.time) return -1;
                     return 0;
@@ -353,16 +353,16 @@ public class move_target_test2 : MonoBehaviour
                     new_text.transform.localPosition = new Vector3(time_text.transform.localPosition.x, +time_text.transform.localPosition.y - (image_ob1.rectTransform.rect.height + 35) * r, time_text.transform.localPosition.z);
                     new_text.transform.rotation = time_text.transform.rotation;
                     new_text.transform.localScale = time_text.transform.localScale;
-                    
+
                     new_text.GetComponent<Text>().text = "Time : " + paths[r].time.ToString();
                     //Debug.Log("r : " + r);
                     //Debug.Log("걸린시간 : " + paths[r].time);
                 }
-                
+
             }
         }
-        
-     
+
+
     }
     void Move(float timeAdj)
     {
@@ -482,7 +482,6 @@ public class move_target_test2 : MonoBehaviour
                 pathfinder.Calc(EvacuatersList[i]);
             //pathfinder.grid.StorePaths(pathfinder.grid.TargetNodes.ToArray());
             accum = 0;
-            preIdx = 0;
         }
     }
 

@@ -80,7 +80,7 @@ abstract public class NodeManager
     private const string KEY_PHYSICAL_ID = "PhysicalID";
     private const string KEY_POSITION = "Position";
     private const string KEY_PROPERTY = "Property";
-    private const string KEY_INIT = "Init";
+    private const string KEY_STAT = "Init";
 
     //===[ Private-Static fields ]===========================================================================
 
@@ -109,11 +109,22 @@ abstract public class NodeManager
 
     // Whether the node has been initialized
     // You cannot de-initialize node.
-    private bool isInitialized = false;
-    public bool IsInitialized
+    public enum NodeState
     {
-        get => isInitialized;
-        set { isInitialized = value; }
+        STATE_UNINITIALIZED,    // Node has not been initialized
+        STATE_PLACING,          // Node is beeing placed.
+        STATE_INITIALIZED       // Node is placed.
+    }
+    private NodeState state = NodeState.STATE_UNINITIALIZED;
+    public NodeState State
+    {
+        get => state;
+        set
+        {
+            state = value;
+            if (state == NodeState.STATE_INITIALIZED) gameObject.SetActive(true);
+            else gameObject.SetActive(false);
+        }
     }
 
     // ===[ Protected = child-only properties of node ]==========================================================================
@@ -166,7 +177,7 @@ abstract public class NodeManager
         Type nodeType = nodeTypes[jsonDict[KEY_NODE_TYPE]];
         Vector3 position = jsonDict[KEY_POSITION].ToVector3();
         Dictionary<string, string> properties = jsonDict[KEY_PROPERTY].Jsonfy();
-        bool isInitialized = bool.Parse(jsonDict[KEY_INIT]);
+        Enum.TryParse(jsonDict[KEY_STAT], out NodeState nodeState);
 
         // Create NodeManager instance
         initiatable = true; // Don't care about this. it prevents to create node with new keyword.
@@ -180,12 +191,12 @@ abstract public class NodeManager
         // Attach gameObject to nodeManager
         nodeManager.gameObject = (GameObject)GameObject.Instantiate(prefab);
         nodeManager.gameObject.transform.position = position;
-        nodeManager.gameObject.SetActive(isInitialized);
+        nodeManager.gameObject.SetActive(nodeState == NodeState.STATE_INITIALIZED);
 
         // Set other properties
         nodeManager.physicalID = physicalID;
         nodeManager.Position = position;
-        nodeManager.isInitialized = isInitialized;
+        nodeManager.State = nodeState;
         nodeManager.DictToProperty(properties);
         nodes.Add(physicalID, nodeManager);
 
@@ -230,11 +241,12 @@ abstract public class NodeManager
     }
 
     // Destroy every node and its properties.
-    public static void DestroyAll()
+    public static void ResetAll()
     {
+        // 
         string[] keys = new string[nodes.Count];
         nodes.Keys.CopyTo(keys, 0);
-        foreach (string key in keys) nodes[key].Destroy();
+        foreach (string key in keys) nodes[key].Reset();
     }
 
     //===[ Protected abstract methods ]===========================================================================
@@ -245,22 +257,6 @@ abstract public class NodeManager
     protected abstract Dictionary<string, string> PropertyToDict();
 
     //===[ Public methods ]===========================================================================
-
-    public void SetActive(bool activation)
-    {
-        gameObject.SetActive(activation);
-    }
-
-    public void Destroy()
-    {
-        // Remove gameObject first.
-        GameObject.Destroy(gameObject);
-        // Then remove this object from dictionary.
-        nodes.Remove(physicalID);
-        // To prevent further access, remove some properties.
-        physicalID = null;
-        gameObject = null;
-    }
 
     // Convert current node to json.
     public string Stringfy()
@@ -273,9 +269,14 @@ abstract public class NodeManager
         json.Add(KEY_NODE_TYPE, GetType().Name);
         json.Add(KEY_POSITION, Position.ToString());
         json.Add(KEY_PROPERTY, propertyString);
-        json.Add(KEY_INIT, isInitialized + "");
+        json.Add(KEY_STAT, State + "");
 
         return json.Stringfy();
+    }
+
+    public void Reset()
+    {
+        State = NodeState.STATE_UNINITIALIZED;
     }
 
     //===[ Default method override ]===========================================================================
@@ -298,7 +299,7 @@ abstract public class NodeManager
             t[KEY_PHYSICAL_ID] = "ID_TEST_" + i;
             t[KEY_POSITION] = new Vector3(i, i, i) + "";
             t[KEY_PROPERTY] = new Dictionary<string, string>().Stringfy(); ;
-            t[KEY_INIT] = ((i % 2 == 0) ? true : false) + "";
+            t[KEY_STAT] = ((i % 2 == 0) ? NodeState.STATE_INITIALIZED : NodeState.STATE_UNINITIALIZED) + "";
             r[i] = t.Stringfy();
         }
         return r;

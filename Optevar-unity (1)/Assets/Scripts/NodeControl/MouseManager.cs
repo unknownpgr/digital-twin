@@ -19,7 +19,7 @@ public class MouseManager : MonoBehaviour
     private static NodeManager placingNode;
     int placableLayer;
 
-    // Camera pan / rotation / zoom
+    // Camera pan / rotate / zoom
     public float wheelConstant = 30f;
     float panningValue = 5f;
     float rotY, rotX;
@@ -27,10 +27,10 @@ public class MouseManager : MonoBehaviour
     // Camera transfrom
     private static Transform cameraTransform;
 
-    // Camera moving. dest.y is some kind of flag. if dest.y>0, do tracking. or, do nothing.
+    // Camera moving. dest.y is used as flag. if dest.y>0, do tracking. or, do nothing.
     Vector3 dest = Vector3.down;
-
-    private static GameObject targetMark;
+    // Target marker object for node placing
+    private static GameObject targetMarker;
 
     public static class MouseState
     {
@@ -85,8 +85,8 @@ public class MouseManager : MonoBehaviour
 
         placableLayer = UnityEngine.LayerMask.NameToLayer("building");
 
-        targetMark = (GameObject)Instantiate((GameObject)Resources.Load("Prefabs/TargetMark"));
-        targetMark.SetActive(false);
+        targetMarker = (GameObject)Instantiate((GameObject)Resources.Load("Prefabs/TargetMark"));
+        targetMarker.SetActive(false);
 
         // Set camera position
         cameraTransform.position = new Vector3(0, 100, -100);
@@ -104,7 +104,7 @@ public class MouseManager : MonoBehaviour
         switch (mouseMode)
         {
             case MouseMode.NORMAL:
-                // if (isDoubleClicked) dest = hit.point;
+                if (MouseState.IsDoubleClicked) dest = MouseState.Point;
                 break;
 
             case MouseMode.NODE_PLACING:
@@ -112,59 +112,73 @@ public class MouseManager : MonoBehaviour
                 break;
         }
 
+        if (MouseState.IsLeftClicked)
+        {
+            FunctionManager.self.OnSensorStateUpdated();
+        }
+
         CameraMove();
     }
 
-    public static void NodePlace(NodeManager obj)
+    public static void ToNodePlaceMode(NodeManager obj)
     {
         placingNode = obj;
-        placingNode.SetActive(false);
         mouseMode = MouseMode.NODE_PLACING;
+        placingNode.State = NodeManager.NodeState.STATE_PLACING;
+        FunctionManager.self.OnSensorStateUpdated();
     }
 
     public static void ToNormalMode()
     {
-        // Do not modify any UI elementes except targetMrk here.
+        //!! Do not modify any UI elementes except targetMrk here.
 
         // Do nothing before initialization
-        if (!targetMark) return;
-        targetMark.SetActive(false);
-        Debug.Log("Normal mode");
+        if (!targetMarker) return;
+        targetMarker.SetActive(false);
 
         // if placingNode is not null, it means node is not placed.
         if (placingNode != null)
         {
-            placingNode.Destroy();
+            placingNode.Reset();
             FunctionManager.Popup("Node placing canceled.");
         }
 
         mouseMode = MouseMode.NORMAL;
+        FunctionManager.self.OnSensorStateUpdated();
     }
 
-    void NodePlacing()
+    private void NodePlacing()
     {
+        // Cancel
+        if (MouseState.IsRightClicked)
+        {
+            ToNormalMode();
+            return;
+        }
+
         bool isPlaceable = false;
         if (MouseState.IsHit) isPlaceable = (MouseState.Target.layer == placableLayer) && !MouseState.IsOverUI;
 
+        // Visibility of target mark
         if (isPlaceable)
         {
             // Show targetMark
-            targetMark.SetActive(true);
+            targetMarker.SetActive(true);
             // Move target marker to the hit point, but lift a little from surface.
-            targetMark.transform.position = MouseState.Point + MouseState.Normal * 0.1f;
+            targetMarker.transform.position = MouseState.Point + MouseState.Normal * 0.01f;
             // Set the direction of mark.
-            targetMark.transform.rotation = Quaternion.LookRotation(MouseState.Normal, Vector3.one);
+            targetMarker.transform.rotation = Quaternion.LookRotation(MouseState.Normal, Vector3.one);
         }
-        else targetMark.SetActive(false);
+        else targetMarker.SetActive(false);
 
-        // Place
         if (MouseState.IsLeftClicked)
         {
+            // Cancel when click UI
+            if (MouseState.IsOverUI) ToNormalMode();
+
+            // Place
             if (isPlaceable)
             {
-                // Activate node
-                placingNode.SetActive(true);
-
                 // Place given node
                 placingNode.Position = MouseState.Point;
 
@@ -174,20 +188,11 @@ public class MouseManager : MonoBehaviour
                 else FunctionManager.Popup(placingNode.DisplayName + " placed.");
 
                 // Change to normal mode. Initialize placing node to null.
+                placingNode.State = NodeManager.NodeState.STATE_INITIALIZED;
                 placingNode = null;
-
                 ToNormalMode();
             }
-            else
-            {
-                FunctionManager.Popup("Cannot place node here.");
-            }
-        }
-
-        // Cancel
-        else if (MouseState.IsRightClicked)
-        {
-            ToNormalMode();
+            else FunctionManager.Popup("Cannot place here");
         }
     }
 

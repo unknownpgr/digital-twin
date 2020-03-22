@@ -9,7 +9,7 @@ public class FunctionManager : MonoBehaviour
 {
     // Building information
     public static string BuildingPath;
-    public static string BuildingName;
+    public static string BuildingName = "ETRI"; // Set default building to ETRI
 
     // Popup associated values
     private static Vector3 POPUP_SHOW = new Vector2(0, -100);
@@ -20,10 +20,15 @@ public class FunctionManager : MonoBehaviour
     private static float popupLifetime = 0;     // Popup lifetime. hide if 0
     public static float POPUP_DURATION = 5;     // Popup default lifetime.
 
-    // Dictionary of uis
+    // Current canvas
     public Canvas canvas;
+    // Dictionary of uis
     private static Dictionary<string, Transform> uis = new Dictionary<string, Transform>();
+    // Floor side display buttons
     private List<GameObject> floorButtons = new List<GameObject>();
+    // Sensor buttons of sensor window
+    private Dictionary<string, GameObject> sensorButtons = new Dictionary<string, GameObject>();
+
 
     // Text of Date And Time UI
     public Text dateText;
@@ -40,9 +45,15 @@ public class FunctionManager : MonoBehaviour
         get { return !isPlacingMode; }
     }
 
+    // Itself
+    public static FunctionManager self;
+
     // Start is called before the first frame update
     void Start()
     {
+        // Set itself
+        self = this;
+
         // Initialize UI.
         RecursiveRegisterChild(canvas.transform, uis);
         // Now ui can be accessed with it's name.
@@ -60,7 +71,7 @@ public class FunctionManager : MonoBehaviour
         MouseManager.ToNormalMode();
 
         // Remove all existing nodes
-        NodeManager.DestroyAll();
+        NodeManager.ResetAll();
 
         // Load builing
         GameObject building = BuildingManager.LoadSkp(BuildingName);
@@ -103,7 +114,7 @@ public class FunctionManager : MonoBehaviour
         }
 
         // Load node data from database
-        // 이 코드 대신에 DB에서 로드하는 코드가 들어가야만 한다.
+        // 이 코드 대신에 DB에서 로드하는 코드가 들어가야 한다.
         foreach (string nodeString in NodeManager.__TEST__GetTestNodes(5))
         {
             NodeManager.Instantiate(nodeString);
@@ -116,18 +127,20 @@ public class FunctionManager : MonoBehaviour
         foreach (string physicalID in NodeManager.GetNodeIDs())
         {
             NodeManager nm = NodeManager.GetNodeByID(physicalID);
+
             newSensorBtn = Instantiate(sensorButton);
             newSensorBtn.transform.SetParent(sensorPanel, false);
             newSensorBtn.transform.localPosition = Vector3.zero;
             newSensorBtn.transform.GetChild(0).GetComponent<Text>().text = nm.DisplayName;
-            newSensorBtn.GetComponent<Image>().color = nm.IsInitialized ? new Color(1, 1, 1) : new Color(1, .8f, .8f);
             newSensorBtn.GetComponent<Button>().onClick.AddListener(() => OnSensorSelected(physicalID));
+            sensorButtons.Add(nm.PhysicalID, newSensorBtn);
         }
         Destroy(sensorButton);
+        OnSensorStateUpdated();
     }
 
     // floor starts from 0. 1st floor = 0
-    void OnSetFloor(int floor)
+    private void OnSetFloor(int floor)
     {
         for (int i = 0; i < BuildingManager.FloorsCount; i++)
         {
@@ -166,7 +179,7 @@ public class FunctionManager : MonoBehaviour
     // Update date and time Text
     private void UpdateDateAndTime()
     {
-        // 매 프레임마다 이런 함수를 호출하면  심할 수 있다. 코루틴을 사용하여 고쳐봅시다.
+        // 매 프레임마다 이런 함수를 호출하면  심할 수 있다. 코루틴을 사용하여 고치자.
         // 스레드도 괜찮다.
         System.DateTime dateTime = System.DateTime.Now;
         dateText.text =
@@ -206,14 +219,7 @@ public class FunctionManager : MonoBehaviour
     public void OnSensorSelected(string nodeID)
     {
         NodeManager node = NodeManager.GetNodeByID(nodeID);
-        if (node.IsInitialized)
-        {
-            Popup("Sensor already initialized");
-        }
-        else
-        {
-            MouseManager.NodePlace(node);
-        }
+        MouseManager.ToNodePlaceMode(node);
     }
 
     public void OnModeChange()
@@ -234,5 +240,27 @@ public class FunctionManager : MonoBehaviour
         }
 
         isPlacingMode = !isPlacingMode;
+    }
+
+    public void OnSensorStateUpdated()
+    {
+        foreach (string physicalID in sensorButtons.Keys)
+        {
+            NodeManager nm = NodeManager.GetNodeByID(physicalID);
+            Color color;
+            switch (nm.State)
+            {
+                case NodeManager.NodeState.STATE_INITIALIZED:
+                    color = new Color(.7f, .7f, 1);
+                    break;
+                case NodeManager.NodeState.STATE_PLACING:
+                    color = new Color(.7f, .7f, .7f);
+                    break;
+                default:
+                    color = new Color(1, .7f, .7f);
+                    break;
+            }
+            sensorButtons[physicalID].GetComponent<Image>().color = color;
+        }
     }
 }
