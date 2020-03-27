@@ -234,12 +234,14 @@ public class FunctionManager : MonoBehaviour
             // Placing mode to monitoring mode
             uis["text_mode"].GetComponent<Text>().text = "모니터링 모드";
             uis["layout_buttons"].gameObject.SetActive(false);
+            ScenarioManager3.singleTon.Init();
         }
         else
         {
             // Monitoring mode to placing mode
             uis["text_mode"].GetComponent<Text>().text = "배치 모드";
             uis["layout_buttons"].gameObject.SetActive(true);
+            ScenarioManager3.singleTon.SetDefault();
         }
 
         isPlacingMode = !isPlacingMode;

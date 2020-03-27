@@ -14,21 +14,61 @@ public static class BuildingManager
     // There is always only one building, therefore use static.
     // Building is therefore singletone.
 
-    private class Floor
+    public class Floor
     {
-        public float Height;
-        public GameObject gameObject;
+        public float Height;            // Center height of building. used for floor sort
+        public GameObject gameObject;   // Gameobject of the floor
+        public Bounds bounds;           // Bound of the floor
+
         public Floor(GameObject gameObject)
         {
             this.gameObject = gameObject;
-            this.Height = GetBounds(gameObject).center.y;
+            this.bounds = GetBounds(gameObject);
+            this.Height = bounds.center.y;
+        }
+
+        public void SetActive(bool activation)
+        {
+            gameObject.SetActive(activation);
+        }
+    }
+
+    private class NavMeshBaker : MonoBehaviour
+    {
+        void Start()
+        {
+            Debug.Log("Coroutine bake");
+            Invoke("BakeNavMesh", 0.1f);
+        }
+
+        // Bake NavMesh in runtime
+        private void BakeNavMesh()
+        {
+            Debug.Log("Start baking");
+            NavMeshSurface surface = gameObject.AddComponent<NavMeshSurface>();
+            NavMeshBuildSettings Setting = surface.GetBuildSettings();
+            Setting.agentRadius = 0.22f;
+            Setting.agentHeight = 1.7f;
+            Setting.agentSlope = 45f;
+            Setting.agentClimb = 1f;
+            Setting.agentTypeID = surface.agentTypeID;
+            surface.layerMask = 1 << LayerMask.NameToLayer("building");
+            surface.BuildNavMesh(Setting);
+        }
+
+        // By using Monobehavior script, bake NavMesh after a few frames.
+        public static bool BakeNavMesh(GameObject gameObject)
+        {
+            if (gameObject.GetComponent<NavMeshBaker>() != null) return false;
+            gameObject.AddComponent<NavMeshBaker>();
+            return true;
         }
     }
 
     public static GameObject building;
     private static int floorsCount;
     public static int FloorsCount { get => floorsCount; }
-    public static List<GameObject> Floors = new List<GameObject>();
+    public static List<Floor> Floors = new List<Floor>();
 
     public static GameObject LoadSkp(string fileName)
     {
@@ -57,18 +97,15 @@ public static class BuildingManager
         // Rewrite meta file
         File.WriteAllText(metaFilePath, value, Encoding.UTF8);
 
-        // Load building model
+        // Load building model and instantiate it.
         GameObject model = (GameObject)Resources.Load(filePath);
         if (model == null) return null;
         GameObject building = (GameObject)GameObject.Instantiate(model);
         building.name = "Building";
 
-        // Delete all Camera Container (Scene in Sketch Up)
-        DeleteCams(building);
-
-        // Set layer to 'building'
-        RecursiveSetLayer(UnityEngine.LayerMask.NameToLayer("building"), building);
-        RecursiveSetCollider(building);
+        DeleteCams(building);                                                       // Delete all Camera Container (Scene in Sketch Up)
+        RecursiveSetLayer(UnityEngine.LayerMask.NameToLayer("building"), building); // Set layer to 'building'
+        RecursiveSetCollider(building);                                             // Set collider
 
         // Get size of whole building
         Bounds bounds = GetBounds(building);
@@ -87,32 +124,38 @@ public static class BuildingManager
         // If building has multiple floors
         if (floorsCount > 1)
         {
-            // Sort floor by height
-
             // Convert gameobject to floor object and append to list
-            List<Floor> floors = new List<Floor>();
+            Floors = new List<Floor>();
             foreach (Transform floor in building.transform)
             {
-                floors.Add(new Floor(floor.gameObject));
+                Floors.Add(new Floor(floor.gameObject));
             }
 
             // Sort by height
-            floors.Sort(delegate (Floor c1, Floor c2)
+            Floors.Sort(delegate (Floor c1, Floor c2)
             {
                 if (c1.Height > c2.Height) return 1;
                 if (c1.Height < c2.Height) return -1;
                 throw new Exception("Same height floor");
             });
-
-            // Add to Floors
-            foreach (Floor floor in floors)
-            {
-                // Debug.Log("H = " + floor.Height);
-                Floors.Add(floor.gameObject);
-            }
         }
 
+        // Invoke bakeNavMesh after delay
+        NavMeshBaker.BakeNavMesh(building);
+
         return building;
+    }
+
+    // Get floor that contains given posiiton.
+    // First floor is 0, if position is out of building, return -1.
+    public static int GetFloor(Vector3 position)
+    {
+        if (floorsCount == 1) return 0;
+        for (int i = 0; i < floorsCount; i++)
+        {
+            if (Floors[i].bounds.Contains(position)) return i;
+        }
+        return -1;
     }
 
     // Remove all cameras of given object
@@ -147,23 +190,6 @@ public static class BuildingManager
         {
             RecursiveSetCollider(obj.transform.GetChild(i).gameObject);
         }
-    }
-
-    // Set NavMesh. used for routing
-    public static void SetNavMesh()
-    {
-        // Bake NavMesh in runtime
-        if (building == null) return;
-
-        NavMeshSurface surface = building.AddComponent<NavMeshSurface>();
-        NavMeshBuildSettings Setting = surface.GetBuildSettings();
-        Setting.agentRadius = 0.22f;
-        Setting.agentHeight = 1.7f;
-        Setting.agentSlope = 45f;
-        Setting.agentClimb = 1f;
-        Setting.agentTypeID = surface.agentTypeID;
-        surface.layerMask = 1 << LayerMask.NameToLayer("building");
-        surface.BuildNavMesh(Setting);
     }
 
     // Get Bound of give obejct

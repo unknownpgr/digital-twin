@@ -54,9 +54,6 @@ public class SimulationManager3 : ScriptableObject
     float minTime = 10000f;
     int pathIdx = -1;
     int pathSize = 0;
-    //List<int> tmpEvacNumList = new List<int>();
-    //List<List<int>> evacNumList = new List<List<int>>();
-    //List<List<List<int>>> PrintList = new List<List<List<int>>>();
     List<PrintableValue> PrintableList;
     int targetSize = 0;
     public List<float> delayList = new List<float>();
@@ -76,26 +73,12 @@ public class SimulationManager3 : ScriptableObject
     // 2. Update sensor data.
     // 3. Simulate.
 
-    public void AddEvacuater(Vector3 area, int nums, List<Node3[]> paths)
+    public void AddEvacuater(NodeArea area, List<Node3[]> paths)
     {
-        if (nums > 0)
+        if (area.Num > 0)
         {
-            Evacuaters3 sc = new Evacuaters3(
-                nums, area, grid);
-            sc.SetVelocity(4);
-            sc.SetPaths(paths);
-            EvacuatersList.Add(sc);
-            targetSize = paths.Count;
-        }
-    }
-
-    public void AddEvacuater(Vector3 area, int nums, List<Node3[]> paths, float _velo)
-    {
-        if (nums > 0)
-        {
-            Evacuaters3 sc = new Evacuaters3(
-                nums, area, grid);
-            sc.SetVelocity(_velo);
+            Evacuaters3 sc = new Evacuaters3(area.Num, area.Position, grid);
+            sc.SetVelocity(area.Velocity);
             sc.SetPaths(paths);
             EvacuatersList.Add(sc);
             targetSize = paths.Count;
@@ -104,95 +87,17 @@ public class SimulationManager3 : ScriptableObject
 
     public void InitSimParam(int _pathSize)
     {
-        InitSimQueue();
-        InitPathSize(_pathSize);
-        InitPrintableValue();
-
-    }
-    void InitSimQueue()
-    {
         simQ = new PriorityQueue(EvacuatersList.Count, CompSimQ);
-    }
-    void InitPathSize(int _pathSize)
-    {
         this.pathSize = _pathSize;
-    }
-    void InitPrintableValue()
-    {
         PrintableList = new List<PrintableValue>(this.pathSize);
         savePath = Application.dataPath + "/Resources/";
     }
-    /* DEPRECATED
-    public void SetEvacuaters(List<AreaPositions> areas, Dictionary<int, int> areaNums)
-    {
-        EvacuatersList.Clear();
-        for (int i = 0; i < areas.Count; i++)
-        {
-
-            if (areaNums[i] > 0)
-            {
-                Evacuaters3 sc = new Evacuaters3(
-                    areaNums[i], areas[i].position, grid);
-                
-                sc.SetVelocity(4);
-                EvacuatersList.Add(sc);
-                //Calc(sc); // Get stored paths from start position and Store into the Evacuaters.
-            }
-        }
-    }
-    */
-
-
-    // Return path-time list.
-
-    /*DEPRECATED
-void Calc(Evacuaters Evacs)
-{
-    //Debug.Log("Position of StartNode: " + grid.NodeFromWorldPosition(StartPos.position).gridX + ", " + grid.NodeFromWorldPosition(StartPos.position).gridY);
-    //grid.ResetFinalPaths();
-    //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-    //sw.Start();
-    List<Node[]> tmpL = new List<Node[]>();
-    for (int i = 0; i < grid.TargetNodes.Count; i++)
-    {
-        tmpL.Add(grid.GetStoredPathFromPosition(Evacs.GetPosition(), i));
-
-    }
-    Evacs.SetPaths(tmpL.ToArray());
-    //grid.AddPath(Evacs.GetPath(0));
-    //sw.Stop();
-
-    //perform += sw.ElapsedMilliseconds;
-    //performCount++;
-    //Debug.Log(sw.ElapsedMilliseconds.ToString() + "ms");
-    //Debug.Log("Perform: " + perform / performCount);
-}
-void Calc(Evacuaters Evacs, int exitNodeIdx)
-{
-    //Debug.Log("Position of StartNode: " + grid.NodeFromWorldPosition(StartPos.position).gridX + ", " + grid.NodeFromWorldPosition(StartPos.position).gridY);
-    //grid.ResetFinalPaths();
-    //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-    //sw.Start();
-    List<Node[]> tmpL = new List<Node[]>();
-    tmpL.Add(grid.GetStoredPathFromPosition(Evacs.GetPosition(), exitNodeIdx));
-    Evacs.SetPaths(tmpL.ToArray());
-    grid.AddPath(Evacs.GetPath(0));
-    //sw.Stop();
-
-    //perform += sw.ElapsedMilliseconds;
-    //performCount++;
-    //Debug.Log(sw.ElapsedMilliseconds.ToString() + "ms");
-    //Debug.Log("Perform: " + perform / performCount);
-}
-*/
-
 
 
     // Progress():
     // Check Evacuater start?
     // Y...NextRoute()
     // N...Init()
-    bool IsEvacs = false;
     public bool Progress()
     // true -> simulation ends up for all paths.
     // false -> It has next path.
@@ -200,13 +105,6 @@ void Calc(Evacuaters Evacs, int exitNodeIdx)
         if (pathIdx == -1)
         {
             pathIdx = 0;
-            //grid.ResetFinalPaths();
-            for (int o = 0; o < EvacuatersList.Count; o++)
-            {
-                //    EvacuatersList[o].SetPath(0);
-                //    grid.AddPath(EvacuatersList[o].GetPath(0));
-
-            }
             Moves();
             return false;
         }
@@ -216,7 +114,7 @@ void Calc(Evacuaters Evacs, int exitNodeIdx)
         }
     }
 
-    void Moves()
+    private void Moves()
     {
         float t = 0f;
         if (EvacuatersList.Count > 0)
@@ -226,7 +124,6 @@ void Calc(Evacuaters Evacs, int exitNodeIdx)
             List<List<int>> evacNumList = new List<List<int>>();
             for (int i = 0; i < EvacuatersList.Count; i++)
                 evacNumList.Add(new List<int>());
-
 
             // 20191118 수정할 시뮬레이션 모듈
             // 우선순위 큐를 이용한다.
@@ -271,8 +168,6 @@ void Calc(Evacuaters Evacs, int exitNodeIdx)
                         evacNumList[i].Add(EvacuatersList[i].curNum);
                 }
 
-                //
-
                 if (tmpEvac.WaitingTime > 0f) // 한 대피 그룹의 대피 완료 조건
                     simQ.Enqueue(tmpEvac);
                 else
@@ -283,44 +178,15 @@ void Calc(Evacuaters Evacs, int exitNodeIdx)
                     simQ.Clear();
             }
             grid.InitWeight();
-            // simulation end
-
-            /*DEPRECATED// simulation start
-            while (!IsEvacs)
-            {
-
-                int tm = MoveInvoke(dt);
-                if (tm < tmi) tmi = tm;
-                tml.Add(tmi);
-                for (int i = 0; i < EvacuatersList.Count; i++)
-                    evacNumList[i].Add(EvacuatersList[i].curNum);
-                t += dt;
-                if (t > 1000f)
-                {
-                    IsEvacs = true;
-                    grid.InitWeight();
-                }
-            }
-            // sim end
-            */
-            /* DEP
-            if (t < 999f)
-            {
-                tmpEvacNumList.AddRange(tml);
-            }
-            else
-            {
-                tmpEvacNumList.Add(0);
-            }
-            PrintList.Add(evacNumList); */
             PrintableList.Add(new PrintableValue(timeList, evacNumList, t));
             delayList.Add(t);
         }
         CheckEvacs(t);
     }
+
     // 현재 경로가 최적 경로인 지 시간으로 확인하는 코드
     // 경로의 시각화 기능 포함
-    void CheckEvacs(float tmpTime)
+    private void CheckEvacs(float tmpTime)
     {
         {
             float DistSum = 0f;
@@ -344,22 +210,8 @@ void Calc(Evacuaters Evacs, int exitNodeIdx)
         }
     }
 
-
-    // 일정 시간의 움직임을 업데이트함
-    int MoveInvoke(float time)
-    {
-        int tmpd = 0;
-        for (int i = 0; i < EvacuatersList.Count; i++)
-        {
-            int tmp = EvacuatersList[i].Update(time);
-            tmpd += tmp;
-        }
-        if (tmpd <= 0) IsEvacs = true;
-        return tmpd;
-    }
-
     // 다음 경로 시뮬레이션을 실행함
-    bool NextRoute()
+    private bool NextRoute()
     {
         //    for (int i = 0;)
         pathIdx++;
@@ -369,7 +221,6 @@ void Calc(Evacuaters Evacs, int exitNodeIdx)
             isSimEnd = true;
             return true;
         }
-        IsEvacs = false;
         for (int i = 0; i < EvacuatersList.Count; i++)
         {
             if (!EvacuatersList[i].NextPath())
@@ -403,7 +254,6 @@ void Calc(Evacuaters Evacs, int exitNodeIdx)
         }
         Moves();
         return false;
-
     }
 
 
@@ -474,36 +324,9 @@ void Calc(Evacuaters Evacs, int exitNodeIdx)
         }
         if (_text == "") _text = "test";
         System.IO.File.WriteAllText(savePath + _text + ".csv", tmps);
-        /* dep
-        for (int i = 0; i < PrintList.Count; i++)
-        {
-
-            for (int j = 0; j < PrintList[i].Count; j++)
-            {
-                tmps += (i + 1) + "," + delayList[i] + ",";
-                for (int o = 0; o < PrintList[i][j].Count; o++)
-                {
-                    tmps += PrintList[i][j][o] + ",";
-                }
-                tmps += "\n";
-            }
-            //if (t < delayList.Count)
-            //{
-            //tmps += (t + 1) + "," + delayList[t] + ",";
-            //    t++;
-            //}
-
-        }
-        string tmps2 = ",,";
-        tmpMax *= 10;
-        tmpMax += 1;
-        for (int i = 0; i < tmpMax; i++) tmps2 += (i * 0.1) + ",";
-        tmps = tmps2 + '\n' + tmps;
-        */
-
     }
 
-    int CompSimQ(object a, object b)
+    private int CompSimQ(object a, object b)
     {
         if (((Evacuaters3)a).NextActingTime < ((Evacuaters3)b).NextActingTime) return -1;
         else if (((Evacuaters3)a).NextActingTime == ((Evacuaters3)b).NextActingTime) return 0;

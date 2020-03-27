@@ -219,15 +219,23 @@ abstract public class NodeManager
         return nodes[nodeID];
     }
 
+    public static List<NodeType> GetNodesByType<NodeType>() where NodeType : NodeManager
+    {
+        List<NodeType> nodes = new List<NodeType>();
+        Type nodeType = typeof(NodeType);
+        foreach (NodeManager node in nodes)
+        {
+            if (node.GetType() == nodeType) nodes.Add((NodeType)node);
+        }
+        return nodes;
+    }
+
     public static List<NodeManager> GetNodesByType(Type nodeType)
     {
         List<NodeManager> nodes = new List<NodeManager>();
         foreach (NodeManager node in nodes)
         {
-            if (node.GetType() == nodeType)
-            {
-                nodes.Add(node);
-            }
+            if (node.GetType() == nodeType) nodes.Add(node);
         }
         return nodes;
     }
