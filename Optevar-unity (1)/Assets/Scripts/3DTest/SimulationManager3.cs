@@ -46,7 +46,6 @@ class PrintableValue
 public class SimulationManager3 : ScriptableObject
 {
     float maxDelay = 1000f;
-    public bool initEvacs = false;
     public bool isSimEnd = false;
     Grid3 grid;
     public List<Evacuaters3> EvacuatersList = new List<Evacuaters3>();
@@ -55,7 +54,6 @@ public class SimulationManager3 : ScriptableObject
     int pathIdx = -1;
     int pathSize = 0;
     List<PrintableValue> PrintableList;
-    int targetSize = 0;
     public List<float> delayList = new List<float>();
 
     string savePath;
@@ -63,6 +61,7 @@ public class SimulationManager3 : ScriptableObject
     PriorityQueue simQ;
 
     // Set variables
+    // 시뮬레이션 매니저 만들 때 한 번 호출해주면 된다.
     public void SetGrid(Grid3 grid)
     {
         this.grid = grid;
@@ -72,16 +71,14 @@ public class SimulationManager3 : ScriptableObject
     // 1. Set evacuaters.
     // 2. Update sensor data.
     // 3. Simulate.
-
     public void AddEvacuater(NodeArea area, List<Node3[]> paths)
     {
         if (area.Num > 0)
         {
-            Evacuaters3 sc = new Evacuaters3(area.Num, area.Position, grid);
+            Evacuaters3 sc = new Evacuaters3(area.Num, area.Position);
             sc.SetVelocity(area.Velocity);
             sc.SetPaths(paths);
             EvacuatersList.Add(sc);
-            targetSize = paths.Count;
         }
     }
 
@@ -98,6 +95,7 @@ public class SimulationManager3 : ScriptableObject
     // Check Evacuater start?
     // Y...NextRoute()
     // N...Init()
+    // 그냥 끝날 때까지 호출하면 되는 듯.
     public bool Progress()
     // true -> simulation ends up for all paths.
     // false -> It has next path.

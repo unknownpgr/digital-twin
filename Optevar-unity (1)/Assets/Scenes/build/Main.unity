@@ -5563,7 +5563,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.0004994429}
+  m_AnchoredPosition: {x: 0, y: 0.00024414062}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &66382618
@@ -27777,7 +27777,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineClass: {fileID: 772413661}
-  arrowLine: {fileID: 0}
   ViewMinPath: 0
   cellRad: 0.2
 --- !u!4 &478999192
@@ -66387,7 +66386,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1380500694}
   m_HandleRect: {fileID: 1380500693}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

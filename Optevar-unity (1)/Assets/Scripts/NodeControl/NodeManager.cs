@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using System.Runtime.Serialization.Formatters.Binary;
 using System;
 using System.Reflection;
 using System.Linq;
-using System.Runtime.Serialization.Json;
+using Newtonsoft.Json;
+using System.Runtime.Serialization;
 
 /*
 
@@ -71,17 +71,43 @@ abstract class에 jsonfy된 객체를 넘기면 abstract class가 이를 파싱�
 
 또한 NodeManager는 abstract class로서, 반드시 child class를 생성해야만 하나, 여러 기법들을 사용하여
 어떤 child class를 생성하든 NodeManager에 dependency가 없어 NodeManager를 수정할 필요가 없는 점에 유의하라.
+
+-----
+
+Node의 Jsonfy에 대하여.
+Node를 Jsonfy하려는데, 여러 문제가 발생하는 듯하다.
+
+- 내가 개발한 방법을 사용
+>> 속성들을 전부 Dict로 저장해야 하므로 코딩하기가 매우매우 귀찮다.
+>> 생성된 JSON이 가독성이 개판이다.
+>> 기존 JSON들과 호환되지 않는다.
+>> 한 번에 여러 노드들을 Jsonfy할 수 없다.
+>> Hierarchy구조로 만들기가 어렵다
+
+- 새로 개발한 방법을 사용
+>> 노드를 New 키워드를 사용하여 Initialize해야한다.
+>> 반드시 Initialize를 하고 나서 JSON을 로드하게 된다.
+
+그렇다면 먼저 기존의 Jsonfy-Inflate과정을 살펴보자.
+1. 타입을 읽는다.
+2. 타입에 맞는 NodeManager를 new 키워드로 생성한다.
+3. prefab종류를 읽는다.
+4. prefab을 Inflate한다.
+5. 나머지 속성을 읽는다.
+6. 나머지 속성을 적용한다.
+
+그런데 생각해본 바, JSON.net라이브러리에서 형식을 유지하는 기능이 있었다!
+따라서 다음과 같이 할 수 있다.
+
+1. 형식을 유지하면서 new Keyword를 사용하여 객체를 Inflate한다.
+2. prefabName은 컴파일 시에 지정되기 때문에, constructor에서 prefab을 Inflate한 후 attach.
+3. 나머지 변수를 자동적으로 복구
+
+이럴 경우 Type등을 굳이 변수로 지정할 필요가 없다는 장점도 있다.
 */
 
 abstract public class NodeManager
 {
-    //===[ Keys for stringfy ]==========================================================================
-    private const string KEY_NODE_TYPE = "NodeType";
-    private const string KEY_PHYSICAL_ID = "PhysicalID";
-    private const string KEY_POSITION = "Position";
-    private const string KEY_PROPERTY = "Property";
-    private const string KEY_STAT = "Init";
-
     //===[ Private-Static fields ]===========================================================================
 
     // Dictionary of every node
@@ -92,19 +118,51 @@ abstract public class NodeManager
     //===[ Public properties of node ]===========================================================================
 
     // Physical ID of node.
-    private string physicalID;
-    public string PhysicalID { get => physicalID; }
+    [JsonIgnore]
+    private string _physicalID;
+    [JsonProperty(Order = -1)]
+    public string PhysicalID
+    {
+        get => _physicalID;
+        set
+        {
+            if (nodes.ContainsKey(value)) throw new Exception("Node " + value + " already exists");
+            else nodes.Add(value, this);
+            _physicalID = value;
+        }
+    }
 
     // Name of node type. default is class name. It is just for display.
     // Do not use DisplayName as more than a string, such as dictionary key.
     // As a dictionary key, use the PhysicalID instead.
+    [JsonIgnore]
     public virtual string DisplayName { get => GetType().Name; }
 
     // Position of node.
+    // This can be serialized via 'position' wrapper variable.
+    [JsonIgnore]
     public Vector3 Position
     {
         get => gameObject.transform.position;
         set { gameObject.transform.position = value; }
+    }
+
+    // Wrapper variable for serialize Position(Vector3)
+    [JsonProperty]
+    private float[] position
+    {
+        get
+        {
+            return new float[] { Position.x, Position.y, Position.z };
+        }
+        set
+        {
+            Vector3 position = Position;
+            position.x = value[0];
+            position.y = value[1];
+            position.z = value[2];
+            Position = position;
+        }
     }
 
     // Whether the node has been initialized
@@ -134,6 +192,7 @@ abstract public class NodeManager
     protected abstract string prefabName { get; }
 
     // Related gameobject
+    [JsonIgnore]
     protected GameObject gameObject;
 
     //===[ Callbacks ]===========================================================================
@@ -147,69 +206,49 @@ abstract public class NodeManager
     static NodeManager()
     {
         foreach (Type t in Assembly
-        .GetAssembly(typeof(NodeManager))
-        .GetTypes()
-        .Where(t => t.IsSubclassOf(typeof(NodeManager))))
+            .GetAssembly(typeof(NodeManager))
+            .GetTypes()
+            .Where(t => t.IsSubclassOf(typeof(NodeManager))))
         {
             nodeTypes.Add(t.Name, t);
-            // Debug.Log("Node type : " + t.Name);
         }
     }
 
     public NodeManager()
     {
-        // New keyword exception
-        if (!initiatable) throw new Exception("You cannot create NodeManager via new keyword.");
+        // Check if initializable.
+        if (!initiatable) throw new Exception("Cannot initialize the NodeManager(" + GetType() + ") with the new keyword.");
+
+        // Load prefab from prefabName
+        GameObject prefab = (GameObject)Resources.Load("Prefabs/" + prefabName);
+        if (prefab == null) throw new Exception("No such prefab(" + prefabName + ") exists.");
+
+        // Attach gameObject to nodeManager
+        if (gameObject != null) GameObject.Destroy(gameObject);
+        gameObject = (GameObject)GameObject.Instantiate(prefab);
+    }
+
+    [OnDeserialized]
+    internal void OnDeserializedMethod(StreamingContext context)
+    {
+        Init();
     }
 
     //===[ Public static methods ]===========================================================================
 
     // You only can make any instance of NodeManager's subclass by using this method.
     private static bool initiatable = false; // It is used to prevent nodemanager is created via new keyword.
-    public static NodeManager Instantiate(string json)
+
+    public static void Instantiate(string json)
     {
-        // Use jsonfy extension
-        Dictionary<string, string> jsonDict = json.Jsonfy();
-
-        // Create NodeManager.
-        // Because NodeManager is not a derivated type of MonoBehavior,
-        // It can be initiated with new keyword.
-        string physicalID = jsonDict[KEY_PHYSICAL_ID];
-
-        // Check if given key exists
-        if (nodes.ContainsKey(physicalID)) return null;
-
-        // Recover common properties
-        Type nodeType = nodeTypes[jsonDict[KEY_NODE_TYPE]];
-        Vector3 position = jsonDict[KEY_POSITION].ToVector3();
-        Dictionary<string, string> properties = jsonDict[KEY_PROPERTY].Jsonfy();
-        Enum.TryParse(jsonDict[KEY_STAT], out NodeState nodeState);
-
-        // Create NodeManager instance
-        initiatable = true; // Don't care about this. it prevents to create node with new keyword.
-        NodeManager nodeManager = (NodeManager)Activator.CreateInstance(nodeType);
+        initiatable = true;
+        JsonConvert.DeserializeObject(json, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
         initiatable = false;
+    }
 
-        // Load prefab
-        GameObject prefab = (GameObject)Resources.Load("Prefabs/" + nodeManager.prefabName);
-        if (prefab == null) return null;
-
-        // Attach gameObject to nodeManager
-        nodeManager.gameObject = (GameObject)GameObject.Instantiate(prefab);
-        nodeManager.gameObject.transform.position = position;
-        nodeManager.gameObject.SetActive(nodeState == NodeState.STATE_INITIALIZED);
-
-        // Set other properties
-        nodeManager.physicalID = physicalID;
-        nodeManager.Position = position;
-        nodeManager.State = nodeState;
-        nodeManager.DictToProperty(properties);
-        nodes.Add(physicalID, nodeManager);
-
-        // Call initialize function
-        nodeManager.Init();
-
-        return nodeManager;
+    public static string Jsonfy()
+    {
+        return JsonConvert.SerializeObject(GetAll(), Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
     }
 
     // Get node by it's phyiscal ID
@@ -263,99 +302,58 @@ abstract public class NodeManager
         foreach (string key in keys) nodes[key].Reset();
     }
 
+    public static void DestroyAll()
+    {
+        string[] keys = nodes.Keys.ToArray();
+        foreach (string key in keys)
+        {
+            nodes[key].Destroy();
+        }
+        if (nodes.Count > 0) throw new Exception("Undestroied node remains");
+    }
+
     //===[ Protected abstract methods ]===========================================================================
 
     // You must initialize node here.
     protected abstract void Init();
-    protected abstract void DictToProperty(Dictionary<string, string> properties);
-    protected abstract Dictionary<string, string> PropertyToDict();
 
     //===[ Public methods ]===========================================================================
-
-    // Convert current node to json.
-    public string Stringfy()
-    {
-        Dictionary<string, string> property = PropertyToDict();
-        string propertyString = property.Stringfy();
-
-        Dictionary<string, string> json = new Dictionary<string, string>();
-        json.Add(KEY_PHYSICAL_ID, physicalID);
-        json.Add(KEY_NODE_TYPE, GetType().Name);
-        json.Add(KEY_POSITION, Position.ToString());
-        json.Add(KEY_PROPERTY, propertyString);
-        json.Add(KEY_STAT, State + "");
-
-        return json.Stringfy();
-    }
 
     public void Reset()
     {
         State = NodeState.STATE_UNINITIALIZED;
     }
 
-    //===[ Default method override ]===========================================================================
-
-    public override sealed string ToString()
+    public void Destroy()
     {
-        return this.Stringfy();
+        nodes.Remove(PhysicalID);
+        OnNodeStateChanged = null;
+        GameObject.Destroy(gameObject);
     }
 
     //===[ Function for test ]===========================================================================
-
-    public static string[] __TEST__GetTestNodes(int n)
+    public static string __TEST__GetTestNodes(int n)
     {
-        string[] r = new string[n];
-        string[] types = nodeTypes.Keys.ToArray();
+        initiatable = true;
+
+        List<NodeManager> nodeManagers = new List<NodeManager>();
+        string[] typeNames = nodeTypes.Keys.ToArray();
         for (int i = 0; i < n; i++)
         {
-            Dictionary<string, string> t = new Dictionary<string, string>();
-            t[KEY_NODE_TYPE] = types[i % nodeTypes.Count] + ""; ;
-            t[KEY_PHYSICAL_ID] = "ID_TEST_" + i;
-            t[KEY_POSITION] = new Vector3(i, i, i) + "";
-            t[KEY_PROPERTY] = new Dictionary<string, string>().Stringfy(); ;
-            t[KEY_STAT] = ((i % 2 == 0) ? NodeState.STATE_INITIALIZED : NodeState.STATE_UNINITIALIZED) + "";
-            r[i] = t.Stringfy();
+            Type nodeType = nodeTypes[typeNames[i % nodeTypes.Count]];
+            NodeManager newNode = (NodeManager)Activator.CreateInstance(nodeType);
+            newNode.PhysicalID = "ID_TEST_" + i;
+            newNode.Position = new Vector3(i, i, i);
+            newNode.State = (i % 2 == 0) ? NodeState.STATE_INITIALIZED : NodeState.STATE_UNINITIALIZED;
+            nodeManagers.Add(newNode);
         }
-        return r;
-    }
-}
 
+        string jsonfied = JsonConvert.SerializeObject(nodeManagers, Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
 
-// Extension for jsonfy
-static class JSONExtension
-{
-    public static string Stringfy(this Dictionary<string, string> dictionary)
-    {
-        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(Dictionary<string, string>));
-        using (MemoryStream ms = new MemoryStream())
-        {
-            serializer.WriteObject(ms, dictionary);
-            return System.Text.Encoding.Default.GetString(ms.ToArray());
-        }
-    }
+        DestroyAll();
 
-    public static Dictionary<string, string> Jsonfy(this string json)
-    {
-        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(Dictionary<string, string>));
-        using (MemoryStream ms = new MemoryStream(System.Text.ASCIIEncoding.ASCII.GetBytes(json)))
-        {
-            Dictionary<string, string> dict = (Dictionary<string, string>)serializer.ReadObject(ms);
-            return dict;
-        }
-    }
+        initiatable = false;
 
-    public static Vector3 ToVector3(this string sVector)
-    {
-        // Remove the parentheses
-        sVector = sVector.Replace("(", "").Replace(")", "");
-
-        // split the items
-        string[] sArray = sVector.Split(',');
-
-        // store as a Vector3
-        return new Vector3(
-            float.Parse(sArray[0]),
-            float.Parse(sArray[1]),
-            float.Parse(sArray[2]));
+        return jsonfied;
     }
 }

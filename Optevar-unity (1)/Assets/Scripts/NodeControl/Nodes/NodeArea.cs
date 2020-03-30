@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class NodeArea : NodeManager
 {
-    protected override string prefabName { get => "Sensor"; }
+    protected override string prefabName { get => "AreaNumber"; }
 
     public override string DisplayName { get => "대피자 구역 " + PhysicalID; }
 
@@ -14,15 +14,5 @@ public class NodeArea : NodeManager
     protected override void Init()
     {
 
-    }
-
-    protected override void DictToProperty(Dictionary<string, string> dict)
-    {
-
-    }
-
-    protected override Dictionary<string, string> PropertyToDict()
-    {
-        return new Dictionary<string, string>();
     }
 }

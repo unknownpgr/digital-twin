@@ -1,0 +1,74 @@
+{
+  "$type": "System.Collections.Generic.List`1[[NodeManager, Assembly-CSharp]], mscorlib",
+  "$values": [
+    {
+      "$type": "NodeArea, Assembly-CSharp",
+      "Num": 0,
+      "Velocity": 4.0,
+      "PhysicalID": "ID_TEST_0",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          13.2158546,
+          15.765,
+          -16.6559715
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "ID_TEST_1",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          5.65140533,
+          15.765,
+          -17.9935589
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeFireSensor, Assembly-CSharp",
+      "PhysicalID": "13000001",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          3.37559128,
+          15.765,
+          -10.8172512
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeArea, Assembly-CSharp",
+      "Num": 0,
+      "Velocity": 4.0,
+      "PhysicalID": "ID_TEST_3",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          10.69656,
+          15.765,
+          -11.1273155
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "ID_TEST_4",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          19.4471436,
+          15.765,
+          -12.7218723
+        ]
+      },
+      "State": 2
+    }
+  ]
+}

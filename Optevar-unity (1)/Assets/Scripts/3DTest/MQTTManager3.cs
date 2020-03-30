@@ -6,62 +6,116 @@ using UnityEngine;
 using UnityEngine.UI;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
-using LitJson;
+using Newtonsoft.Json;
 
 public class MQTTManager3 : MonoBehaviour
 {
-    [SerializeField]
     public class MQTTMsgData
     {
-        public string messageId;
-        public string nodeId;
-        public string timestamp;
-        public int sensorType;
-        public float value;
-        public bool isDisaster;
+        // Visible variable
+        [JsonIgnore]
+        public Type NodeType { get => GetNodeType(sensorType); }
+        [JsonIgnore]
+        public string PhysicalID;
+        [JsonIgnore]
+        public float Value { get => value; }
+        [JsonIgnore]
+        public bool IsDisaster { get => isDisaster; }
 
-        public MQTTMsgData(string msgstr, bool isDisaster)
+        // Json property variable
+        [JsonProperty]
+        private string areaId = null;
+        [JsonProperty]
+        private string nodeId = null;
+        [JsonProperty]
+        private float value = 0;
+        [JsonProperty]
+        private int sensorType = 0;
+        [JsonProperty]
+        private bool isDisaster = false;
+        [JsonProperty]
+        public string messageId = "";
+        [JsonProperty]
+        public string timestamp = "";
+
+        private MQTTMsgData()
         {
-            msgstr = msgstr.Trim();
-            msgstr = msgstr.Substring(1, msgstr.Length - 2);
-            string[] msgs = msgstr.Split(',');
-            foreach (string msg in msgs)
-            {
-                string[] tmp = msg.Split(':');
-                for (int j = 0; j < 2; j++)
-                {
-                    tmp[j] = tmp[j]
-                        .Replace("'", "")
-                        .Replace("\"", "")
-                        .Trim();
-                }
-                this.SetProperty(tmp[0], tmp[1]);
-            }
-            this.isDisaster = isDisaster;
         }
 
-        private void SetProperty(string key, string value)
+        public static MQTTMsgData GetMQTTMsgData(string jsonStr, bool isDisaster)
         {
-            switch (key)
+            MQTTMsgData data = JsonConvert.DeserializeObject<MQTTMsgData>(jsonStr);
+            data.isDisaster = isDisaster;
+            if (data.nodeId == null || data.nodeId == "") data.PhysicalID = data.areaId;
+            else data.PhysicalID = data.nodeId;
+            if (data.PhysicalID == null || data.PhysicalID == "") throw new Exception("MQTTMsgData without physical ID.");
+            return data;
+        }
+
+        private static Type GetNodeType(int nodeType)
+        {
+            // ToDo: Implement some other sensors including area.
+            switch (nodeType)
             {
-                case "messageId":
-                    messageId = value;
-                    break;
-                case "nodeId":
-                    nodeId = (value);
-                    break;
-                case "timestamp":
-                    timestamp = value;
-                    break;
-                case "sensorType":
-                    sensorType = int.Parse(value);
-                    break;
-                case "value":
-                    this.value = float.Parse(value);
-                    break;
+                case 33:    // Fire, 16진수 21
+                    return typeof(NodeFireSensor);
+                case 2:     // Water
+                    return typeof(NodeFireSensor);
+                case 3:     // Eearthquake
+                    return typeof(NodeFireSensor);
+                case 39:    // Direction
+                    return typeof(NodeFireSensor);
                 default:
-                    Debug.Log("Unknown key :" + key);
-                    break;
+                    return null;
+            }
+        }
+    }
+
+    private class Dispatcher : MonoBehaviour
+    {
+        /*
+        Dispatcher class for multithreading environment.
+        Most UnityEngine object does not works on non-main thread.
+        Methods can be invoked in main thread via this class.
+        This class is especially designed to deal with MQTT receive event.
+        */
+        private static Dispatcher singleTon;
+        private static List<Del> tasks = new List<Del>();
+        private static List<MQTTMsgData> parameters = new List<MQTTMsgData>();
+        private static GameObject dispatcherObject;
+
+        public static void Init()
+        {
+            if ((singleTon == null) != (dispatcherObject == null)) throw new Exception("The nullity of the singleton and the gameobject are different.");
+            if (dispatcherObject == null)
+            {
+                dispatcherObject = new GameObject();
+                singleTon = dispatcherObject.AddComponent<Dispatcher>();
+            }
+        }
+
+        public static void Invoke(Del action, MQTTMsgData param)
+        {
+            if (action == null) return;
+            lock (tasks)
+            {
+                tasks.Add(action);
+                parameters.Add(param);
+            }
+        }
+
+        private void Update()
+        {
+            lock (tasks)
+            {
+                if (tasks.Count != parameters.Count) throw new Exception("The number of the tasks and the parameters unmatches.");
+                for (int i = 0; i < tasks.Count; i++)
+                {
+                    try { tasks[i](parameters[i]); }
+                    catch (Exception e) { Debug.Log(e); }
+                }
+                tasks.Clear();
+                parameters.Clear();
             }
         }
     }
@@ -71,11 +125,13 @@ public class MQTTManager3 : MonoBehaviour
     private JsonParser jsonParser = new JsonParser();
 
     public delegate void Del(MQTTMsgData data);
-    public Del OnSensorUpdated;
-    public Del OnDirectionUpdated;
+    public Del OnNodeUpdated;
 
     public void Init(string configuration = "mqttconf")
     {
+        // Initialzie dispatcher
+        Dispatcher.Init();
+
         // Load configuration
         MQTTConf = jsonParser.Load<MQTTConf>("mqttconf");
 
@@ -96,133 +152,6 @@ public class MQTTManager3 : MonoBehaviour
         }
     }
 
-    private void OnConnectionClosed(object sender, EventArgs e)
-    {
-        client.Connect(MQTTConf.clientId);
-        //Debug.Log("Connection closed...");
-    }
-
-    private void OnMQTTMsgReceived(object sender, MqttMsgPublishEventArgs e)
-    {
-        string msgStr = System.Text.Encoding.UTF8.GetString(e.Message);
-        string topic = e.Topic;
-        Debug.Log("Received msg from " + topic + " : " + msgStr);
-
-        if (topic == MQTTConf.topic[0] ||//mws/Notification/Periodic/SensingValueEvent
-            topic == MQTTConf.topic[1] ||//mws/Notification/Periodic/DisasterEvent
-            topic == MQTTConf.topic[3])//mws/Set/Direction
-        {
-            MQTTMsgData data = new MQTTMsgData(msgStr, topic == MQTTConf.topic[1]);
-            OnSensorUpdated?.Invoke(data);
-        }
-        else
-        {
-            Debug.Log("Unregistered MQTT topic : " + e.Topic);
-            Debug.Log("Data : " + msgStr);
-        }
-
-        return;
-
-        if (e.Topic == MQTTConf.topic[0])
-        {
-            /*
-                {
-                "nodeId":"00010000",
-                "timestamp":"2020-02-21T02:23:03.321Z",
-                "sensorType":33,
-                "value":-10
-                }
-             */
-            //"mws/Notification/Periodic/SensingValueEvent", wan
-
-        }
-        else if (e.Topic == MQTTConf.topic[1])
-        {
-            // print(MQTTConf.topic[1]);
-            /*
-             {
-             "nodeId":"00010000",
-             "timestamp":"1970-01-17T12:02:24Z",
-             "sensorType":33,
-             "value":-10
-             }
-             */
-            // MQTTMsgData md = Parse(msgStr);
-        }
-        else if (e.Topic == MQTTConf.topic[2])//mws/Notification/Periodic/EvacueeEvent
-        {
-
-            /*
-            room1 ( 00001000, 000020000)
-            room2 ( 00001000, 000030000)
-            일때, 
-            00001000의 센싱이 발생할 때, 아래와 같이 두번의 mqtt event가 발생한다.
-            {
-            "areaId":"room2",
-            "timestamp":"2020-02-21T02:56:17.355Z",
-            "value":1
-            }
-            { "areaId":"room1","timestamp":"2020-02-21T02:56:17.353Z","value":2}
-            // */
-            // MessageData md = Jsoning(msg);
-            // if (scenarioManager.areaNums.ContainsKey(md.areaId.Replace("room", "")))//(md.areaId))
-            //     if (scenarioManager.areaNums[md.areaId.Replace("room", "")] != (int)md.value)
-            //     {
-            //         scenarioManager.areaNums[md.areaId.Replace("room", "")] = (int)md.value;
-            //         scenarioManager.isAreaChanged = true;
-            //     }
-        }
-        else if (e.Topic == MQTTConf.topic[3])
-        //ScenarioManager3에서 말고 여기서 unity system에 방향지시등 모양 시각화 표시하도록
-        {
-            /*
-             {
-             "nodeId": "00001000",
-             "direction": "up"
-             }
-            */
-        }
-        else if (e.Topic == MQTTConf.topic[4])//**아직 없음 "mws/Set/Sound"
-        {
-            /*
-              {
-              "nodeId": "00001000",
-              "sound": "on"
-              }   
-            */
-
-        }
-        else if (e.Topic == MQTTConf.topic[5])//**mws/Request/Area    from DT to mws
-        {//"미들웨어에게 특정 지역의 계산된 인원수 값을 요청한다.특정 지역의 계산된 인원수 값을 요청한다."
-            /*
-             { 
-             "areaId": "room1" 
-             }    
-             */
-
-        }
-        else if (e.Topic.Contains("mws/Response/Area/"))//mws/Response/Area/room1   from mws to DT
-        {//토픽의 wild card로 특정 지역 area ID를 지정한다. 특정 지역의 계산된 인원수 값을 응답한다.
-         //****추가수정필요
-            /*
-             {
-             "peopleCount":2
-             }
-             */
-            // if (scenarioManager.areaNums.ContainsKey(md.areaId))
-            //     if (scenarioManager.areaNums[md.areaId] != (int)md.value)
-            //     {
-            //         scenarioManager.areaNums[md.areaId] = (int)md.value;
-            //         scenarioManager.isAreaChanged = true;
-            //     }
-
-        }
-        else if (e.Topic == "messageID")//?
-        {
-
-        }
-    }
-
     public void Publish(string topic, string msg)
     {
         client.Publish(topic, Encoding.UTF8.GetBytes(msg), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
@@ -230,11 +159,11 @@ public class MQTTManager3 : MonoBehaviour
 
     public void PubDirectionOperation(string nodeId, string dir)//{"nodeId":"4","direction":"down"}
     {
-        DirectionOperation d = new DirectionOperation();
-        d.nodeId = nodeId;
-        d.direction = dir;
-        string jd = JsonMapper.ToJson(d);
-        Publish(MQTTConf.topic[3], jd);
+        // DirectionOperation d = new DirectionOperation();
+        // d.nodeId = nodeId;
+        // d.direction = dir;
+        // string jd = JsonMapper.ToJson(d);
+        // Publish(MQTTConf.topic[3], jd);
     }
 
     public void PubAreaUpdate(string id)
@@ -242,7 +171,6 @@ public class MQTTManager3 : MonoBehaviour
         string msg = "{'areaId':'" + id + "'}";
         Publish(MQTTConf.topic[5], msg);
     }
-
     private void Connect()
     {
         client = new MqttClient(MQTTConf.brokerAddr);
@@ -255,6 +183,31 @@ public class MQTTManager3 : MonoBehaviour
             Debug.LogError("Connnection error: " + e);
         }
 
+    }
+    private void OnConnectionClosed(object sender, EventArgs e)
+    {
+        client.Connect(MQTTConf.clientId);
+        Debug.Log("Connection closed...");
+    }
+
+    private void OnMQTTMsgReceived(object sender, MqttMsgPublishEventArgs e)
+    {
+        string msgStr = System.Text.Encoding.UTF8.GetString(e.Message);
+        string topic = e.Topic;
+        Debug.Log("Received msg from " + topic + " : " + msgStr);
+
+        if (topic == MQTTConf.topic[0] ||//mws/Notification/Periodic/SensingValueEvent
+            topic == MQTTConf.topic[1] ||//mws/Notification/Periodic/DisasterEvent
+            topic == MQTTConf.topic[3])//mws/Set/Direction
+        {
+            MQTTMsgData data = MQTTMsgData.GetMQTTMsgData(msgStr, topic == MQTTConf.topic[1]);
+            Dispatcher.Invoke(OnNodeUpdated, data);
+        }
+        else
+        {
+            Debug.Log("Unregistered MQTT topic : " + e.Topic);
+            Debug.Log("Data : " + msgStr);
+        }
     }
 
     public void Close()
@@ -286,7 +239,6 @@ class DirectionOperation//
     //public int messageID { get; set; }
     public string nodeId { get; set; }
     public string direction { get; set; }
-
 
     public int GetDirection()
     {

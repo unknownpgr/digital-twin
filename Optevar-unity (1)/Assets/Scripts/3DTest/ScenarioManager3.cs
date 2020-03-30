@@ -6,77 +6,6 @@ using UnityEngine.AI;
 using System.Linq;
 using System;
 
-public class Sensors
-{
-    public GameObject gameObject { get; set; }
-    public NavMeshObstacle navMeshObstacle { get; set; }
-    public sensor_attribute sensor_Attribute { get; set; }
-    public Material Material { get; set; }
-    public Material Effect { get; set; }
-
-    bool preDanger = false;
-    float trans = .3f;
-    float noTrans = 0f;
-    public void Init()
-    {
-        navMeshObstacle.carving = false;
-        Material.color = Color.white;
-        Effect.color = new Color(Effect.color.r, Effect.color.g, Effect.color.b, noTrans);
-    }
-
-    // 왠진 모르겠으나 상태가 변했는지를 반환한다.
-    bool SetSensor()
-    {
-        bool _thres = sensor_Attribute.one_sensor.disaster;
-
-        if (_thres) Effect.color = new Color(Effect.color.r, Effect.color.g, Effect.color.b, trans);
-        else Effect.color = new Color(Effect.color.r, Effect.color.g, Effect.color.b, noTrans);
-
-        navMeshObstacle.carving = _thres;
-        bool isTrans = preDanger ^ _thres;
-        preDanger = _thres;
-        return isTrans;
-    }
-
-    // 이것도 danger에 변화가 있는지를 반환한다. 왜....?
-    public bool SensorValue()
-    {
-        bool ret = true;
-
-        switch (sensor_Attribute.one_sensor.nodeType)
-        {
-            case 33://16진수 21
-                //fire
-                Material.color = new Color(1, 1 - sensor_Attribute.one_sensor.value1 * 3 / 255f, 1 - sensor_Attribute.one_sensor.value1 * 3 / 255f);
-                //SetSensor(sensor_Attribute.one_sensor.value1 > 70);
-                ret = SetSensor();
-                break;
-            case 2:
-                //water
-                Material.color = new Color(1 - sensor_Attribute.one_sensor.value1 * 3 / 255f, 1 - sensor_Attribute.one_sensor.value1 * 3 / 255f, 1);
-                //SetSensor(sensor_Attribute.one_sensor.value1 > 0);
-                ret = SetSensor();
-                break;
-            case 3:
-                // earthquake
-                Material.color = new Color(1 - sensor_Attribute.one_sensor.value1 * 3 / 255f, 1, 1 - sensor_Attribute.one_sensor.value1 * 3 / 255f);
-                //SetSensor(sensor_Attribute.one_sensor.value1 > 0);
-                ret = SetSensor();
-                break;
-            case 39://기존 39
-                // 방향 지시
-                // 이때 value1는 방향을 나타낸다. 0 ~ 3: 나가는 방향 지시, 4 ~ 7: 들어오는 방향 지시.
-                DirectionSensorScript dir = gameObject.GetComponent<DirectionSensorScript>();
-                if (sensor_Attribute.one_sensor.value1 < 4)
-                    dir.OnOff((int)sensor_Attribute.one_sensor.value1, false, true);
-                else if (sensor_Attribute.one_sensor.value1 >= 4)
-                    dir.OnOff((int)sensor_Attribute.one_sensor.value1 - 4, true, true);
-                break;
-        }
-        return ret;
-    }
-
-}
 public class ScenarioManager3 : MonoBehaviour
 {
     // Singleton obejct for static call
@@ -85,14 +14,9 @@ public class ScenarioManager3 : MonoBehaviour
     MQTTManager3 mQTTManager;
     public Grid3 grid;
 
-
-    //MQTT, Json Interface elements
-    public List<SensorNodeJson> sensorNodeJsons;
-
     //Self data
     NavMeshPath p;
     public SimulationManager3 simulationManager = null;
-    int floor;
     int pathSize = 0;
     int LastUpdatedFloor = 0;
     public bool isSensorUpdated;
@@ -100,40 +24,35 @@ public class ScenarioManager3 : MonoBehaviour
     public bool isSimulating = false;
     bool isDanger = false;
 
-    /********for GUI********/
-    float time;
 
     Camera sub_camera;
     Camera main_camera;
-    private Texture2D scrshot_tecture;
     public GameObject image_panel;
     GameObject content;
     Text time_text;
     Image image_ob1;
     SideGUI SideGUI;
-    Text WarnText;
     AudioSource musicPlayer;
 
 
     List<screenshot_attr> paths = new List<screenshot_attr>();
     screenshot_attr temp_path;
-
-    public Dictionary<string, Sensors> SensorDictionary;
-
     List<GameObject> sensorObjs = new List<GameObject>();
+
+    // ???
+    bool initEvacs = false;
 
     public void Start()
     {
         singleTon = this;
     }
 
-    // Scenario ScenarioFromJson;
     public void Init()////////////////////
     {
         //Camera initiation
         main_camera = Camera.main;
-        if (sub_camera == null)
-            sub_camera = main_camera.transform.GetChild(0).GetComponent<Camera>();
+        // if (sub_camera == null)
+        // sub_camera = main_camera.transform.GetChild(0).GetComponent<Camera>();
 
         if (grid == null) grid = transform.GetComponent<Grid3>();
         NavMeshTriangulation tri = NavMesh.CalculateTriangulation();
@@ -143,8 +62,7 @@ public class ScenarioManager3 : MonoBehaviour
         mQTTManager.Init();
 
         // Register callback listener
-        mQTTManager.OnSensorUpdated = OnSensorUpdated;
-        Debug.Log("MQTTManager is loaded.");
+        mQTTManager.OnNodeUpdated = OnNodeUpdated;
 
         isDanger = false;
         musicPlayer = gameObject.GetComponent<AudioSource>();
@@ -164,21 +82,22 @@ public class ScenarioManager3 : MonoBehaviour
         mQTTManager?.Close();
     }
 
-    void OnSensorUpdated(MQTTManager3.MQTTMsgData data)
+    void OnNodeUpdated(MQTTManager3.MQTTMsgData data)
     {
-        Debug.Log(data);
-
-        if (isAreaChanged)
+        // Apply changes on node.
+        if (data.NodeType == typeof(NodeFireSensor))
         {
-            foreach (NodeArea area in NodeManager.GetNodesByType<NodeArea>()) ;
+            NodeFireSensor node = (NodeFireSensor)NodeManager.GetNodeByID(data.PhysicalID);
+            node.IsDisaster = data.IsDisaster;
         }
+
         if (isSensorUpdated)
         {
             // SetSensorValue가 뭔가 중요해보이는데.
             if (!SetSensorValue())
             {
                 // 위험 지역이 변화했을 때만 initEvacs == true;
-                simulationManager.initEvacs = false;
+                initEvacs = false;
                 simulationManager.isSimEnd = false;
                 return;
             }
@@ -191,12 +110,16 @@ public class ScenarioManager3 : MonoBehaviour
 
         // if문 아래는 시뮬레이션 과정으로, 한 번 반복할 때 하나의 경로에 대한 시뮬레이션을 진행함.
         // 추후 쓰레드를 활용한 모듈로 분리하여 최적화할 수 있음.
+    }
 
+    // Update is called once per frame
+    void Update()
+    {
         if (isSimulating && !simulationManager.isSimEnd)
         {
             Debug.Log(simulationManager.isSimEnd);
             Siren();
-            if (!simulationManager.initEvacs)
+            if (!initEvacs)
             {
                 InitSimulation();
             }
@@ -204,14 +127,14 @@ public class ScenarioManager3 : MonoBehaviour
             {
                 if (simulationManager.Progress())
                 {
-                    // 모든 경로에 대해 시뮬레이션이 완료됨. isSimEnd = true.
+                    // 모든 경로에 대해 시뮬레이션이 완료됨.
                     grid.InitWeight();
                     SetDirectionSensor();
                     grid.ViewMinPath = true;
                     grid.Liner();
                     isSimulating = false;
                     simulationManager.PrintOut("");
-                    simulationManager.initEvacs = false;
+                    initEvacs = false;
                     ScreenShot(simulationManager.delayList[simulationManager.delayList.Count - 1]);
                 }
                 else
@@ -220,30 +143,6 @@ public class ScenarioManager3 : MonoBehaviour
                 }
             }
         }
-    }
-
-    // Currently not used. just for memo.
-    private Type GetNodeType(int nodeType)
-    {
-        // ToDo: Implement some other sensors including area.
-        switch (nodeType)
-        {
-            case 33:    // Fire, 16진수 21
-                return typeof(NodeFireSensor);
-            case 2:     // Water
-                return typeof(NodeFireSensor);
-            case 3:     // Eearthquake
-                return typeof(NodeFireSensor);
-            case 39:    // Direction
-                return typeof(NodeFireSensor);
-            default:
-                return null;
-        }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
     }
 
     void OnDanger()
@@ -266,7 +165,7 @@ public class ScenarioManager3 : MonoBehaviour
         Debug.Log("Research...");
         if (isDanger)
         {
-            simulationManager.initEvacs = false;
+            initEvacs = false;
             simulationManager.isSimEnd = false;
         }
     }
@@ -315,6 +214,8 @@ public class ScenarioManager3 : MonoBehaviour
                     // Calculate path
                     List<Node3> path = new List<Node3>();
                     p = new NavMeshPath();
+
+                    // Calculate path from every area to every exit
                     NavMesh.CalculatePath(area.Position, exit.Position, -1, p);
                     for (int o = 0; o < p.corners.Length - 1; o++)
                     {
@@ -342,102 +243,103 @@ public class ScenarioManager3 : MonoBehaviour
         Debug.Log(this.pathSize);
         simulationManager.InitSimParam(this.pathSize);
         paths.Clear();
-        simulationManager.initEvacs = true;
+        initEvacs = true;
     }
 
     public void SetSensorNodes()
     {
-        SensorDictionary = new Dictionary<string, Sensors>();
+        // SensorDictionary = new Dictionary<string, Sensors>();
 
-        for (int i = 0; i < sensorNodeJsons.Count; i++)
-        {
-            Sensors tmp = new Sensors
-            {
-                gameObject = sensorObjs[i],
-                sensor_Attribute = sensorObjs[i].GetComponent<sensor_attribute>()
-            };
-            if (tmp.gameObject.GetComponent<MeshRenderer>() != null)
-                tmp.Material = tmp.gameObject.GetComponent<MeshRenderer>().material;
-            else
-                tmp.Material = null;
-            if (tmp.gameObject.GetComponent<NavMeshObstacle>() != null)
-                tmp.navMeshObstacle = tmp.gameObject.GetComponent<NavMeshObstacle>();
-            else
-                tmp.navMeshObstacle = null;
-            if (tmp.gameObject.transform.GetChild(0).GetComponent<MeshRenderer>() != null)
-                tmp.Effect = tmp.gameObject.transform.GetChild(0).GetComponent<MeshRenderer>().material;
-            else
-                tmp.Effect = null;
-            Debug.Log("add sensor : " + tmp);
-            SensorDictionary.Add(sensorNodeJsons[i].nodeId, tmp);
-        }
+        // for (int i = 0; i < sensorNodeJsons.Count; i++)
+        // {
+        //     Sensors tmp = new Sensors
+        //     {
+        //         gameObject = sensorObjs[i],
+        //         sensor_Attribute = sensorObjs[i].GetComponent<sensor_attribute>()
+        //     };
+        //     if (tmp.gameObject.GetComponent<MeshRenderer>() != null)
+        //         tmp.Material = tmp.gameObject.GetComponent<MeshRenderer>().material;
+        //     else
+        //         tmp.Material = null;
+        //     if (tmp.gameObject.GetComponent<NavMeshObstacle>() != null)
+        //         tmp.navMeshObstacle = tmp.gameObject.GetComponent<NavMeshObstacle>();
+        //     else
+        //         tmp.navMeshObstacle = null;
+        //     if (tmp.gameObject.transform.GetChild(0).GetComponent<MeshRenderer>() != null)
+        //         tmp.Effect = tmp.gameObject.transform.GetChild(0).GetComponent<MeshRenderer>().material;
+        //     else
+        //         tmp.Effect = null;
+        //     Debug.Log("add sensor : " + tmp);
+        //     SensorDictionary.Add(sensorNodeJsons[i].nodeId, tmp);
+        // }
     }
 
     // 여기서 Target floor와 isDanger를 결정한다. 왜....?
     public bool SetSensorValue()
     {
-        List<int> dangerFloors = new List<int>();
-        int TargetFloor = 0;
-        isDanger = false;
-        bool ret = true;
+        // List<int> dangerFloors = new List<int>();
+        // int TargetFloor = 0;
+        // isDanger = false;
+        // bool ret = true;
 
-        foreach (string k in SensorDictionary.Keys)
-        {
-            ret &= SensorDictionary[k].SensorValue();
-            if (SensorDictionary[k].sensor_Attribute.one_sensor.disaster)//DisasterEvent일 때
-            {
-                //scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.nodeType = md.sensorType;
-                switch (SensorDictionary[k].sensor_Attribute.one_sensor.nodeType)
-                {
-                    case 33://16진수 21
-                        //fire
-                        //if (SensorDictionary[k].sensor_Attribute.one_sensor.value1 > 70)
-                        {
-                            Debug.Log("fire 21");
-                            TargetFloor = 1;
-                            LastUpdatedFloor = BuildingManager.GetFloor(SensorDictionary[k].sensor_Attribute.one_sensor.positions);
-                            WarnText.text = "화재 발생";
-                            isDanger = true;
-                        }
+        // foreach (string k in SensorDictionary.Keys)
+        // {
+        //     ret &= SensorDictionary[k].SensorValue();
+        //     if (SensorDictionary[k].sensor_Attribute.one_sensor.disaster)//DisasterEvent일 때
+        //     {
+        //         //scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.nodeType = md.sensorType;
+        //         switch (SensorDictionary[k].sensor_Attribute.one_sensor.nodeType)
+        //         {
+        //             case 33://16진수 21
+        //                 //fire
+        //                 //if (SensorDictionary[k].sensor_Attribute.one_sensor.value1 > 70)
+        //                 {
+        //                     Debug.Log("fire 21");
+        //                     TargetFloor = 1;
+        //                     LastUpdatedFloor = BuildingManager.GetFloor(SensorDictionary[k].sensor_Attribute.one_sensor.positions);
+        //                     WarnText.text = "화재 발생";
+        //                     isDanger = true;
+        //                 }
 
-                        break;
-                    case 2:
-                        //water
-                        //if (SensorDictionary[k].sensor_Attribute.one_sensor.value1 > 0)
-                        {
-                            // select floor
-                            Debug.Log("water 2");
-                            TargetFloor = floor;
-                            WarnText.text = "수재해 발생";
-                            LastUpdatedFloor = BuildingManager.GetFloor(SensorDictionary[k].sensor_Attribute.one_sensor.positions);
-                            isDanger = true;
-                        }
-                        break;
-                    case 3:
-                        // earthquake
-                        //if (SensorDictionary[k].sensor_Attribute.one_sensor.value1 > 0)
-                        {
-                            // select floor
-                            Debug.Log("earthquake 3");
-                            TargetFloor = 1;
-                            WarnText.text = "지진 발생";
-                            LastUpdatedFloor = BuildingManager.GetFloor(SensorDictionary[k].sensor_Attribute.one_sensor.positions);
-                            isDanger = true;
-                        }
+        //                 break;
+        //             case 2:
+        //                 //water
+        //                 //if (SensorDictionary[k].sensor_Attribute.one_sensor.value1 > 0)
+        //                 {
+        //                     // select floor
+        //                     Debug.Log("water 2");
+        //                     TargetFloor = floor;
+        //                     WarnText.text = "수재해 발생";
+        //                     LastUpdatedFloor = BuildingManager.GetFloor(SensorDictionary[k].sensor_Attribute.one_sensor.positions);
+        //                     isDanger = true;
+        //                 }
+        //                 break;
+        //             case 3:
+        //                 // earthquake
+        //                 //if (SensorDictionary[k].sensor_Attribute.one_sensor.value1 > 0)
+        //                 {
+        //                     // select floor
+        //                     Debug.Log("earthquake 3");
+        //                     TargetFloor = 1;
+        //                     WarnText.text = "지진 발생";
+        //                     LastUpdatedFloor = BuildingManager.GetFloor(SensorDictionary[k].sensor_Attribute.one_sensor.positions);
+        //                     isDanger = true;
+        //                 }
 
-                        break;
-                    case 39://39
-                        {
-                            // 방향 지시
-                            Debug.Log("39 방향지시");
-                            break;
-                        }
-                }
-            }
-        }
+        //                 break;
+        //             case 39://39
+        //                 {
+        //                     // 방향 지시
+        //                     Debug.Log("39 방향지시");
+        //                     break;
+        //                 }
+        //         }
+        //     }
+        // }
 
-        if (!isDanger) ret = true;
-        return ret;
+        // if (!isDanger) ret = true;
+        // return ret;
+        return true;
     }
 
     IEnumerator screen_pixels()

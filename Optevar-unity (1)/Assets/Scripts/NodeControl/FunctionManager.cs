@@ -29,7 +29,6 @@ public class FunctionManager : MonoBehaviour
     // Sensor buttons of sensor window
     private Dictionary<string, GameObject> sensorButtons = new Dictionary<string, GameObject>();
 
-
     // Text of Date And Time UI
     public Text dateText;
     public Text timeText;
@@ -115,10 +114,10 @@ public class FunctionManager : MonoBehaviour
 
         // Load node data from database
         // 이 코드 대신에 DB에서 로드하는 코드가 들어가야 한다.
-        foreach (string nodeString in NodeManager.__TEST__GetTestNodes(5))
-        {
-            NodeManager.Instantiate(nodeString);
-        }
+        string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
+        string nodeString = File.ReadAllText(path);
+        // File.WriteAllText(path, nodeString);
+        NodeManager.Instantiate(nodeString);
 
         // Initialize sensor buttons and create existing node
         GameObject sensorButton = uis["button_sensor_ID"].gameObject;
@@ -127,7 +126,6 @@ public class FunctionManager : MonoBehaviour
         foreach (string physicalID in NodeManager.GetNodeIDs())
         {
             NodeManager nm = NodeManager.GetNodeByID(physicalID);
-
             newSensorBtn = Instantiate(sensorButton);
             newSensorBtn.transform.SetParent(sensorPanel, false);
             newSensorBtn.transform.localPosition = Vector3.zero;
@@ -140,6 +138,12 @@ public class FunctionManager : MonoBehaviour
         // Add callback listener
         NodeManager.OnNodeStateChanged += OnSensorStateUpdated;
         OnSensorStateUpdated();
+
+        // localfiletext_4.cs
+        GameObject jsonFileButton = uis["button_json_file"].gameObject;
+        Transform jsonFilePanel = uis["panel_json_file"];
+        GameObject newJsonFileBtn;
+
     }
 
     // floor starts from 0. 1st floor = 0
@@ -225,6 +229,23 @@ public class FunctionManager : MonoBehaviour
         MouseManager.ToNodePlaceMode(node);
     }
 
+    public void OnLoadJson()
+    {
+        WindowManager loadJsonWindow = WindowManager.GetWindow("window_load_json");
+        loadJsonWindow.SetVisible(true);
+    }
+
+    public void OnJsonFileSelected()
+    {
+        // 선택된 Json File 불러오기
+    }
+
+    public void OnSaveJson()
+    {
+        WindowManager loadJsonWindow = WindowManager.GetWindow("window_save_json");
+        loadJsonWindow.SetVisible(true);
+    }
+
     public void OnModeChange()
     {
         WindowManager.CloseAll();
@@ -267,5 +288,8 @@ public class FunctionManager : MonoBehaviour
             }
             sensorButtons[physicalID].GetComponent<Image>().color = color;
         }
+
+        string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
+        File.WriteAllText(path, NodeManager.Jsonfy());
     }
 }

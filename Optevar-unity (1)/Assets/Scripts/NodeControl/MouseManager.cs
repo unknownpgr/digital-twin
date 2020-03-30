@@ -173,7 +173,7 @@ public class MouseManager : MonoBehaviour
             if (isPlaceable)
             {
                 // Place given node
-                placingNode.Position = MouseState.Point;
+                placingNode.Position = MouseState.Point + MouseState.Normal * 0.01f;
 
                 // Check if given surface is wall
                 float angleCosine = Mathf.Abs(Vector3.Dot(Vector3.up, MouseState.Normal));

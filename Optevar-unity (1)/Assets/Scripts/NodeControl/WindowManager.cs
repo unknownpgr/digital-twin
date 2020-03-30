@@ -10,7 +10,7 @@ public class WindowManager : MonoBehaviour
     private static Dictionary<string, WindowManager> windows = new Dictionary<string, WindowManager>();
 
     public string WindowName = "Test_Window";
-    public Vector3 WINODW_VISIBLE_POSITION = new Vector2(0, -100);
+    public Vector3 WINDOW_VISIBLE_POSITION = new Vector2(0, -100);
 
     // Private fields
     public Dictionary<string, Transform> Elements = new Dictionary<string, Transform>();
@@ -72,7 +72,7 @@ public class WindowManager : MonoBehaviour
         entryDrop.eventID = EventTriggerType.EndDrag;
         entryDrop.callback.AddListener((evetData) =>
         {
-            WINODW_VISIBLE_POSITION = rectTransform.anchoredPosition;
+            WINDOW_VISIBLE_POSITION = rectTransform.anchoredPosition;
             WINDOW_HIDE_POSITION.x = rectTransform.anchoredPosition.x;
         });
 
@@ -101,7 +101,7 @@ public class WindowManager : MonoBehaviour
             float t;
             if (visibility) t = movingTime;
             else t = 1 - movingTime;
-            rectTransform.anchoredPosition = Vector2.Lerp(WINODW_VISIBLE_POSITION, WINDOW_HIDE_POSITION, SmoothMove(t));
+            rectTransform.anchoredPosition = Vector2.Lerp(WINDOW_VISIBLE_POSITION, WINDOW_HIDE_POSITION, SmoothMove(t));
             movingTime -= Time.deltaTime;
         }
 
