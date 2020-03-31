@@ -47,24 +47,30 @@ public class FunctionManager : MonoBehaviour
     // Itself
     public static FunctionManager self;
 
+    // Get UI by name
+    // This function is required because GameObject.Find doesn't find inactive gameobject.
+    public static Transform Find(string uiName)
+    {
+        return uis[uiName];
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         // Set itself
         self = this;
 
-        // Initialize UI.
+        // Initialzie ui
         RecursiveRegisterChild(canvas.transform, uis);
-        // Now ui can be accessed with it's name.
 
         // Initialize popup
-        popup = uis["popup"].gameObject;
+        popup = Find("popup").gameObject;
         popupTransform = popup.GetComponent<RectTransform>();
         popupText = popupTransform.GetChild(0).GetComponent<Text>();
         popupTransform.anchoredPosition = POPUP_HIDE;
 
         // Set building name
-        uis["text_building_name"].GetComponent<Text>().text = BuildingName;
+        Find("text_building_name").GetComponent<Text>().text = BuildingName;
 
         // Initialize mouse
         MouseManager.ToNormalMode();
@@ -84,8 +90,8 @@ public class FunctionManager : MonoBehaviour
             if (BuildingManager.FloorsCount > 1)
             {
                 // Get exsisting floor button
-                GameObject floorButton = uis["button_floor"].gameObject;
-                Transform plainFloors = uis["panel_floor"];
+                GameObject floorButton = Find("button_floor").gameObject;
+                Transform plainFloors = Find("panel_floor");
 
                 // Create floor buttons
                 GameObject newButton;
@@ -108,7 +114,7 @@ public class FunctionManager : MonoBehaviour
             else
             {
                 // Hide floors view
-                uis["scrollview_floors"].gameObject.SetActive(false);
+                Find("scrollview_floors").gameObject.SetActive(false);
             }
         }
 
@@ -120,8 +126,8 @@ public class FunctionManager : MonoBehaviour
         NodeManager.Instantiate(nodeString);
 
         // Initialize sensor buttons and create existing node
-        GameObject sensorButton = uis["button_sensor_ID"].gameObject;
-        Transform sensorPanel = uis["panel_sensor"];
+        GameObject sensorButton = Find("button_sensor_ID").gameObject;
+        Transform sensorPanel = Find("panel_sensor");
         GameObject newSensorBtn;
         foreach (string physicalID in NodeManager.GetNodeIDs())
         {
@@ -140,8 +146,8 @@ public class FunctionManager : MonoBehaviour
         OnSensorStateUpdated();
 
         // localfiletext_4.cs
-        GameObject jsonFileButton = uis["button_json_file"].gameObject;
-        Transform jsonFilePanel = uis["panel_json_file"];
+        GameObject jsonFileButton = Find("button_json_file").gameObject;
+        Transform jsonFilePanel = Find("panel_json_file");
         GameObject newJsonFileBtn;
 
     }
@@ -157,14 +163,6 @@ public class FunctionManager : MonoBehaviour
             if (i != floor) floorButtons[i].GetComponent<Image>().color = new Color(200, 200, 200);
             else floorButtons[i].GetComponent<Image>().color = Color.white;
         }
-    }
-
-
-    // Recursively stored for later access from the dictionary.
-    public static void RecursiveRegisterChild(Transform parent, Dictionary<string, Transform> dict)
-    {
-        if (!dict.ContainsKey(parent.name)) dict.Add(parent.name, parent);
-        foreach (Transform child in parent) RecursiveRegisterChild(child, dict);
     }
 
     // Update is called once per frame
@@ -214,6 +212,12 @@ public class FunctionManager : MonoBehaviour
         }
     }
 
+    private static void RecursiveRegisterChild(Transform parent, Dictionary<string, Transform> dict)
+    {
+        if (!dict.ContainsKey(parent.name)) dict.Add(parent.name, parent);
+        foreach (Transform child in parent) RecursiveRegisterChild(child, dict);
+    }
+
     //=======[ Callback functions ]=========================================================
 
     // Called when sensor create button clicked
@@ -253,16 +257,19 @@ public class FunctionManager : MonoBehaviour
         if (IsPlacingMode)
         {
             // Placing mode to monitoring mode
-            uis["text_mode"].GetComponent<Text>().text = "모니터링 모드";
-            uis["layout_buttons"].gameObject.SetActive(false);
+            Find("text_mode").GetComponent<Text>().text = "모니터링 모드";
+            Find("layout_buttons").gameObject.SetActive(false);
             ScenarioManager3.singleTon.Init();
         }
         else
         {
             // Monitoring mode to placing mode
-            uis["text_mode"].GetComponent<Text>().text = "배치 모드";
-            uis["layout_buttons"].gameObject.SetActive(true);
+            Find("text_mode").GetComponent<Text>().text = "배치 모드";
+            Find("layout_buttons").gameObject.SetActive(true);
             ScenarioManager3.singleTon.SetDefault();
+
+            // Close picture window
+            Find("window_screenshot").gameObject.SetActive(false);
         }
 
         isPlacingMode = !isPlacingMode;

@@ -29,7 +29,7 @@ public class WindowManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        FunctionManager.RecursiveRegisterChild(transform, Elements);
+        RecursiveRegisterChild(transform, Elements);
         Debug.Log("Window assigned : " + WindowName);
         Elements["text_title"].GetComponent<Text>().text = WindowName;
 
@@ -151,5 +151,13 @@ public class WindowManager : MonoBehaviour
     public static float SmoothMove(float t)
     {
         return t * t * t * (3 * t * (2 * t - 5) + 10);
+    }
+
+
+    // Recursively stored for later access from the dictionary.
+    private static void RecursiveRegisterChild(Transform parent, Dictionary<string, Transform> dict)
+    {
+        if (!dict.ContainsKey(parent.name)) dict.Add(parent.name, parent);
+        foreach (Transform child in parent) RecursiveRegisterChild(child, dict);
     }
 }

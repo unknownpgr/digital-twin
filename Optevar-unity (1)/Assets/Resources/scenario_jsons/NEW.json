@@ -3,9 +3,9 @@
   "$values": [
     {
       "$type": "NodeArea, Assembly-CSharp",
-      "Num": 0,
       "Velocity": 4.0,
-      "PhysicalID": "ID_TEST_0",
+      "Num": 0,
+      "PhysicalID": "room3",
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
@@ -44,15 +44,15 @@
     },
     {
       "$type": "NodeArea, Assembly-CSharp",
-      "Num": 0,
       "Velocity": 4.0,
+      "Num": 0,
       "PhysicalID": "ID_TEST_3",
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          10.69656,
+          15.20042,
           15.765,
-          -11.1273155
+          -12.3566284
         ]
       },
       "State": 2
@@ -63,9 +63,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          19.4471436,
+          22.7845688,
           15.765,
-          -12.7218723
+          25.36421
         ]
       },
       "State": 2

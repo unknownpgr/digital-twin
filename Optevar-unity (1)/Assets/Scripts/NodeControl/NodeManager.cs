@@ -260,13 +260,13 @@ abstract public class NodeManager
 
     public static List<NodeType> GetNodesByType<NodeType>() where NodeType : NodeManager
     {
-        List<NodeType> nodes = new List<NodeType>();
+        List<NodeType> result = new List<NodeType>();
         Type nodeType = typeof(NodeType);
-        foreach (NodeManager node in nodes)
+        foreach (NodeManager node in GetAll())
         {
-            if (node.GetType() == nodeType) nodes.Add((NodeType)node);
+            if (node.GetType() == nodeType) result.Add((NodeType)node);
         }
-        return nodes;
+        return result;
     }
 
     public static List<NodeManager> GetNodesByType(Type nodeType)

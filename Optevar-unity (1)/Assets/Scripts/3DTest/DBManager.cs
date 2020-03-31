@@ -14,8 +14,9 @@ class DBClass{
 
     public string db_name = "";
     public string sensor_table = "tb_sensornode";//'tb_sensornode'
-    public string sensor_value_table = "tb_sensingvalue";
-    public string area_table = "AreaTable";//아직없음<-회의 "area_table": "areaTable"이거 추후 dbconf.json에 추가해야함
+    //public string sensor_value_table = "tb_sensingvalue";
+    public string area_table = "mmwave_area";
+    public string sensor_id_table = "tb_sensornode_sensor_ids";
 }
 
 public class DBManager : MonoBehaviour
@@ -59,6 +60,7 @@ public class DBManager : MonoBehaviour
         
         Debug.Log("DB Loaded.");
     }
+    /*
     public void SensorValueSelect(Text _nodeId, Text _start, Text _end)
     {
         //select * from products where registdate between '2013-03-01' and '2013-03-04'
@@ -90,14 +92,13 @@ public class DBManager : MonoBehaviour
         _gameObject.transform.GetChild(2).GetChild(0).GetComponentInChildren<Text>(),
         _gameObject.transform.GetChild(2).GetChild(1).GetComponentInChildren<Text>());
         
-    }
+    }*/
+    /*
     public void SensorSave(SensorNodeJson sensor)//SensorNodeJson로??
     {
 
         if (conn.Ping())//conn.State == System.Data.ConnectionState.Open)//
         {
-
-            //UPDATE
             string q = "" +
                 "UPDATE " + db.sensor_table +
                 " SET " +
@@ -110,12 +111,11 @@ public class DBManager : MonoBehaviour
             Debug.Log("save 쿼리문 : " + q);
             MySqlCommand command = new MySqlCommand(q, conn);
             command.ExecuteNonQuery();
-
-
+            
         }
         //conn.Close()
     }
-    //area의 location도 tb_sensornode에 포함된다는 가정하에
+    
     public void SensorSave(areasensor_attribute sensor)
     {
         // area에 관한 DB 테이블이 현재 존재하지 않으므로 개발 필요.
@@ -139,20 +139,24 @@ public class DBManager : MonoBehaviour
             command.ExecuteNonQuery();
             
         }
-    }
+    }*/
 
-    public string SensorLoad()
+    public string SensorLoad()// 화재센서 & 방향지시등센서
     {
         string temp = "";
+        /*
         string q = "" +
             "SELECT node_address,location" +
             " FROM " + db.sensor_table + ";";
-        
-        /*
+            */
+
+        //node_id, sensor_type
         string q = "" +
-            "SELECT COUNT(*)" +
-            " FROM " + db.sensor_table + ";";
-        */
+            "SELECT tb_sensornode_node_address, sensor_ids" +
+            " FROM " + db.sensor_id_table + 
+           " WHERE sensor_ids IN (21, 22, 23, 27);";
+
+        
         //bool ret = false;
         Debug.Log("load쿼리문 : "+q);
         
@@ -188,35 +192,22 @@ public class DBManager : MonoBehaviour
     }
     
 
-    public bool SensorLoad(int id, areasensor_attribute sensor)
+    public string AreaLoad()//area
     {
-        // area에 관한 DB 테이블이 현재 존재하지 않으므로 개발 필요.
+        string temp = "";
         string q = "" +
-            "SELECT 'node_address','location'" +
-            " FROM '" + db.area_table +
-            "' WHERE nodeId = " + id.ToString() + ";";
-        bool ret = false;
+            "SELECT area_id" +
+            " FROM " + db.area_table + ";";
         Debug.Log(q);
         if (conn.Ping())
         {
             MySqlCommand command = new MySqlCommand(q, conn);
-            Debug.Log("command : " + command);
+            //Debug.Log("command : " + command);
             MySqlDataReader rdr = command.ExecuteReader();
-            ret = false;
-            string temp = RdrToStr(rdr);
-            ret = (temp != string.Empty);
-
-            string[] tmp = temp.Split(';');
-            if (sensor != null)
-            {
-                sensor.one_sensor.areaId = (tmp[0]);
-                string[] pos = tmp[1].Split(',');
-                sensor.one_sensor.position = new Vector3(
-                    float.Parse(pos[0]), float.Parse(pos[1]), float.Parse(tmp[2]));
-            }
-            Debug.Log(temp);
+            temp = RdrToStr(rdr);
+            Debug.Log("area data : "+temp);
         }
-        return ret;
+        return temp;
     }
 
 

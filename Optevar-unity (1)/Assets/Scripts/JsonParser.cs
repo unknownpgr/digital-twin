@@ -10,6 +10,7 @@ public class JsonParser
         Debug.Log("Saving json...");
         string js = JsonUtility.ToJson(_obj);
         FolderCheck(Application.dataPath + path);
+
         File.WriteAllText(Application.dataPath
                 + path + _name + ".json"
                 , js);
@@ -24,7 +25,7 @@ public class JsonParser
         return jsObj;
     }
 
-
+    
     public void Save2(object _obj, string _path)
     {
         Debug.Log("Saving json...");

@@ -69,6 +69,7 @@ public static class BuildingManager
     private static int floorsCount;
     public static int FloorsCount { get => floorsCount; }
     public static List<Floor> Floors = new List<Floor>();
+    public static Bounds BuildingBound;
 
     public static GameObject LoadSkp(string fileName)
     {
@@ -108,13 +109,16 @@ public static class BuildingManager
         RecursiveSetCollider(building);                                             // Set collider
 
         // Get size of whole building
-        Bounds bounds = GetBounds(building);
-        Vector3 size = bounds.size;
+        BuildingBound = GetBounds(building);
+        Vector3 size = BuildingBound.size;
 
         // Move building to center of plane,
         // and slightly lift to prevent plane duplication.
         size.y = -0.01f;
         building.GetComponent<Transform>().position -= size / 2;
+
+        // Update BuildingBound because we moved building.
+        BuildingBound = GetBounds(building);
 
         BuildingManager.building = building;
 

@@ -46,7 +46,6 @@ class PrintableValue
 public class SimulationManager3 : ScriptableObject
 {
     float maxDelay = 1000f;
-    public bool isSimEnd = false;
     Grid3 grid;
     public List<Evacuaters3> EvacuatersList = new List<Evacuaters3>();
 
@@ -216,7 +215,6 @@ public class SimulationManager3 : ScriptableObject
         if (pathSize == pathIdx)
         {
             pathIdx = -1;
-            isSimEnd = true;
             return true;
         }
         for (int i = 0; i < EvacuatersList.Count; i++)

@@ -6,12 +6,12 @@ using UnityEngine.AI;
 using System.Linq;
 using System;
 
-public class ScenarioManager3 : MonoBehaviour
+public class ScenarioManager : MonoBehaviour
 {
     // Singleton obejct for static call
-    public static ScenarioManager3 singleTon;
+    public static ScenarioManager singleTon;
 
-    MQTTManager3 mQTTManager;
+    MQTTManager mQTTManager;
     public Grid3 grid;
 
     // Current state.
@@ -65,7 +65,7 @@ public class ScenarioManager3 : MonoBehaviour
         NavMeshTriangulation tri = NavMesh.CalculateTriangulation();
         grid.CreateGrid(tri.vertices, BuildingManager.FloorsCount);
 
-        if (mQTTManager == null) mQTTManager = GetComponent<MQTTManager3>();
+        if (mQTTManager == null) mQTTManager = GetComponent<MQTTManager>();
         mQTTManager.Init();
 
         // Register callback listener
@@ -106,7 +106,7 @@ public class ScenarioManager3 : MonoBehaviour
         mQTTManager?.Close();
     }
 
-    void OnNodeUpdated(MQTTManager3.MQTTMsgData data)
+    void OnNodeUpdated(MQTTManager.MQTTMsgData data)
     {
         Debug.Log(data);
 

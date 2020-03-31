@@ -252,9 +252,9 @@ public class Grid3 : MonoBehaviour
                         GameObject lineTmp = GameObject.Instantiate(lineClass);
                         LineRenderer line = lineTmp.GetComponent<LineRenderer>();
                         Color c;
-                        if (i == 0) c = new Color(0, 1, 0, 1f);
-                        else if (i == 1) c = new Color(1, 0, 0, 1f);
-                        else c = new Color(0, 0, 1, 1f);
+                        if (i == 0) c = new Color(0, 1, 0, 1);
+                        else if (i == 1) c = new Color(1, 0, 0, 1);
+                        else c = new Color(0, 0, 1, 1);
 
                         SetLine(line, c);
                         line.positionCount = this.MinPaths[i].Length;
@@ -286,10 +286,7 @@ public class Grid3 : MonoBehaviour
                         line.SetPositions(NodesToPos(this.FinalPaths[i]));
                         line.enabled = true;
                         this.renderer.Add(lineTmp);
-
-                        //DrawArrow(FinalPaths[i]);
                     }
-
                 }
             }
     }
