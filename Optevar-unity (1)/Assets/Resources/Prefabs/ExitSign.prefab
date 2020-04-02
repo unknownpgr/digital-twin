@@ -13,8 +13,6 @@ GameObject:
   - component: {fileID: 2221413899982026951}
   - component: {fileID: 1653167942970490791}
   - component: {fileID: 7339972507493426560}
-  - component: {fileID: 416497189514775313}
-  - component: {fileID: 7317937056037455968}
   m_Layer: 0
   m_Name: ExitSign
   m_TagString: Untagged
@@ -110,24 +108,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!222 &416497189514775313
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6546088107223898605}
-  m_CullTransparentMesh: 0
---- !u!114 &7317937056037455968
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6546088107223898605}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2017729f79d6d6d4aa2dfbf4bca346ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  transform: {fileID: 0}

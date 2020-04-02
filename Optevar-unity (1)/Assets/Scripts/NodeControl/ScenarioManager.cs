@@ -28,9 +28,7 @@ public class ScenarioManager : MonoBehaviour
     public bool isSimulating = false;
     bool isDanger = false;
 
-
     Camera subCamera;
-    public GameObject image_panel;
     GameObject content;
     Text time_text;
     Image image_ob1;
@@ -48,7 +46,7 @@ public class ScenarioManager : MonoBehaviour
         singleTon = this;
     }
 
-    public void Init()////////////////////
+    public void Init()
     {
         //Camera initiation
         if (subCamera == null) subCamera = GameObject.Find("SubCamera").GetComponent<Camera>();
@@ -60,11 +58,12 @@ public class ScenarioManager : MonoBehaviour
         cameraPosition.y = 100;
         subCamera.transform.position = cameraPosition;
 
-
+        // << BLOCKING TASK 1 >>
         if (grid == null) grid = transform.GetComponent<Grid3>();
         NavMeshTriangulation tri = NavMesh.CalculateTriangulation();
         grid.CreateGrid(tri.vertices, BuildingManager.FloorsCount);
 
+        // << BLOCKING TASK 2 >>
         if (mQTTManager == null) mQTTManager = GetComponent<MQTTManager>();
         mQTTManager.Init();
 
@@ -75,8 +74,6 @@ public class ScenarioManager : MonoBehaviour
         musicPlayer = gameObject.GetComponent<AudioSource>();
 
         content = GameObject.Find("scr_shot_panel");
-        if (image_panel == null)
-            image_panel = GameObject.Find("path_window_region");
         if (image_ob1 == null)
         {
             Transform tmpOb = GameObject.Find("panel_imgshow").transform;
@@ -85,18 +82,9 @@ public class ScenarioManager : MonoBehaviour
             image_ob1 = tmpOb.GetChild(0).GetComponent<Image>();
         }
 
+        // << BLOCKING TASK 3 >>
         simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
         simulationManager.SetGrid(grid);
-
-        foreach (NodeExit exit in NodeManager.GetNodesByType<NodeExit>())
-        {
-            Debug.Log(exit.PhysicalID);
-        }
-
-        foreach (NodeArea area in NodeManager.GetNodesByType<NodeArea>())
-        {
-            Debug.Log(area.PhysicalID);
-        }
     }
 
     public void SetDefault()
@@ -191,30 +179,6 @@ public class ScenarioManager : MonoBehaviour
         }
     }
 
-    void OnDanger()
-    {
-        if (!this.image_panel.activeSelf)
-        {
-            // Off -> On으로 전환되었을 때
-            //mQTTManager.PubPeriod(10);
-            this.image_panel.SetActive(true);
-            // 60초 후 자동 재 검색
-            if (IsInvoking("ReSearch"))
-                CancelInvoke("ReSearch");
-            Invoke("ReSearch", 60);
-        }
-        isSimulating = true;
-    }
-
-    void ReSearch()
-    {
-        Debug.Log("Research...");
-        if (isDanger)
-        {
-            initEvacs = false;
-        }
-    }
-
     void Siren()
     {
         //MusicPlayer.loop = true;
@@ -273,7 +237,7 @@ public class ScenarioManager : MonoBehaviour
             }
 
             this.pathSize = paths.Count;
-            simulationManager.AddEvacuater(area, paths);
+            simulationManager.AddEvacuater(area.Position, area.Num, paths, area.Velocity);
         }
         Debug.Log(this.pathSize);
         simulationManager.InitSimParam(this.pathSize);
@@ -284,16 +248,17 @@ public class ScenarioManager : MonoBehaviour
     IEnumerator screen_pixels()
     {
         subCamera.enabled = true;
-        temp_path.scrshot = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, true);
-
         yield return new WaitForEndOfFrame();
         RenderTexture rt = new RenderTexture(Screen.width, Screen.height, 24);//depth : 일단 24
         subCamera.targetTexture = rt;
-        //texture1
         subCamera.Render();
         RenderTexture.active = rt;
-        temp_path.scrshot.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0, true);
-        temp_path.scrshot.Apply();
+
+        Texture2D screenShot = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, true);
+        screenShot.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0, true);
+        screenShot.Apply();
+
+        temp_path.scrshot = screenShot;
     }
 
     void ScreenShot(float tmpTime)
@@ -332,8 +297,6 @@ public class ScenarioManager : MonoBehaviour
                 {
                     new_image_ob = Instantiate(image_ob1, image_ob1.transform.position, Quaternion.identity);
                     new_text = Instantiate(time_text, image_ob1.transform.position, Quaternion.identity);
-                    // CreatedForGUI.Add(new_image_ob.gameObject);
-                    // CreatedForGUI.Add(new_text.gameObject);
                 }
 
                 new_image_ob.transform.SetParent(content.transform);
@@ -381,18 +344,27 @@ public class ScenarioManager : MonoBehaviour
             {
                 DirectionSensorScript dir = sensorObjs[i].GetComponent<DirectionSensorScript>();
                 dir.Init();
+
+                // target = nearest path position
                 Vector3 target = GetDirectionTarget(sensorObjs[i].transform.position);
+
+                // Calculate direction
                 NavMeshPath p = new NavMeshPath();
                 NavMesh.CalculatePath(sensorObjs[i].transform.position, target, -1, p);
                 if (p.status == NavMeshPathStatus.PathComplete)
                 {
-                    mQTTManager.PubDirectionOperation(sensorObjs[i].GetComponent<sensor_attribute>().one_sensor.nodeId, VectorToDirection(
-                        p.corners[1] - p.corners[0]));
+                    // Publish direction operation.
+                    mQTTManager.PubDirectionOperation(sensorObjs[i].GetComponent<sensor_attribute>().one_sensor.nodeId, VectorToDirection(p.corners[1] - p.corners[0]));
                 }
             }
         }
+        foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>())
+        {
+
+        }
     }
 
+    // 가장 가까운 경로 위치를 가져옴.
     Vector3 GetDirectionTarget(Vector3 origin)
     {
         float mD = 100000f;

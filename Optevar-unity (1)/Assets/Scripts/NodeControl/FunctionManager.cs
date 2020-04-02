@@ -116,6 +116,9 @@ public class FunctionManager : MonoBehaviour
                 // Hide floors view
                 Find("scrollview_floors").gameObject.SetActive(false);
             }
+
+            // Start clock
+            StartCoroutine(UpdateDateAndTime());
         }
 
         // Load node data from database
@@ -149,7 +152,6 @@ public class FunctionManager : MonoBehaviour
         GameObject jsonFileButton = Find("button_json_file").gameObject;
         Transform jsonFilePanel = Find("panel_json_file");
         GameObject newJsonFileBtn;
-
     }
 
     // floor starts from 0. 1st floor = 0
@@ -170,7 +172,6 @@ public class FunctionManager : MonoBehaviour
     void Update()
     {
         UpdatePopup();
-        UpdateDateAndTime();
     }
 
     // Show popup message
@@ -182,14 +183,15 @@ public class FunctionManager : MonoBehaviour
     }
 
     // Update date and time Text
-    private void UpdateDateAndTime()
+    private IEnumerator UpdateDateAndTime()
     {
-        // 매 프레임마다 이런 함수를 호출하면  심할 수 있다. 코루틴을 사용하여 고치자.
-        // 스레드도 괜찮다.
-        System.DateTime dateTime = System.DateTime.Now;
-        dateText.text =
-            dateTime.ToString("yyyy") + "/" + dateTime.ToString("MM") + "/" + dateTime.ToString("dd");
-        timeText.text = dateTime.ToString("hh시 mm분 ss초");
+        while (true)
+        {
+            System.DateTime dateTime = System.DateTime.Now;
+            dateText.text = dateTime.ToString("yyyy/MM/dd");
+            timeText.text = dateTime.ToString("hh시 mm분 ss초");
+            yield return new WaitForSeconds(1);
+        }
     }
 
     private void UpdatePopup()
@@ -257,16 +259,16 @@ public class FunctionManager : MonoBehaviour
         if (IsPlacingMode)
         {
             // Placing mode to monitoring mode
-            Find("text_mode").GetComponent<Text>().text = "모니터링 모드";
+            Find("text_mode").GetComponent<Text>().text = "배치 모드";
             Find("layout_buttons").gameObject.SetActive(false);
-            ScenarioManager3.singleTon.Init();
+            ScenarioManager.singleTon.Init();
         }
         else
         {
             // Monitoring mode to placing mode
-            Find("text_mode").GetComponent<Text>().text = "배치 모드";
+            Find("text_mode").GetComponent<Text>().text = "모니터링 모드";
             Find("layout_buttons").gameObject.SetActive(true);
-            ScenarioManager3.singleTon.SetDefault();
+            ScenarioManager.singleTon.SetDefault();
 
             // Close picture window
             Find("window_screenshot").gameObject.SetActive(false);

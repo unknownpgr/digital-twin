@@ -21,9 +21,9 @@ public class BuildingSelector : MonoBehaviour
         string builings = root + "/Resources/Models";
 
         // Get building skp list and make buttons
-        float term = 10;
-        float left = term;
-        float right = 0;
+        float space = 10;
+        float leftOffset = space;
+        float rightOffset = 0;
         foreach (string filePath in Directory.GetFiles(builings))
         {
             // Check if given file is skp file
@@ -49,14 +49,14 @@ public class BuildingSelector : MonoBehaviour
             // Place
             buildingView.transform.SetParent(scrollList.transform);
             RectTransform rt = buildingView.GetComponent<RectTransform>();
-            rt.anchoredPosition = new Vector2(left, 0);
+            rt.anchoredPosition = new Vector2(leftOffset, 0);
             rt.offsetMin = new Vector2(rt.offsetMin.x, 0);
             rt.offsetMax = new Vector2(rt.offsetMax.x, 0);
-            left += rt.sizeDelta.x + term;
+            leftOffset += rt.sizeDelta.x + space;
         }
 
         // Extend viewer
-        scrollList.sizeDelta = new Vector2(left, scrollList.sizeDelta.y);
+        scrollList.sizeDelta = new Vector2(leftOffset, scrollList.sizeDelta.y);
     }
 
     // Update is called once per frame

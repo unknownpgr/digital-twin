@@ -4,14 +4,14 @@
     {
       "$type": "NodeArea, Assembly-CSharp",
       "Velocity": 4.0,
-      "Num": 0,
+      "Num": 30,
       "PhysicalID": "room3",
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          13.2158546,
+          16.51933,
           15.765,
-          -16.6559715
+          -10.971571
         ]
       },
       "State": 2
@@ -22,9 +22,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          5.65140533,
+          -13.3577271,
           15.765,
-          -17.9935589
+          20.4567928
         ]
       },
       "State": 2
@@ -35,9 +35,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          3.37559128,
+          3.36658859,
           15.765,
-          -10.8172512
+          -15.6804056
         ]
       },
       "State": 2
@@ -50,9 +50,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          15.20042,
+          15.0348473,
           15.765,
-          -12.3566284
+          -19.6385956
         ]
       },
       "State": 2
@@ -63,9 +63,22 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          22.7845688,
+          -13.3852787,
           15.765,
-          25.36421
+          -19.02796
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeDirection, Assembly-CSharp",
+      "PhysicalID": "directionSensor",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          14.1152763,
+          17.18586,
+          16.5924683
         ]
       },
       "State": 2

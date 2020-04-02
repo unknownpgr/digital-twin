@@ -78,8 +78,10 @@ public class mode_change_UI : MonoBehaviour
             }
 
         }
-    }
 
+
+
+    }
     public void on_clicked_simulation_button()
     {
         if (ui_cont.building == null) ui_cont.building = GameObject.Find("Building");
@@ -123,7 +125,10 @@ public class mode_change_UI : MonoBehaviour
         }
         object_button.mode_num = 0;
         sm = ui_cont.path.GetComponent<ScenarioManager3>();
-        sm.Init();
+        sm.Initiation();
+        sm.image_panel.SetActive(false);
+        sm.SetLists(this.scene, pb.GetSensorObjects());//현재 씬의 센서 obj들 받아
+        sm.InitMoniteringMode();//시나리오모드시작
     }
 
     public void active_disas_panel()

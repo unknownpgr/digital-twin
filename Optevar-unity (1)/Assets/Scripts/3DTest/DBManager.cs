@@ -7,7 +7,8 @@ using System;
 
 
 [SerializeField]
-class DBClass{
+class DBClass
+{
     public string ipAddress = "localhost";
     public string db_id = "root";
     public string db_pw = "uostest";
@@ -24,7 +25,7 @@ public class DBManager : MonoBehaviour
     JsonParser jsonParser = new JsonParser();
     DBClass db;
     MySqlConnection conn;
-    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -34,15 +35,15 @@ public class DBManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-    }
 
+    }
 
     void Init()
     {
-        
+
         db = jsonParser.Load<DBClass>("dbconf");//dbcon.jsonf를 통해 load한다(이 파일 수정하기)
-        if (db!=null) {
+        if (db != null)
+        {
             //Debug.Log("읽어옴");
         }
         string strConn = string.Format("server={0};uid={1};pwd={2};database={3};charset=utf8 ;",
@@ -57,7 +58,7 @@ public class DBManager : MonoBehaviour
             Debug.Log(e);
             return;
         }
-        
+
         Debug.Log("DB Loaded.");
     }
     /*
@@ -141,7 +142,7 @@ public class DBManager : MonoBehaviour
         }
     }*/
 
-    public string SensorLoad()// 화재센서 & 방향지시등센서
+    public string SensorLoad()// 화재센서 & 방향지시등센서 
     {
         string temp = "";
         /*
@@ -153,13 +154,13 @@ public class DBManager : MonoBehaviour
         //node_id, sensor_type
         string q = "" +
             "SELECT tb_sensornode_node_address, sensor_ids" +
-            " FROM " + db.sensor_id_table + 
+            " FROM " + db.sensor_id_table +
            " WHERE sensor_ids IN (21, 22, 23, 27);";
 
-        
+
         //bool ret = false;
-        Debug.Log("load쿼리문 : "+q);
-        
+        Debug.Log("load쿼리문 : " + q);
+
         if (conn.Ping())//conn.State == System.Data.ConnectionState.Open)// == true
         {
             MySqlCommand command = new MySqlCommand(q, conn);
@@ -168,7 +169,7 @@ public class DBManager : MonoBehaviour
             temp = RdrToStr(rdr);
             //ret = (temp != string.Empty);
 
-            Debug.Log("센서 data : "+temp);
+            Debug.Log("센서 data : " + temp);
             /*
             <string>
             13000001;(41.52,15.75,17.83)
@@ -190,9 +191,9 @@ public class DBManager : MonoBehaviour
         //conn.close();
         return temp;
     }
-    
 
-    public string AreaLoad()//area
+
+    public string AreaLoad()//area 구분자 Newline
     {
         string temp = "";
         string q = "" +
@@ -205,13 +206,13 @@ public class DBManager : MonoBehaviour
             //Debug.Log("command : " + command);
             MySqlDataReader rdr = command.ExecuteReader();
             temp = RdrToStr(rdr);
-            Debug.Log("area data : "+temp);
+            Debug.Log("area data : " + temp);
         }
         return temp;
     }
 
 
-    string RdrToStr(MySqlDataReader rdr)
+    private string RdrToStr(MySqlDataReader rdr)
     {
         string temp = string.Empty;
         try
@@ -220,18 +221,18 @@ public class DBManager : MonoBehaviour
             {
                 for (int i = 0; i < rdr.FieldCount; i++)
                 {
-                    if (i != rdr.FieldCount-1)
+                    if (i != rdr.FieldCount - 1)
                         temp += rdr[i] + ";";    // parser 넣어주기
-                    else if (i == rdr.FieldCount-1)
+                    else if (i == rdr.FieldCount - 1)
                         temp += rdr[i] + "\n";
                 }
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
+            Debug.Log(e);
             temp = "No return";
         }
-        //}
         return temp;
     }
 }

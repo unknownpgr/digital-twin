@@ -10,6 +10,7 @@ public class Grid3 : MonoBehaviour
     public List<Node3[]> MinPaths = new List<Node3[]>();
     public GameObject lineClass;
     List<GameObject> renderer = new List<GameObject>();
+    public GameObject arrowLine;
     public bool ViewMinPath = false;
 
     public float cellRad = 0.2f; // 0.2m
@@ -27,7 +28,7 @@ public class Grid3 : MonoBehaviour
     {
         //this.nodes = nodes;
         cellDiameter = cellRad * 2;
-
+        
         maxNode = minNode = nodes[0];
         Vector3 tmp;
         yList = new List<int>();
@@ -42,13 +43,13 @@ public class Grid3 : MonoBehaviour
             if (tmp.x > 0) maxNode.x = nodes[i].x;
             if (tmp.y > 0) maxNode.y = nodes[i].y;
             if (tmp.z > 0) maxNode.z = nodes[i].z;
-
-
+            
+            
         }
 
         mx = Mathf.CeilToInt((maxNode.x - minNode.x) / cellDiameter);
         my = Mathf.CeilToInt((maxNode.y - minNode.y) / (cellDiameter));
-
+        
         mz = Mathf.CeilToInt((maxNode.z - minNode.z) / cellDiameter);
         grid = new Node3[mx + 1, my + 1, mz + 1];
         tmp = maxNode - minNode;
@@ -58,7 +59,7 @@ public class Grid3 : MonoBehaviour
         List<int> tmpYList;
         for (int i = 0; i < nodes.Length; i++)
         {
-
+            
             tmpY = Mathf.CeilToInt((nodes[i].y - minNode.y) / cellDiameter);
             tmpX = Mathf.CeilToInt((nodes[i].x - minNode.x) / cellDiameter);
             tmpZ = Mathf.CeilToInt((nodes[i].z - minNode.z) / cellDiameter);
@@ -95,12 +96,12 @@ public class Grid3 : MonoBehaviour
                 for (int z = 0; z <= mz; z++)
                 {
                     for (int y = 0; y < tmpYList.Count; y++)
-                        grid[x, tmpYList[y], z] = new Node3(
+                        grid[x, tmpYList[y], z] = new Node3 (
                             minNode + new Vector3(x * tmp.x / mx, tmpYList[y] * tmp.y / my, z * tmp.z / mz));
                 }
             }
         }
-        mx++; my++; mz++;
+        mx++;my++;mz++;
 
     }
 
@@ -178,11 +179,64 @@ public class Grid3 : MonoBehaviour
         ret = tn * v + tu * vup + td * vdown;
         return ret;
     }
+    private void OnDrawGizmos()
+    {
+        if (grid == null) return;
+        Gizmos.DrawWireCube((maxNode + minNode) / 2, (maxNode - minNode));
+
+        for (int i = 1; i < nodes.Count; i++)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawCube(grid[nodes[i].x, nodes[i].y, nodes[i].z].position, Vector3.one * (cellDiameter));
+        }
+
+        for (int x = 0; x < mx; x++)
+        {
+
+            /*
+            for (int y = 0; y < my; y++)
+            {
+                for (int z = 0; z < mz; z++)
+                {
+                    Gizmos.DrawCube(grid[x,y,z].position, Vector3.one * (cellDiameter));
+                }
+            }
+            */
+            {
+                for (int z = 0; z < mz; z++)
+                {
+                    for (int y = 0; y < yList.Count; y++)
+                    {
+                        switch (grid[x, yList[y], z].weight)
+                        {
+                            case 1:
+                                Gizmos.color = Color.red;
+                                break;
+                            case 2:
+                                Gizmos.color = Color.yellow;
+                                break;
+                            case 3:
+                                Gizmos.color = Color.blue;
+                                break;
+                        }
+                        if (grid[x, yList[y], z].weight >= 1)
+                            Gizmos.DrawCube(grid[x, yList[y], z].position, Vector3.one * (cellDiameter));
+                        //else if (grid[x, yList[y], z].weight == 0)
+                        //  Gizmos.color = Color.clear;
+
+                    }
+                }
+            }
+        }
+        
+        
+    }
 
     public void InitWeight()
     {
         for (int x = 0; x < mx; x++)
         {
+
             /*
             for (int y = 0; y < my; y++)
             {
@@ -204,6 +258,7 @@ public class Grid3 : MonoBehaviour
             }
         }
     }
+
 
     public void InitLiner()
     {
@@ -252,16 +307,19 @@ public class Grid3 : MonoBehaviour
                         GameObject lineTmp = GameObject.Instantiate(lineClass);
                         LineRenderer line = lineTmp.GetComponent<LineRenderer>();
                         Color c;
-                        if (i == 0) c = new Color(0, 1, 0, 1);
-                        else if (i == 1) c = new Color(1, 0, 0, 1);
-                        else c = new Color(0, 0, 1, 1);
+                        if (i == 0) c = new Color(0, 1, 0, 1f);
+                        else if (i == 1) c = new Color(1, 0, 0, 1f);
+                        else c = new Color(0, 0, 1, 1f);
 
                         SetLine(line, c);
                         line.positionCount = this.MinPaths[i].Length;
                         line.SetPositions(NodesToPos(this.MinPaths[i]));
                         line.enabled = true;
                         this.renderer.Add(lineTmp);
+                        
+                        //DrawArrow(MinPaths[i]);
                     }
+
                 }
             }
         }
@@ -280,14 +338,43 @@ public class Grid3 : MonoBehaviour
                         if (i == 0) c = new Color(0, 1, 0, 1f);
                         else if (i == 1) c = new Color(1, 0, 0, 1f);
                         else c = new Color(0, 0, 1, 1f);
-
+                        
                         SetLine(line, c, 1.2f);
                         line.positionCount = this.FinalPaths[i].Length;
                         line.SetPositions(NodesToPos(this.FinalPaths[i]));
                         line.enabled = true;
                         this.renderer.Add(lineTmp);
+                        
+                        //DrawArrow(FinalPaths[i]);
                     }
+
                 }
             }
+
+    }
+    //Using Arrow Renderer
+    void DrawArrow(Node3[] _nodes)
+    {
+        
+        for (int i = 0; i < _nodes.Length - 1; i++)
+        {
+            GameObject lineTmp = Instantiate(arrowLine, arrowLine.transform.parent);
+            ArrowRenderer ar = lineTmp.GetComponent<ArrowRenderer>();
+            Vector3 st = _nodes[i].position;
+            st.y += 1f;
+            Vector3 en = _nodes[i + 1].position;
+            en.y += 1f;
+            ar.SetPositions(st, en);
+            renderer.Add(lineTmp);
+
+        }
+    }
+    Vector3 RoundF(Vector3 _a)
+    {
+        Vector3 a = new Vector3(
+            Mathf.Round(_a.x * 10f) / 10f,
+            Mathf.Round(_a.y * 10f) / 10f,
+            Mathf.Round(_a.z * 10f) / 10f);
+        return a;
     }
 }

@@ -21,6 +21,8 @@ public class MQTTManager : MonoBehaviour
         public float Value { get => value; }
         [JsonIgnore]
         public bool IsDisaster { get => isDisaster; }
+        [JsonIgnore]
+        public string Direction { get => direction; }
 
         // Json property variable
         [JsonProperty]
@@ -34,12 +36,15 @@ public class MQTTManager : MonoBehaviour
         [JsonProperty]
         private bool isDisaster = false;
         [JsonProperty]
+        private string direction = "";
+        [JsonProperty]
         public string messageId = "";
         [JsonProperty]
         public string timestamp = "";
 
         private MQTTMsgData()
         {
+
         }
 
         public static MQTTMsgData GetMQTTMsgData(string jsonStr, bool isDisaster)
@@ -139,7 +144,7 @@ public class MQTTManager : MonoBehaviour
     }
 
     private MqttClient client;
-    private MQTTConf MQTTConf;
+    private MQTTClass MQTTConf;
     private JsonParser jsonParser = new JsonParser();
 
     public delegate void Del(MQTTMsgData data);
@@ -151,7 +156,7 @@ public class MQTTManager : MonoBehaviour
         Dispatcher.Init();
 
         // Load configuration
-        MQTTConf = jsonParser.Load<MQTTConf>("mqttconf");
+        MQTTConf = jsonParser.Load<MQTTClass>("mqttconf");
 
         // Connect
         MQTTConf.clientId = Guid.NewGuid().ToString();//random string생성해 clientId입력
@@ -177,6 +182,7 @@ public class MQTTManager : MonoBehaviour
 
     public void PubDirectionOperation(string nodeId, string dir)//{"nodeId":"4","direction":"down"}
     {
+        string json = string.Format("{\"nodeId\":\"{0}\",\"direction\":\"{1}\"}", nodeId, dir);
         // DirectionOperation d = new DirectionOperation();
         // d.nodeId = nodeId;
         // d.direction = dir;
@@ -200,7 +206,6 @@ public class MQTTManager : MonoBehaviour
         {
             Debug.LogError("Connnection error: " + e);
         }
-
     }
     private void OnConnectionClosed(object sender, EventArgs e)
     {
