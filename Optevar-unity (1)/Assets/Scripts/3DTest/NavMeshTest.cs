@@ -15,7 +15,7 @@ public class NavMeshTest : MonoBehaviour
     public GameObject building;
 
     public int[] dangerFloor;
-    
+
     int floor;
     Dictionary<int, Vector3[]> targets;
 
@@ -24,7 +24,7 @@ public class NavMeshTest : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
         NavMeshTriangulation tri = NavMesh.CalculateTriangulation();
 
         InitBuildingInfo();
@@ -37,13 +37,13 @@ public class NavMeshTest : MonoBehaviour
             dangerFloor = new int[1];
             dangerFloor[0] = 3;
         }
-        
+
     }
 
     void InitBuildingInfo()
     {
         floor = building.transform.childCount;
-        
+
     }
     public void InitLiner()
     {
@@ -62,6 +62,7 @@ public class NavMeshTest : MonoBehaviour
         _line.startWidth = 0.3f;
         _line.endWidth = .3f;
     }
+
     // Update is called once per frame
     void Update()
     {
@@ -100,7 +101,7 @@ public class NavMeshTest : MonoBehaviour
 
                 }
                 paths.Add(ret.ToArray());
-                
+
 
             }
         }
@@ -145,13 +146,13 @@ public class NavMeshTest : MonoBehaviour
                     end.transform.GetChild(i).GetChild(j).transform.position
                     );
             }
-            targets.Add(i+1, tmp.ToArray());
+            targets.Add(i + 1, tmp.ToArray());
         }
     }
     void UpdatePaths()
     {
-        
+
     }
 
-    
+
 }

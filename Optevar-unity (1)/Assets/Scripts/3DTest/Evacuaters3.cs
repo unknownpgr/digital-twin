@@ -12,7 +12,6 @@ public class Evacuaters3
     //grid
     Grid3 grid;
     List<Node3[]> paths;
-    List<Node3> targets;
     Node3[] curPath;  // All movable nodes.
     int curPIdx;
     int curPStart;
@@ -23,9 +22,8 @@ public class Evacuaters3
     float delayed;
     float velocity = 1f; // std velo
     float upVelo = 0.3f;
-    float downVelo = 0.38f; 
+    float downVelo = 0.38f;
     bool isWait;
-    List<NavMeshPath> NavPaths;
     bool isInit;
 
     public bool isEvacuating;
@@ -44,27 +42,6 @@ public class Evacuaters3
         isInit = false;
     }
 
-    public bool InitPaths(Vector3[] _targets)
-    {/*
-        if (!isInit)
-        {
-            targets = new List<Node3>();
-            NavPaths = new List<NavMeshPath>();
-            for (int i = 0; i < _targets.Length; i++)
-            {
-                targets.Add(grid.GetNodeFromPosition(_targets[i]));
-                NavPaths.Add(new NavMeshPath());
-            }
-
-            
-            isInit = true;
-        }
-        else
-        {
-            for (int i = 0; i < NavPaths)
-        }*/
-        return false;
-    }
     public void InitPath()
     {
         this.WaitingTime = this.distancesOfCell[pathIdx][0];
@@ -75,10 +52,12 @@ public class Evacuaters3
         this.curPStart = 0;
         this.isEvacuating = false;
     }
-    public void SetVelocity(float _velo)
+
+    public void SetVelocity(float velocity)
     {
-        this.velocity = _velo;
+        this.velocity = velocity;
     }
+
     public void SetPaths(List<Node3[]> p)
     {
         paths = p;
@@ -95,7 +74,7 @@ public class Evacuaters3
             {
                 dist = p[i][j].GetRealDistance(p[i][j + 1]);
                 tmpF3 = dist / this.velocity;
-                deg = Mathf.Rad2Deg*(Mathf.Asin((Mathf.Abs(p[i][j + 1].position.y - p[i][j].position.y) / dist)));
+                deg = Mathf.Rad2Deg * (Mathf.Asin((Mathf.Abs(p[i][j + 1].position.y - p[i][j].position.y) / dist)));
                 isM = (p[i][j + 1].position.y > p[i][j].position.y);
                 if ((deg > 45f))
                 {
@@ -106,20 +85,18 @@ public class Evacuaters3
                 }
                 tmpF2.Add(tmpF3);
             }
-                
+
             tmpF2.Add(tmpF2[tmpF2.Count - 1]); // EOF
             tmpF.Add(tmpF2.ToArray());
         }
         this.distancesOfCell = tmpF.ToArray();
     }
-    public void AddPath(Node3[] p)
-    {
-        paths.Add(p);
-    }
+
     public Node3[] GetPath()
     {
         return paths[pathIdx];
     }
+
     public float GetDistance()
     {
         float ret = 0f;
@@ -149,33 +126,10 @@ public class Evacuaters3
 
         }
     }
+
     public void SetPath()
     {
         curNum = number;
-    }
-    /*
-    public void SetPaths(Vector3[] _targets, NavMeshPath p)
-    {
-        targets = new List<Node3>();
-        for (int i = 0; i < _targets.Length; i++)
-        {
-            targets.Add(grid.GetNodeFromPosition(_targets[i]));
-            
-        }
-        for (int t = 0; t < targets.Count; t++)
-        {
-            NavMesh.CalculatePath(startNode.position, targets[t].position, -1, p);
-            List<Node3> ret = new List<Node3>();
-            for (int i = 0; i < _targets.Length - 1; i++)
-                ret.AddRange(grid.GetNodesFromLine(_targets[i], _targets[i + 1]));
-
-            paths.Add(ret.ToArray());
-        }
-        pathIdx = 0;
-    }*/
-    public void PathtoNodes()
-    {
-        
     }
 
     // float time 
@@ -203,7 +157,8 @@ public class Evacuaters3
                 // 다음 차례 기다리기 (막혔을 경우임)
                 this.NextActingTime = second + 0.01f; // 다음 실행 시각은 다 다음 차례 + 0.1초
             }
-        } else
+        }
+        else
         {
             //// N: 경로의 끝?
             //////// Y: 꼬리 줄이기; 다음 이동 기다리기(yield return WaitTime());
@@ -217,7 +172,8 @@ public class Evacuaters3
                 isEvacuating = true;
                 //this.WaitingTime = this.distancesOfCell[pathIdx][curPIdx];
                 this.NextActingTime = this.WaitingTime + curTime;
-            } else
+            }
+            else
             {
                 // 다음 차례 기다리기 (막혔을 경우임)
                 this.NextActingTime = second + 0.01f; // 다음 실행 시각은 다 다음 차례 + 0.1초
@@ -229,51 +185,16 @@ public class Evacuaters3
         {
             this.WaitingTime = -1f;
         }
-            
+
         //return null;
-        
+
     }
 
-    /*
-    public IEnumerator Move()
-    {
-        // while 노드의 끝이 아닐 경우
-        // 이동하기 (grid에 weight 적용하기)
-        // 막혀서 이동 못하는 경우 yield return null;
-        // 이동한 경우 yield return new WaitForSeconds(다음 노드에 도착할 것 같은 시간)
-
-        // 다음칸 이동하기 가능?
-        if (curPath[curPIdx+1].weight == 0)
-        {
-            //// Y: 이동하기; 꼬리 늘려야하면 늘리기; 다음 이동 기다리기(yield return WaitTime());
-            // Move
-            curPIdx++;
-            curPath[curPIdx].weight = 1;
-            if (curPIdx - curPStart >= number)
-            {
-                // 꼬리줄이기
-                curPath[curPStart].weight = 0;
-                curPStart++;
-            }
-            yield return WaitForSeconds();
-
-        }
-        else
-        {
-            //// N: 경로의 끝?
-            //////// Y: 꼬리 줄이기; 다음 이동 기다리기(yield return WaitTime());
-            //////// N: 기다리기(yield return null);
-        }
-
-        return null;
-    }
-    */
     public int Update(float deltaTime)
     {
         if (isWait)
         {
             // 기다림 -> 한칸 이동; return;
-
             move();
         }
         else
@@ -305,12 +226,10 @@ public class Evacuaters3
         {
             // 추가
             evacList.Add(startNode);
-            
         }
         else
         {
             // 경로의 끝에 다다르면 삭제
-            
         }
         // 0 기다림
         delayed = 0f;

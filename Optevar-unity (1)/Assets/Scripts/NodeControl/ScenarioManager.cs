@@ -34,9 +34,8 @@ public class ScenarioManager : MonoBehaviour
     Image image_ob1;
     AudioSource musicPlayer;
 
-    List<screenshot_attr> paths = new List<screenshot_attr>();
-    screenshot_attr temp_path;
-    List<GameObject> sensorObjs = new List<GameObject>();
+    List<screenshot_attr> pathImages = new List<screenshot_attr>();
+    screenshot_attr tempPathImage;
 
     // ???
     bool initEvacs = false;
@@ -63,7 +62,6 @@ public class ScenarioManager : MonoBehaviour
         NavMeshTriangulation tri = NavMesh.CalculateTriangulation();
         grid.CreateGrid(tri.vertices, BuildingManager.FloorsCount);
 
-        // << BLOCKING TASK 2 >>
         if (mQTTManager == null) mQTTManager = GetComponent<MQTTManager>();
         mQTTManager.Init();
 
@@ -134,9 +132,6 @@ public class ScenarioManager : MonoBehaviour
                 // Disaster is started, or the number of area changed.
                 FunctionManager.Find("window_screenshot").gameObject.SetActive(true);
                 InitSimulation();
-                if (IsInvoking("ReSearch"))
-                    CancelInvoke("ReSearch");
-                Invoke("ReSearch", 60);
                 isSimulating = true;
             }
             else
@@ -169,12 +164,8 @@ public class ScenarioManager : MonoBehaviour
                     simulationManager.PrintOut("");
                     initEvacs = false;
                     SetDirectionSensor();
-                    ScreenShot(simulationManager.delayList[simulationManager.delayList.Count - 1]);
                 }
-                else
-                {
-                    ScreenShot(simulationManager.delayList[simulationManager.delayList.Count - 1]);
-                }
+                ScreenShot(simulationManager.delayList[simulationManager.delayList.Count - 1]);
             }
         }
     }
@@ -241,7 +232,7 @@ public class ScenarioManager : MonoBehaviour
         }
         Debug.Log(this.pathSize);
         simulationManager.InitSimParam(this.pathSize);
-        paths.Clear();
+        pathImages.Clear();
         initEvacs = true;
     }
 
@@ -258,31 +249,27 @@ public class ScenarioManager : MonoBehaviour
         screenShot.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0, true);
         screenShot.Apply();
 
-        temp_path.scrshot = screenShot;
+        tempPathImage.scrshot = screenShot;
     }
 
     void ScreenShot(float tmpTime)
     {
-        temp_path = new screenshot_attr();
-        temp_path.time = tmpTime;
+        tempPathImage = new screenshot_attr();
+        tempPathImage.time = tmpTime;
         StartCoroutine(screen_pixels());
         subCamera.enabled = false;
-        paths.Add(temp_path);
+        pathImages.Add(tempPathImage);
 
-        if (pathSize == paths.Count)
+        if (pathSize == pathImages.Count)
         {
-            // for (int i = 0; i < CreatedForGUI.Count; i++)
-            // Destroy(CreatedForGUI[i]);
-            // CreatedForGUI.Clear();
-
-            paths.Sort(delegate (screenshot_attr x, screenshot_attr y)
+            pathImages.Sort(delegate (screenshot_attr x, screenshot_attr y)
             {
                 if (x.time > y.time) return 1;
                 else if (x.time < y.time) return -1;
                 return 0;
             });
             int maxList = 10;
-            if (maxList > paths.Count) maxList = paths.Count;
+            if (maxList > pathImages.Count) maxList = pathImages.Count;
             for (int r = 0; r < maxList; r++)
             {
                 Image new_image_ob;
@@ -291,7 +278,6 @@ public class ScenarioManager : MonoBehaviour
                 {
                     new_image_ob = image_ob1;
                     new_text = time_text;
-
                 }
                 else
                 {
@@ -304,7 +290,7 @@ public class ScenarioManager : MonoBehaviour
                 new_image_ob.transform.localPosition = new Vector3(image_ob1.transform.localPosition.x, -(35) * r, image_ob1.transform.localPosition.z);
                 new_image_ob.transform.rotation = image_ob1.transform.rotation;
                 new_image_ob.transform.localScale = image_ob1.transform.localScale;
-                new_image_ob.GetComponent<Image>().sprite = Sprite.Create(paths[r].scrshot, new Rect(0, 0, Screen.width, Screen.height), new Vector2(0.5f, 0.5f));
+                new_image_ob.GetComponent<Image>().sprite = Sprite.Create(pathImages[r].scrshot, new Rect(0, 0, Screen.width, Screen.height), new Vector2(0.5f, 0.5f));
 
                 new_text.transform.SetParent(content.transform);
                 new_text.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, time_text.rectTransform.rect.width);
@@ -312,7 +298,7 @@ public class ScenarioManager : MonoBehaviour
                 new_text.transform.rotation = time_text.transform.rotation;
                 new_text.transform.localScale = time_text.transform.localScale;
 
-                new_text.GetComponent<Text>().text = "Time : " + paths[r].time.ToString();
+                new_text.GetComponent<Text>().text = "Time : " + pathImages[r].time.ToString();
             }
         }
     }
@@ -334,69 +320,55 @@ public class ScenarioManager : MonoBehaviour
         return -1;
     }
 
-    void SetDirectionSensor()//최적경로에 따른 대피유도신호로 바꾸기()
+    void SetDirectionSensor()//최적경로에 따른 대피유도신호로 바꾸기
     {
-        // 타겟에 따른 최적 경로, 
-        // 모든 방향 지시등 센서마다.
-        for (int i = 0; i < sensorObjs.Count; i++)
-        {
-            if (sensorObjs[i].GetComponent<sensor_attribute>().one_sensor.nodeType == 39) // 방향 지시등 일 때
-            {
-                DirectionSensorScript dir = sensorObjs[i].GetComponent<DirectionSensorScript>();
-                dir.Init();
-
-                // target = nearest path position
-                Vector3 target = GetDirectionTarget(sensorObjs[i].transform.position);
-
-                // Calculate direction
-                NavMeshPath p = new NavMeshPath();
-                NavMesh.CalculatePath(sensorObjs[i].transform.position, target, -1, p);
-                if (p.status == NavMeshPathStatus.PathComplete)
-                {
-                    // Publish direction operation.
-                    mQTTManager.PubDirectionOperation(sensorObjs[i].GetComponent<sensor_attribute>().one_sensor.nodeId, VectorToDirection(p.corners[1] - p.corners[0]));
-                }
-            }
-        }
         foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>())
         {
+            // target = nearest path position
+            Vector3 target = GetNearestPathPoint(node.Position);
 
+            // Calculate direction
+            NavMeshPath p = new NavMeshPath();
+            NavMesh.CalculatePath(node.Position, target, -1, p);
+            if (p.status == NavMeshPathStatus.PathComplete)
+            {
+                mQTTManager.PubDirectionOperation(node.PhysicalID, VectorToDirection(p.corners[1] - p.corners[0]));
+            }
         }
     }
 
     // 가장 가까운 경로 위치를 가져옴.
-    Vector3 GetDirectionTarget(Vector3 origin)
+    private Vector3 GetNearestPathPoint(Vector3 origin)
     {
-        float mD = 100000f;
+        float minDistance = float.MaxValue;
         Vector3 target = Vector3.zero;
-        for (int j = 0; j < grid.MinPaths.Count; j++)
+        foreach (Node3[] node in grid.MinPaths)
         {
-            float tmp = Vector3.Distance(origin, grid.MinPaths[j][0].position);
-            if (tmp < mD)
+            float tmp = Vector3.Distance(origin, node[0].position);
+            if (tmp < minDistance)
             {
-                mD = tmp;
-                target = grid.MinPaths[j].Last().position;
+                minDistance = tmp;
+                target = node.Last().position;
             }
         }
         return target;
     }
-    string VectorToDirection(Vector3 dir)
+
+    // return = up(z), right(x), down(-z), left(-x)
+    private string VectorToDirection(Vector3 dir)
     {
-        // 동서남북 중 가장 가까운
-        // In? Out?
-        string ret = "left";
+        string ret = "up";
         Vector3 tmp = dir.normalized;
-        if (Mathf.Abs(tmp.x) > Mathf.Abs(tmp.z))
+        if (tmp.z < tmp.x)
         {
-            if (tmp.x > 0) ret = "right";
-            else ret = "left";
+            if (tmp.z > -tmp.x) ret = "right";
+            else ret = "down";
         }
         else
         {
-            if (tmp.z > 0) ret = "up";
-            else ret = "down";
+            if (tmp.z > -tmp.x) ret = "up";
+            else ret = "left";
         }
-        Debug.Log(tmp.ToString() + ret);
         return ret;
     }
 }

@@ -29,5 +29,6 @@ public class NodeArea : NodeManager
     protected override void Init()
     {
         textMesh = gameObject.GetComponent<TextMesh>();
+        Num = 0;
     }
 }

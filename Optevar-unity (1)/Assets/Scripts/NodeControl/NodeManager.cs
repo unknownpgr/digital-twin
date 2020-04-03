@@ -82,7 +82,7 @@ abstract public class NodeManager
     [JsonIgnore]
     public Vector3 Position
     {
-        get => gameObject.transform.position;
+        get { return gameObject.transform.position; }
         set { gameObject.transform.position = value; }
     }
 
@@ -110,19 +110,22 @@ abstract public class NodeManager
     {
         STATE_UNINITIALIZED,    // Node has not been initialized
         STATE_PLACING,          // Node is beeing placed.
-        STATE_INITIALIZED       // Node is placed.
+        STATE_INITIALIZED,      // Node is placed.
     }
+
+    private bool hide = false;
+    [JsonIgnore]
+    public bool Hide
+    {
+        get => hide;
+        set { hide = value; onNodeStateChanged(); }
+    }
+
     private NodeState state = NodeState.STATE_UNINITIALIZED;
     public NodeState State
     {
         get => state;
-        set
-        {
-            state = value;
-            if (state == NodeState.STATE_INITIALIZED) gameObject.SetActive(true);
-            else gameObject.SetActive(false);
-            if (OnNodeStateChanged != null) OnNodeStateChanged();
-        }
+        set { state = value; onNodeStateChanged(); }
     }
 
     // ===[ Protected = child-only properties of node ]==========================================================================
@@ -138,6 +141,15 @@ abstract public class NodeManager
 
     public delegate void Del();
     public static Del OnNodeStateChanged;
+
+    private void onNodeStateChanged()
+    {
+        // Do not edit 'Hide' or 'State' in here. It would occur recursive function call stack overflow.
+        if (state != NodeState.STATE_INITIALIZED) hide = false; // Initialize 'hide' when node is not initialized.
+        else if (!hide) gameObject.SetActive(true);             // If node is initialized and not hidden, show it.
+        else gameObject.SetActive(false);                       // Else hide it.
+        OnNodeStateChanged?.Invoke();                           // Invoke callback
+    }
 
     //===[ Constructors ]===========================================================================
 

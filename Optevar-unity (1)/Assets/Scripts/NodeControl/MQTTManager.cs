@@ -7,6 +7,8 @@ using UnityEngine.UI;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using Newtonsoft.Json;
+using System.Threading;
+using System.IO;
 
 public class MQTTManager : MonoBehaviour
 {
@@ -144,23 +146,34 @@ public class MQTTManager : MonoBehaviour
     }
 
     private MqttClient client;
-    private MQTTClass MQTTConf;
+    private MQTTClass mqttConf;
     private JsonParser jsonParser = new JsonParser();
 
     public delegate void Del(MQTTMsgData data);
     public Del OnNodeUpdated;
 
+    // Path of mqttconf. cannot call Application.dataPath in thread.
+    private string mqttConfPath;
+
     public void Init(string configuration = "mqttconf")
     {
-        // Initialzie dispatcher
+        // Initialzie dispatcher. Must be called in main therad because it uses Unity Engine.
         Dispatcher.Init();
 
+        // Do blocking tasks in thread.
+        mqttConfPath = Application.dataPath + "/Resources/scenario_jsons/mqttconf.json";
+        Thread thread = new Thread(InitTask);
+        thread.Start();
+    }
+
+    private void InitTask()
+    {
         // Load configuration
-        MQTTConf = jsonParser.Load<MQTTClass>("mqttconf");
+        mqttConf = JsonConvert.DeserializeObject<MQTTClass>(File.ReadAllText(mqttConfPath));
 
         // Connect
-        MQTTConf.clientId = Guid.NewGuid().ToString();//random string생성해 clientId입력
-        Debug.Log("Connecting ... " + MQTTConf.brokerAddr + ", " + MQTTConf.clientId);
+        mqttConf.clientId = Guid.NewGuid().ToString();//random string생성해 clientId입력
+        Debug.Log("Connecting ... " + mqttConf.brokerAddr + ", " + mqttConf.clientId);
         Connect();
 
         // Register event listener
@@ -169,7 +182,7 @@ public class MQTTManager : MonoBehaviour
 
         // Setting - I don't know what exactly it does.
         byte[] qosLevels = { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE };
-        foreach (var t in MQTTConf.topic)
+        foreach (var t in mqttConf.topic)
         {
             client.Subscribe(new string[] { t }, qosLevels);
         }
@@ -193,23 +206,25 @@ public class MQTTManager : MonoBehaviour
     public void PubAreaUpdate(string id)
     {
         string msg = "{'areaId':'" + id + "'}";
-        Publish(MQTTConf.topic[5], msg);
+        Publish(mqttConf.topic[5], msg);
     }
     private void Connect()
     {
-        client = new MqttClient(MQTTConf.brokerAddr);
+        client = new MqttClient(mqttConf.brokerAddr);
         try
         {
-            client.Connect(MQTTConf.clientId, MQTTConf.userName, MQTTConf.password, false, 0);
+            client.Connect(mqttConf.clientId, mqttConf.userName, mqttConf.password, false, 0);
+            Debug.Log("Connected");
         }
         catch (Exception e)
         {
             Debug.LogError("Connnection error: " + e);
         }
     }
+
     private void OnConnectionClosed(object sender, EventArgs e)
     {
-        client.Connect(MQTTConf.clientId);
+        client.Connect(mqttConf.clientId);
         Debug.Log("Connection closed...");
     }
 
@@ -219,12 +234,12 @@ public class MQTTManager : MonoBehaviour
         string topic = e.Topic;
         Debug.Log("Received msg from " + topic + " : " + msgStr);
 
-        if (topic == MQTTConf.topic[0] ||   //mws/Notification/Periodic/SensingValueEvent
-            topic == MQTTConf.topic[1] ||   //mws/Notification/Periodic/DisasterEvent
-            topic == MQTTConf.topic[2] ||   //mws/Notification/Periodic/EvacueeEvent
-            topic == MQTTConf.topic[3])     //mws/Set/Direction
+        if (topic == mqttConf.topic[0] ||   //mws/Notification/Periodic/SensingValueEvent
+            topic == mqttConf.topic[1] ||   //mws/Notification/Periodic/DisasterEvent
+            topic == mqttConf.topic[2] ||   //mws/Notification/Periodic/EvacueeEvent
+            topic == mqttConf.topic[3])     //mws/Set/Direction
         {
-            MQTTMsgData data = MQTTMsgData.GetMQTTMsgData(msgStr, topic == MQTTConf.topic[1]);
+            MQTTMsgData data = MQTTMsgData.GetMQTTMsgData(msgStr, topic == mqttConf.topic[1]);
             Dispatcher.Invoke(OnNodeUpdated, data);
         }
         else

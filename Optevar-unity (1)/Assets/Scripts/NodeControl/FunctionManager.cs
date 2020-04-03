@@ -102,7 +102,7 @@ public class FunctionManager : MonoBehaviour
                     newButton.transform.localPosition = Vector3.zero;
                     newButton.transform.GetChild(0).GetComponent<Text>().text = "F" + (i + 1);
 
-                    // var i must be copied, orit would be always FloorsCount-1 as it is used from inline functions that share context.
+                    // var i must be copied, or it would be always FloorsCount-1 as it is used from inline functions that share context.
                     int k = i;
                     newButton.GetComponent<Button>().onClick.AddListener(() => { OnSetFloor(k); });
                     floorButtons.Add(newButton);
@@ -152,6 +152,9 @@ public class FunctionManager : MonoBehaviour
         GameObject jsonFileButton = Find("button_json_file").gameObject;
         Transform jsonFilePanel = Find("panel_json_file");
         GameObject newJsonFileBtn;
+
+        // Close picture window
+        Find("window_screenshot").gameObject.SetActive(false);
     }
 
     // floor starts from 0. 1st floor = 0
@@ -164,6 +167,11 @@ public class FunctionManager : MonoBehaviour
 
             if (i != floor) floorButtons[i].GetComponent<Image>().color = new Color(200, 200, 200);
             else floorButtons[i].GetComponent<Image>().color = Color.white;
+        }
+
+        foreach (NodeManager node in NodeManager.GetAll())
+        {
+            node.Hide = BuildingManager.GetFloor(node.Position) > floor;
         }
     }
 
