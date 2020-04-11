@@ -195,7 +195,7 @@ public class MQTTManager : MonoBehaviour
 
     public void PubDirectionOperation(string nodeId, string dir)//{"nodeId":"4","direction":"down"}
     {
-        string json = string.Format("{\"nodeId\":\"{0}\",\"direction\":\"{1}\"}", nodeId, dir);
+        string json = "{'\"'nodeId\":\"{" + nodeId + "}\",\"direction\":\"{" + dir + "}\"}";
         // DirectionOperation d = new DirectionOperation();
         // d.nodeId = nodeId;
         // d.direction = dir;

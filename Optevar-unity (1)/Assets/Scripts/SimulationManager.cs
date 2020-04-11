@@ -4,8 +4,6 @@ using System.Collections.Generic;
 
 public class SimulationManager : ScriptableObject
 {
-
-
     CustomGrid grid;
     public List<Evacuaters> EvacuatersList = new List<Evacuaters>();
 
@@ -15,7 +13,7 @@ public class SimulationManager : ScriptableObject
     List<List<int>> evacNumList = new List<List<int>>();
     List<List<List<int>>> PrintList = new List<List<List<int>>>();
     public List<float> delayList = new List<float>();
-    
+
     string savePath = "./Assets/Resources/test";
 
 
@@ -25,13 +23,13 @@ public class SimulationManager : ScriptableObject
         this.grid = grid;
     }
 
-   // Simulate
-   // 1. Set evacuaters.
-   // 2. Update sensor data.
-   // 3. Simulate.
+    // Simulate
+    // 1. Set evacuaters.
+    // 2. Update sensor data.
+    // 3. Simulate.
     public void SetEvacuaters(List<AreaPositions> areas, List<EvacuaterNodeJson> Evacs)
     {
-        
+
     }
 
     public void SetEvacuaters(List<AreaPositions> areas, Dictionary<string, int> areaNums)
@@ -51,8 +49,8 @@ public class SimulationManager : ScriptableObject
         }
     }
 
-   
-   // Return path-time list.
+
+    // Return path-time list.
 
     void Calc(Evacuaters Evacs)
     {
@@ -118,7 +116,7 @@ public class SimulationManager : ScriptableObject
             return NextRoute();
         }
     }
-    
+
 
 
     void Moves()
@@ -132,7 +130,7 @@ public class SimulationManager : ScriptableObject
                 evacNumList.Add(new List<int>());
             List<int> tml = new List<int>();
             int tmi = 10000;
-            
+
             while (!IsEvacs)
             {
 
@@ -187,7 +185,7 @@ public class SimulationManager : ScriptableObject
 
                 }
             }
-            
+
             Debug.LogWarning("Path " + pathIdx + ": " + EvacuatersList.Count + " peoples each point ..." + " Evacuation Time: " + tmpTime + "sec for Distance: " + DistSum);
 
 
@@ -221,7 +219,7 @@ public class SimulationManager : ScriptableObject
             System.IO.File.WriteAllText(savePath + ".csv", tmps);
             */
             grid.Liner();
-//startTime = 0f;
+            //startTime = 0f;
         }
     }
     public void PrintOut()
@@ -229,11 +227,11 @@ public class SimulationManager : ScriptableObject
         string tmps = "";
         float tmpMax = -1f; // max header
         for (int i = 0; i < delayList.Count; i++) if (tmpMax < delayList[i] & delayList[i] < 100f) tmpMax = delayList[i];
-        
+
 
         for (int i = 0; i < PrintList.Count; i++)
         {
-            
+
             for (int j = 0; j < PrintList[i].Count; j++)
             {
                 tmps += (i + 1) + "," + delayList[i] + ",";
@@ -245,7 +243,7 @@ public class SimulationManager : ScriptableObject
             }
             //if (t < delayList.Count)
             //{
-                //tmps += (t + 1) + "," + delayList[t] + ",";
+            //tmps += (t + 1) + "," + delayList[t] + ",";
             //    t++;
             //}
 

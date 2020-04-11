@@ -30,7 +30,7 @@ public class WindowManager : MonoBehaviour
     void Start()
     {
         RecursiveRegisterChild(transform, Elements);
-        Debug.Log("Window assigned : " + WindowName);
+        // Debug.Log("Window assigned : " + WindowName);
         Elements["text_title"].GetComponent<Text>().text = WindowName;
 
         if (!Application.IsPlaying(gameObject)) return;
@@ -104,9 +104,6 @@ public class WindowManager : MonoBehaviour
             rectTransform.anchoredPosition = Vector2.Lerp(WINDOW_VISIBLE_POSITION, WINDOW_HIDE_POSITION, SmoothMove(t));
             movingTime -= Time.deltaTime;
         }
-
-        // Exponential approach. Easy to calculate but foo fast when hide.
-        // rectTransform.anchoredPosition += (targetPosition - rectTransform.anchoredPosition) * Time.deltaTime * 4.0f;
     }
 
     public static WindowManager GetWindow(string windowName)

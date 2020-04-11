@@ -29,13 +29,24 @@ public class ScenarioManager : MonoBehaviour
     bool isDanger = false;
 
     Camera subCamera;
+    /*
     GameObject content;
     Text time_text;
     Image image_ob1;
+    */
     AudioSource musicPlayer;
 
+    // (New) Elements of path window UI
+    GameObject defaultPathPanel;
+    Transform content;
+
+    // (New) Element of disaster warning UI
+    GameObject warningBox;
+    Text disatsterName;
+
+
+
     List<screenshot_attr> pathImages = new List<screenshot_attr>();
-    screenshot_attr tempPathImage;
 
     // ???
     bool initEvacs = false;
@@ -71,14 +82,13 @@ public class ScenarioManager : MonoBehaviour
         isDanger = false;
         musicPlayer = gameObject.GetComponent<AudioSource>();
 
-        content = GameObject.Find("scr_shot_panel");
-        if (image_ob1 == null)
-        {
-            Transform tmpOb = GameObject.Find("panel_imgshow").transform;
-            content = tmpOb.parent.gameObject;
-            time_text = tmpOb.GetChild(1).GetComponent<Text>();
-            image_ob1 = tmpOb.GetChild(0).GetComponent<Image>();
-        }
+        // (New) Get exsisting path panel and transform of parent
+        defaultPathPanel = GameObject.Find("panel_path");
+        content = defaultPathPanel.transform.parent; // FunctionManager.Find("Content");
+
+        // (New) Get text of disaster warning UI                /*구현 추가하기*/
+        warningBox = FunctionManager.Find("warning_box").gameObject;
+        disatsterName = warningBox.transform.GetChild(1).GetComponent<Text>();
 
         // << BLOCKING TASK 3 >>
         simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
@@ -130,9 +140,11 @@ public class ScenarioManager : MonoBehaviour
             if (isDisaster)
             {
                 // Disaster is started, or the number of area changed.
-                FunctionManager.Find("window_screenshot").gameObject.SetActive(true);
-                InitSimulation();
-                isSimulating = true;
+                // (New) 대피 경로 window, warning box 활성화
+                WindowManager.GetWindow("window_path").SetVisible(true);
+                warningBox.SetActive(true);
+
+                StartCoroutine(InitSimulation());
             }
             else
             {
@@ -141,7 +153,7 @@ public class ScenarioManager : MonoBehaviour
                 grid.ViewMinPath = false;
                 grid.InitLiner();
                 if (musicPlayer != null) musicPlayer.Stop();
-                // Image panel is not implemented yet.
+
                 //mQTTManager.PubPeriod(360);
             }
         }
@@ -154,6 +166,7 @@ public class ScenarioManager : MonoBehaviour
         {
             if (simulationManager.EvacuatersList.Count > 0)
             {
+                Debug.Log("SIM...");
                 if (simulationManager.Progress())
                 {
                     // 모든 경로에 대해 시뮬레이션이 완료됨.
@@ -165,7 +178,7 @@ public class ScenarioManager : MonoBehaviour
                     initEvacs = false;
                     SetDirectionSensor();
                 }
-                ScreenShot(simulationManager.delayList[simulationManager.delayList.Count - 1]);
+                StartCoroutine(ScreenShot(simulationManager.delayList[simulationManager.delayList.Count - 1]));
             }
         }
     }
@@ -177,8 +190,11 @@ public class ScenarioManager : MonoBehaviour
             musicPlayer.Play();
     }
 
-    void InitSimulation()
+    IEnumerator InitSimulation()
     {
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame();
+
         // Init simulation manager
         simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
         simulationManager.SetGrid(grid);
@@ -189,8 +205,6 @@ public class ScenarioManager : MonoBehaviour
         // Store paths
         foreach (NodeArea area in NodeManager.GetNodesByType<NodeArea>())
         {
-            Debug.Log(area.PhysicalID);
-
             // Pass empty area
             if (area.Num == 0) continue;
 
@@ -227,39 +241,43 @@ public class ScenarioManager : MonoBehaviour
                 if (path.Count > 0) paths.Add(path.ToArray());
             }
 
-            this.pathSize = paths.Count;
+            pathSize += paths.Count;
             simulationManager.AddEvacuater(area.Position, area.Num, paths, area.Velocity);
         }
-        Debug.Log(this.pathSize);
-        simulationManager.InitSimParam(this.pathSize);
+
+        // Now, path calculating finished.
+        Debug.Log(pathSize);
+        simulationManager.InitSimParam(pathSize);
         pathImages.Clear();
         initEvacs = true;
+
+        // Start simulating
+        isSimulating = true;
     }
 
-    IEnumerator screen_pixels()
+    IEnumerator ScreenShot(float time)
     {
+        screenshot_attr screenShotData = new screenshot_attr();
+        screenShotData.time = time;
+
+        // Take picture
         subCamera.enabled = true;
         yield return new WaitForEndOfFrame();
         RenderTexture rt = new RenderTexture(Screen.width, Screen.height, 24);//depth : 일단 24
         subCamera.targetTexture = rt;
         subCamera.Render();
+        subCamera.enabled = false;
         RenderTexture.active = rt;
 
-        Texture2D screenShot = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, true);
-        screenShot.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0, true);
-        screenShot.Apply();
+        Texture2D screenShotTexture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, true);
+        screenShotTexture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0, true);
+        screenShotTexture.Apply();
 
-        tempPathImage.scrshot = screenShot;
-    }
+        screenShotData.scrshot = screenShotTexture;
 
-    void ScreenShot(float tmpTime)
-    {
-        tempPathImage = new screenshot_attr();
-        tempPathImage.time = tmpTime;
-        StartCoroutine(screen_pixels());
-        subCamera.enabled = false;
-        pathImages.Add(tempPathImage);
+        pathImages.Add(screenShotData);
 
+        // If image is full
         if (pathSize == pathImages.Count)
         {
             pathImages.Sort(delegate (screenshot_attr x, screenshot_attr y)
@@ -268,40 +286,35 @@ public class ScenarioManager : MonoBehaviour
                 else if (x.time < y.time) return -1;
                 return 0;
             });
-            int maxList = 10;
-            if (maxList > pathImages.Count) maxList = pathImages.Count;
-            for (int r = 0; r < maxList; r++)
+
+            // Show top-10 fastest pathes on panel
+            int listCount = Math.Min(pathImages.Count, 10);
+            for (int r = 0; r < listCount; r++)
             {
-                Image new_image_ob;
-                Text new_text;
-                if (r == 0)
-                {
-                    new_image_ob = image_ob1;
-                    new_text = time_text;
-                }
-                else
-                {
-                    new_image_ob = Instantiate(image_ob1, image_ob1.transform.position, Quaternion.identity);
-                    new_text = Instantiate(time_text, image_ob1.transform.position, Quaternion.identity);
-                }
+                // Create new image
+                GameObject newPathPanel = Instantiate(defaultPathPanel);
+                Transform newPanelTransform = newPathPanel.transform;
+                newPanelTransform.SetParent(content, false);
+                newPanelTransform.localPosition = Vector3.zero;
 
-                new_image_ob.transform.SetParent(content.transform);
-                new_image_ob.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, image_ob1.rectTransform.rect.width);
-                new_image_ob.transform.localPosition = new Vector3(image_ob1.transform.localPosition.x, -(35) * r, image_ob1.transform.localPosition.z);
-                new_image_ob.transform.rotation = image_ob1.transform.rotation;
-                new_image_ob.transform.localScale = image_ob1.transform.localScale;
-                new_image_ob.GetComponent<Image>().sprite = Sprite.Create(pathImages[r].scrshot, new Rect(0, 0, Screen.width, Screen.height), new Vector2(0.5f, 0.5f));
+                // Set image
+                Image evacpathImage = newPanelTransform.GetChild(0).GetComponent<Image>();
+                evacpathImage.sprite = Sprite.Create(pathImages[r].scrshot, new Rect(0, 0, Screen.width - 1, Screen.height - 1), new Vector2(0.5f, 0.5f));
 
-                new_text.transform.SetParent(content.transform);
-                new_text.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, time_text.rectTransform.rect.width);
-                new_text.transform.localPosition = new Vector3(time_text.transform.localPosition.x, image_ob1.rectTransform.rect.height - (35) * r, time_text.transform.localPosition.z);
-                new_text.transform.rotation = time_text.transform.rotation;
-                new_text.transform.localScale = time_text.transform.localScale;
+                // Set rank text
+                Text evacRankText = newPanelTransform.GetChild(1).GetComponentInChildren<Text>();
+                evacRankText.text = (r + 1).ToString();
 
-                new_text.GetComponent<Text>().text = "Time : " + pathImages[r].time.ToString();
+                // Set time
+                Text evacTimeText = newPanelTransform.GetChild(2).GetComponentInChildren<Text>();
+                evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
             }
+
+            // And show the panel
+            defaultPathPanel.SetActive(false);
         }
     }
+
 
     int GetTargetFloor(int startFloor, int[] dangerFloor, int floor)
     {

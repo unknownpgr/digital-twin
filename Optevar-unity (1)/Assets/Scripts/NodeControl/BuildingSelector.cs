@@ -47,16 +47,18 @@ public class BuildingSelector : MonoBehaviour
             trigger.triggers.Add(entry);
 
             // Place
+            /*
             buildingView.transform.SetParent(scrollList.transform);
             RectTransform rt = buildingView.GetComponent<RectTransform>();
             rt.anchoredPosition = new Vector2(leftOffset, 0);
             rt.offsetMin = new Vector2(rt.offsetMin.x, 0);
             rt.offsetMax = new Vector2(rt.offsetMax.x, 0);
             leftOffset += rt.sizeDelta.x + space;
+            */
         }
 
         // Extend viewer
-        scrollList.sizeDelta = new Vector2(leftOffset, scrollList.sizeDelta.y);
+        // scrollList.sizeDelta = new Vector2(leftOffset, scrollList.sizeDelta.y);
     }
 
     // Update is called once per frame
@@ -91,10 +93,14 @@ public class BuildingSelector : MonoBehaviour
         GameObject prefab = (GameObject)Resources.Load("Prefabs/BuildingView");
         prefab = (GameObject)Instantiate(prefab);
 
+        prefab.transform.SetParent(scrollList.transform);
+        prefab.transform.localPosition = Vector3.zero;
+        prefab.transform.localScale = new Vector3(1.0f, 1.0f);
+
         // Set text
         Text buildingName = prefab
                             .transform
-                            .GetChild(1)
+                            .GetChild(0)
                             .GetChild(0)
                             .GetComponent<Text>();
         buildingName.text = name;

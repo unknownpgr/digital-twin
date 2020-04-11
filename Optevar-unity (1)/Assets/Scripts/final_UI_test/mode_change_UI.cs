@@ -84,6 +84,7 @@ public class mode_change_UI : MonoBehaviour
     }
     public void on_clicked_simulation_button()
     {
+        Debug.Log("시뮬");
         if (ui_cont.building == null) ui_cont.building = GameObject.Find("Building");
 
         if (ui_cont.building == null)

@@ -139,7 +139,7 @@ public class FunctionManager : MonoBehaviour
             newSensorBtn.transform.SetParent(sensorPanel, false);
             newSensorBtn.transform.localPosition = Vector3.zero;
             newSensorBtn.transform.GetChild(0).GetComponent<Text>().text = nm.DisplayName;
-            newSensorBtn.GetComponent<Button>().onClick.AddListener(() => OnSensorSelected(physicalID));
+            newSensorBtn.GetComponent<Button>().onClick.AddListener(() => OnSelectSensor(physicalID));
             sensorButtons.Add(nm.PhysicalID, newSensorBtn);
         }
         Destroy(sensorButton);
@@ -148,13 +148,10 @@ public class FunctionManager : MonoBehaviour
         NodeManager.OnNodeStateChanged += OnSensorStateUpdated;
         OnSensorStateUpdated();
 
-        // localfiletext_4.cs
-        GameObject jsonFileButton = Find("button_json_file").gameObject;
-        Transform jsonFilePanel = Find("panel_json_file");
-        GameObject newJsonFileBtn;
-
-        // Close picture window
-        Find("window_screenshot").gameObject.SetActive(false);
+        // json file list 가져오기
+        GameObject loadJsonWindow = uis["window_load_json"].gameObject;
+        localFileTest_4 localFileTest = loadJsonWindow.GetComponent<localFileTest_4>();
+        localFileTest.GetPathList();
     }
 
     // floor starts from 0. 1st floor = 0
@@ -237,10 +234,20 @@ public class FunctionManager : MonoBehaviour
         sensorWindow.SetVisible(true);
     }
 
-    public void OnSensorSelected(string nodeID)
+    public void OnSelectSensor(string nodeID)
     {
         NodeManager node = NodeManager.GetNodeByID(nodeID);
         MouseManager.ToNodePlaceMode(node);
+    }
+
+    public void OnCreateArea()
+    {
+
+    }
+
+    public void OnCreateExit()
+    {
+
     }
 
     public void OnLoadJson()
@@ -249,15 +256,50 @@ public class FunctionManager : MonoBehaviour
         loadJsonWindow.SetVisible(true);
     }
 
-    public void OnJsonFileSelected()
+    public void OnLoadJsonFile()
     {
-        // 선택된 Json File 불러오기
+        // 불러오기
+        // objects_batch.load_button_clicked();
     }
+
 
     public void OnSaveJson()
     {
         WindowManager loadJsonWindow = WindowManager.GetWindow("window_save_json");
         loadJsonWindow.SetVisible(true);
+    }
+
+    public void OnSaveJsonFile()
+    {
+        // 저장
+        // objects_batch.save_clicked();
+    }
+
+    public void OnInitialize()
+    {
+        WindowManager initWindow = WindowManager.GetWindow("window_init");
+        initWindow.SetVisible(true);
+    }
+
+    public void OnClickInformation()
+    {
+        WindowManager informationWindow = WindowManager.GetWindow("window_information");
+        informationWindow.SetVisible(true);
+    }
+
+    public void OnLoadBuildingInfo()
+    {
+
+    }
+
+    public void OnLoadMQTTInfo()
+    {
+
+    }
+
+    public void OnLoadSystemInfo()
+    {
+
     }
 
     public void OnModeChange()
@@ -277,9 +319,6 @@ public class FunctionManager : MonoBehaviour
             Find("text_mode").GetComponent<Text>().text = "모니터링 모드";
             Find("layout_buttons").gameObject.SetActive(true);
             ScenarioManager.singleTon.SetDefault();
-
-            // Close picture window
-            Find("window_screenshot").gameObject.SetActive(false);
         }
 
         isPlacingMode = !isPlacingMode;
