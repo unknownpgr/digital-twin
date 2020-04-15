@@ -30,7 +30,7 @@ public class NodeArea : NodeManager
                 humanoidList[i].transform.localScale = Vector3.one;
             }
             humanoidList[visibleNumber].SetActive(value % 10 > 0);
-            humanoidList[visibleNumber].transform.localScale = Vector3.one * (value > 5 ? 1 : .5f);
+            humanoidList[visibleNumber].transform.localScale = Vector3.one * (value%10 > 5 ? 1 : .75f);
         }
     }
 
