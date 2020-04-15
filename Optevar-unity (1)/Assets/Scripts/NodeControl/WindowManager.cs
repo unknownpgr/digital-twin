@@ -11,6 +11,7 @@ public class WindowManager : MonoBehaviour
 
     public string WindowName = "Test_Window";
     public Vector3 WINDOW_VISIBLE_POSITION = new Vector2(0, -100);
+    public bool DefaultShow = false;
 
     // Private fields
     public Dictionary<string, Transform> Elements = new Dictionary<string, Transform>();
@@ -43,7 +44,11 @@ public class WindowManager : MonoBehaviour
         WINDOW_HIDE_POSITION = new Vector2(0, rectTransform.sizeDelta.y + 100);
 
         // Move current window to given position
-        rectTransform.anchoredPosition = WINDOW_HIDE_POSITION;
+        if(DefaultShow){
+            rectTransform.anchoredPosition = WINDOW_VISIBLE_POSITION;
+            visibility = true;
+        }
+        else rectTransform.anchoredPosition = WINDOW_HIDE_POSITION;
 
         // Add window to dictionary.
         windows.Add(gameObject.name, this);
