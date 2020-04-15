@@ -39,6 +39,7 @@ public class FunctionManager : MonoBehaviour
     {
         get { return isPlacingMode; }
     }
+
     public static bool IsMonitoringMode
     {
         get { return !isPlacingMode; }
@@ -124,9 +125,7 @@ public class FunctionManager : MonoBehaviour
         // Load node data from database
         // 이 코드 대신에 DB에서 로드하는 코드가 들어가야 한다.
         string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
-        string nodeString = File.ReadAllText(path);
-        // File.WriteAllText(path, nodeString);
-        NodeManager.Instantiate(nodeString);
+        NodeManager.InitiateFromFile(path);
 
         // Initialize sensor buttons and create existing node
         GameObject sensorButton = Find("button_sensor_ID").gameObject;
@@ -258,8 +257,9 @@ public class FunctionManager : MonoBehaviour
 
     public void OnLoadJsonFile()
     {
-        // 불러오기
-        // objects_batch.load_button_clicked();
+        //ToDo : Implement JSON load. given code is an example.
+        string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
+        NodeManager.InitiateFromFile(path);
     }
 
 
@@ -271,8 +271,9 @@ public class FunctionManager : MonoBehaviour
 
     public void OnSaveJsonFile()
     {
-        // 저장
-        // objects_batch.save_clicked();
+        // ToDo : Implement JSON save. given code is an example.
+        string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
+        File.WriteAllText(path, NodeManager.Jsonfy());
     }
 
     public void OnInitialize()

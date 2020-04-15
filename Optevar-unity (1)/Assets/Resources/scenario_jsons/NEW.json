@@ -8,9 +8,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          16.51933,
+          2.58010483,
           15.765,
-          -10.971571
+          -11.571537
         ]
       },
       "State": 2
@@ -26,7 +26,7 @@
           18.1955853
         ]
       },
-      "State": 2
+      "State": 0
     },
     {
       "$type": "NodeFireSensor, Assembly-CSharp",
@@ -34,9 +34,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          -0.298553467,
+          1.65132141,
           15.765,
-          -16.04606
+          -15.5722065
         ]
       },
       "State": 2
@@ -48,9 +48,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          15.0348473,
-          15.765,
-          -19.6385956
+          6.93963528,
+          0.137792349,
+          27.4536686
         ]
       },
       "State": 2

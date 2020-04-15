@@ -1,9 +1,9 @@
 {
   "ipAddress": "127.0.0.1",
-  "db_id": "root",
-  "db_pw": "uostest",
-  "db_name": "etrimws_test2",
+  "db_id": "etrimws",
+  "db_pw": "secret",
+  "db_name": "etrimws",
+  "port": "3306",
   "sensor_table": "tb_sensornode",
-  "mmwave_area_table": "mmwave_area",
-  "": ""
+  "sensor_id_table": "tb_sensornode_sensor_ids"
 }

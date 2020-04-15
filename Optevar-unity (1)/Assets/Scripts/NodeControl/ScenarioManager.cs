@@ -44,8 +44,6 @@ public class ScenarioManager : MonoBehaviour
     GameObject warningBox;
     Text disatsterName;
 
-
-
     List<screenshot_attr> pathImages = new List<screenshot_attr>();
 
     // ???
@@ -120,6 +118,8 @@ public class ScenarioManager : MonoBehaviour
             NodeFireSensor node = (NodeFireSensor)NodeManager.GetNodeByID(data.PhysicalID);
             node.IsDisaster = data.IsDisaster;
             newDisasterState |= data.IsDisaster;
+            // (New) 재난 이름 설정하기
+            disatsterName.text = "화재 발생";
         }
 
         // Check if number of people in area changed.

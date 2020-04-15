@@ -7,12 +7,12 @@ using UnityEngine;
 
 public class Evacuaters
 {
-    int number;//
+    int number;
     public int CurNum;
     int pathIdx;
     CustomGrid grid;
-    Node[][] path;
-    Vector3 startPosition;//
+    Node[][] paths;
+    Vector3 startPosition;
     List<Evacuater> evacList;
     public float DistancesOfPath;
     public Evacuaters(int n)
@@ -27,44 +27,48 @@ public class Evacuaters
     public float GetDistance()
     {
         float ret = 0f;
-        for (int i = 0; i < path[pathIdx].Length - 1; i++)
+        for (int i = 0; i < paths[pathIdx].Length - 1; i++)
         {
-            ret += Vector3.Distance(path[pathIdx][i].Position, path[pathIdx][i + 1].Position);
+            ret += Vector3.Distance(paths[pathIdx][i].Position, paths[pathIdx][i + 1].Position);
         }
         return ret;
     }
+
     public void SetPaths(Node[][] p)
     {
-        path = p;
+        paths = p;
         pathIdx = 0;
         for (int i = 0; i < number; i++)
         {
             evacList[i].SetParams(this.startPosition, grid, new Vector3());
-            evacList[i].InitPath(path[pathIdx]);
+            evacList[i].InitPath(paths[pathIdx]);
         }
         CurNum = number;
     }
+
     public void SetPath(int idx)
     {
         pathIdx = idx;
         for (int i = 0; i < number; i++)
         {
             evacList[i].SetParams(this.startPosition, grid, new Vector3());
-            evacList[i].InitPath(path[pathIdx]);
+            evacList[i].InitPath(paths[pathIdx]);
         }
         CurNum = number;
 
     }
+
     public void SetPath()
     {
         for (int i = 0; i < number; i++)
         {
             evacList[i].SetParams(this.startPosition, grid, new Vector3());
-            evacList[i].InitPath(path[pathIdx]);
+            evacList[i].InitPath(paths[pathIdx]);
         }
         CurNum = number;
 
     }
+
     void InitEvacs()
     {
         for (int i = 0; i < evacList.Count; i++)
@@ -75,7 +79,7 @@ public class Evacuaters
     public bool NextPath()
     {
         pathIdx++;
-        if (pathIdx == path.Length)
+        if (pathIdx == paths.Length)
         {
             pathIdx = 0;
             return true; // carry
@@ -88,11 +92,11 @@ public class Evacuaters
     }
     public Node[] GetPath(int idx)
     {
-        return this.path[idx];
+        return this.paths[idx];
     }
     public Node[] GetPath()
     {
-        return this.path[pathIdx];
+        return this.paths[pathIdx];
     }
     public Vector3 GetPosition()
     {

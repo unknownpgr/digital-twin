@@ -197,6 +197,13 @@ abstract public class NodeManager
         initiatable = false;
     }
 
+    public static void InitiateFromFile(string path)
+    {
+        string nodeString = File.ReadAllText(path);
+        NodeManager.DestroyAll();
+        NodeManager.Instantiate(nodeString);
+    }
+
     public static string Jsonfy()
     {
         return JsonConvert.SerializeObject(GetAll(), Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });

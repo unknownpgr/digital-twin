@@ -9,15 +9,17 @@ using System;
 [SerializeField]
 class DBClass
 {
-    public string ipAddress = "localhost";
-    public string db_id = "root";
-    public string db_pw = "uostest";
+    public string ipAddress = "";
+
+    public string db_id = "";
+    public string db_pw = "";
 
     public string db_name = "";
-    public string sensor_table = "tb_sensornode";//'tb_sensornode'
+    public string sensor_table = "";//'tb_sensornode'
     //public string sensor_value_table = "tb_sensingvalue";
-    public string area_table = "mmwave_area";
-    public string sensor_id_table = "tb_sensornode_sensor_ids";
+    //public string area_table = "mmwave_area";
+    public string sensor_id_table = "";
+    public string port = "";
 }
 
 public class DBManager : MonoBehaviour
@@ -40,14 +42,16 @@ public class DBManager : MonoBehaviour
 
     void Init()
     {
+        DockerManager DM = new DockerManager();
+        DM.RunDocker();
 
         db = jsonParser.Load<DBClass>("dbconf");//dbcon.jsonf를 통해 load한다(이 파일 수정하기)
         if (db != null)
         {
             //Debug.Log("읽어옴");
         }
-        string strConn = string.Format("server={0};uid={1};pwd={2};database={3};charset=utf8 ;",
-                               db.ipAddress, db.db_id, db.db_pw, db.db_name);//연결형식
+        string strConn = string.Format("server={0};port={1};uid={2};pwd={3};database={4};charset=utf8;",
+                               db.ipAddress, db.port, db.db_id, db.db_pw, db.db_name);//연결형식
         conn = new MySqlConnection(strConn);
         try
         {
@@ -192,7 +196,7 @@ public class DBManager : MonoBehaviour
         return temp;
     }
 
-
+    /*
     public string AreaLoad()//area 구분자 Newline
     {
         string temp = "";
@@ -209,7 +213,7 @@ public class DBManager : MonoBehaviour
             Debug.Log("area data : " + temp);
         }
         return temp;
-    }
+    }*/
 
 
     private string RdrToStr(MySqlDataReader rdr)

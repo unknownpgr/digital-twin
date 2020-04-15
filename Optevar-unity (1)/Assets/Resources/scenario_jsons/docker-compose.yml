@@ -1,0 +1,69 @@
+version: '3.7'
+
+services:
+  mwsdb:
+    image: mysql:5.7
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci 
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=etrimws
+      - MYSQL_USER=etrimws
+      - MYSQL_PASSWORD=secret
+
+  servicedb:
+    image: mysql:5.7
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci 
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=etriservicebroker
+      - MYSQL_USER=etriservicebroker
+      - MYSQL_PASSWORD=secret
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8000:80  
+    environment:
+      - PMA_HOSTS=mwsdb,servicedb
+
+  etrimws:
+    image: kimkeehwan/iot-data-collector
+    ports:
+      - 20000:20000
+      - 8081:8080
+      - 1883:1883
+    environment:
+      - USING_NMS=false
+      - TCP_PORT=20000
+      - SERVER_PORT=8080
+      - HIKARI_IDLETIMEOUT=10000
+      - HIKARI_LIFETIME=420000
+      - HIKARI_CONNECTIONTIMEOUT=10000
+      - HIKARI_VALIDATIONTIMEOUT=10000
+      - DATABASE_HOST=mwsdb
+      - DATABASE_PORT=3306
+      - DATABASE_USER=etrimws
+      - DATABASE_PASSWORD=secret
+      - DATABASE_NAME=etrimws
+
+  etriservice:
+    image: kimkeehwan/iot-data-collector-service
+    ports:
+      - 8082:8080
+    environment:
+      - ACTIVE_PROFILE=disaster
+      - MQTT_HOST=etrimws
+      - MQTT_PORT=1883
+      - SERVER_PORT=8080
+      - HIKARI_IDLETIMEOUT=10000
+      - HIKARI_LIFETIME=420000
+      - HIKARI_CONNECTIONTIMEOUT=10000
+      - HIKARI_VALIDATIONTIMEOUT=10000
+      - DATABASE_HOST=servicedb
+      - DATABASE_PORT=3306
+      - DATABASE_USER=etriservicebroker
+      - DATABASE_PASSWORD=secret
+      - DATABASE_NAME=etriservicebroker
+       

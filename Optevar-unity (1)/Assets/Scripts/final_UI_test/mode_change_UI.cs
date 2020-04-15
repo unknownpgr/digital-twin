@@ -26,7 +26,7 @@ public class mode_change_UI : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("Gameobject : " + gameObject);
+        //Debug.Log("Gameobject : " + gameObject);
     }
 
     // Update is called once per frame
