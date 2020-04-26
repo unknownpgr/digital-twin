@@ -257,7 +257,7 @@ abstract public class NodeManager
     // Destroy every node and its properties.
     public static void ResetAll()
     {
-        // 
+        // ???...구현 왜이렇게 했더라?
         string[] keys = new string[nodes.Count];
         nodes.Keys.CopyTo(keys, 0);
         foreach (string key in keys) nodes[key].Reset();

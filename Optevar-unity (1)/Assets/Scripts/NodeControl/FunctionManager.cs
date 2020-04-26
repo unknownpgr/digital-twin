@@ -11,15 +11,6 @@ public class FunctionManager : MonoBehaviour
     public static string BuildingPath;
     public static string BuildingName = "다층건물"; // Set default building to ETRI
 
-    // Popup associated values
-    private static Vector3 POPUP_SHOW = new Vector2(0, -100);
-    private static Vector3 POPUP_HIDE = new Vector2(0, 200);
-    private GameObject popup;                   // Popup message box
-    private RectTransform popupTransform;       // Transform
-    private static Text popupText;              // Text
-    private static float popupLifetime = 0;     // Popup lifetime. hide if 0
-    public static float POPUP_DURATION = 5;     // Popup default lifetime.
-
     // Current canvas
     public Canvas canvas;
     // Dictionary of uis
@@ -65,12 +56,6 @@ public class FunctionManager : MonoBehaviour
         // Initialzie ui
         RecursiveRegisterChild(canvas.transform, uis);
 
-        // Initialize popup
-        popup = Find("popup").gameObject;
-        popupTransform = popup.GetComponent<RectTransform>();
-        popupText = popupTransform.GetChild(0).GetComponent<Text>();
-        popupTransform.anchoredPosition = POPUP_HIDE;
-
         // Set building name
         Find("text_building_name").GetComponent<Text>().text = BuildingName;
 
@@ -83,7 +68,7 @@ public class FunctionManager : MonoBehaviour
         // Load builing
         GameObject building = BuildingManager.LoadSkp(BuildingName);
 
-        if (!building) Popup("That is not a valid building.");
+        if (!building) Popup.Show("That is not a valid building.");
         else
         {
             // Set building floors
@@ -190,21 +175,6 @@ public class FunctionManager : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    float t;
-    void Update()
-    {
-        UpdatePopup();
-    }
-
-    // Show popup message
-    public static void Popup(string text)
-    {
-        if (popupLifetime > 0) popupLifetime = POPUP_DURATION - 1.0f;
-        else popupLifetime = POPUP_DURATION;        // Set lifetime to 5 sec
-        popupText.text = text;                      // Set text fo popup message
-    }
-
     // Update date and time Text
     private IEnumerator UpdateDateAndTime()
     {
@@ -214,26 +184,6 @@ public class FunctionManager : MonoBehaviour
             dateText.text = dateTime.ToString("yyyy/MM/dd");
             timeText.text = dateTime.ToString("hh시 mm분 ss초");
             yield return new WaitForSeconds(1);
-        }
-    }
-
-    private void UpdatePopup()
-    {
-        if (popupLifetime > 0)
-        {
-            // Showing
-            if (popupLifetime > 1.0f)
-            {
-                t = POPUP_DURATION - popupLifetime;
-                if (t > 1) t = 1;
-            }
-            // Hiding
-            else
-            {
-                t = popupLifetime;
-            }
-            popupTransform.anchoredPosition = Vector2.Lerp(POPUP_HIDE, POPUP_SHOW, WindowManager.SmoothMove(t));
-            popupLifetime -= Time.deltaTime;
         }
     }
 
@@ -305,10 +255,10 @@ public class FunctionManager : MonoBehaviour
 
     public void OnInitializeNode()
     {
-        foreach (NodeManager nm in NodeManager.GetAll()) nm.State = NodeManager.NodeState.STATE_UNINITIALIZED;
+        NodeManager.ResetAll();
         WindowManager initWindow = WindowManager.GetWindow("window_init");
         initWindow.SetVisible(false);
-        Popup("초기화되었습니다.");
+        Popup.Show("초기화되었습니다.");
     }
 
     public void OnClickInformation()
@@ -356,7 +306,7 @@ public class FunctionManager : MonoBehaviour
         isPlacingMode = !isPlacingMode;
     }
 
-    public void OnSensorStateUpdated()
+    private void OnSensorStateUpdated()
     {
         foreach (string physicalID in sensorButtons.Keys)
         {
@@ -377,6 +327,7 @@ public class FunctionManager : MonoBehaviour
             sensorButtons[physicalID].GetComponent<Image>().color = color;
         }
 
+        // Update json file
         string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
         File.WriteAllText(path, NodeManager.Jsonfy());
     }

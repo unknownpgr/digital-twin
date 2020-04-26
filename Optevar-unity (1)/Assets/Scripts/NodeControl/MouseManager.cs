@@ -134,7 +134,7 @@ public class MouseManager : MonoBehaviour
         if (placingNode != null)
         {
             placingNode.Reset();
-            FunctionManager.Popup("Node placing canceled.");
+            Popup.Show("Node placing canceled.");
         }
 
         mouseMode = MouseMode.NORMAL;
@@ -177,15 +177,15 @@ public class MouseManager : MonoBehaviour
 
                 // Check if given surface is wall
                 float angleCosine = Mathf.Abs(Vector3.Dot(Vector3.up, MouseState.Normal));
-                if (angleCosine < 0.5f) FunctionManager.Popup("Warning : " + placingNode.DisplayName + " placed on wall.");
-                else FunctionManager.Popup(placingNode.DisplayName + " placed.");
+                if (angleCosine < 0.5f) Popup.Show("Warning : " + placingNode.DisplayName + " placed on wall.");
+                else Popup.Show(placingNode.DisplayName + " placed.");
 
                 // Change to normal mode. Initialize placing node to null.
                 placingNode.State = NodeManager.NodeState.STATE_INITIALIZED;
                 placingNode = null;
                 ToNormalMode();
             }
-            else FunctionManager.Popup("Cannot place here");
+            else Popup.Show("Cannot place here");
         }
     }
 
