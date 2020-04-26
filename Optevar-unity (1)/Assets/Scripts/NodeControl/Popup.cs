@@ -8,7 +8,6 @@ public class Popup : MonoBehaviour
     // Popup associated values
     private static Vector3 POPUP_SHOW = new Vector2(0, -100);
     private static Vector3 POPUP_HIDE = new Vector2(0, 200);
-    private GameObject popup;                   // Popup message box
     private RectTransform popupTransform;       // Transform
     private static Text popupText;              // Text
     private static float popupLifetime = 0;     // Popup lifetime. hide if 0
@@ -18,8 +17,7 @@ public class Popup : MonoBehaviour
     void Start()
     {
         // Initialize popup
-        popup = GameObject.Find("popup").gameObject;
-        popupTransform = popup.GetComponent<RectTransform>();
+        popupTransform = gameObject.GetComponent<RectTransform>();
         popupText = popupTransform.GetChild(0).GetComponent<Text>();
         popupTransform.anchoredPosition = POPUP_HIDE;
     }

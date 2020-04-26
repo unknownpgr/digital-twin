@@ -31,7 +31,7 @@ public class MouseManager : MonoBehaviour
     Vector3 dest = Vector3.down;
     // Target marker object for node placing
     private static GameObject targetMarker;
-
+    // Wrapper class for mouse
     public static class MouseState
     {
         public static bool IsLeftClicked { get; private set; }
@@ -43,7 +43,7 @@ public class MouseManager : MonoBehaviour
         public static bool IsOverGameObject { get; private set; }
         private static RaycastHit hit;
         public static RaycastHit Hit { get => hit; private set { } }
-        public static GameObject Target { get => hit.collider.gameObject; }
+        public static GameObject Target { get => hit.collider?.gameObject; }
         public static Vector3 Point { get => hit.point; private set { } }
         public static Vector3 Normal { get => hit.normal; private set { } }
 
@@ -105,6 +105,11 @@ public class MouseManager : MonoBehaviour
         {
             case MouseMode.NORMAL:
                 if (MouseState.IsDoubleClicked) dest = MouseState.Point;
+                if (MouseState.IsLeftClicked)
+                {
+                    GameObject target = MouseState.Target;
+
+                }
                 break;
 
             case MouseMode.NODE_PLACING:

@@ -117,6 +117,9 @@ public static class BuildingManager
         size.y = -0.01f;
         building.GetComponent<Transform>().position -= size / 2;
 
+        // Set building parent to Plane so that it renders after UI.
+        building.transform.SetParent(GameObject.Find("Plane").transform);
+
         // Update BuildingBound because we moved building.
         BuildingBound = GetBounds(building);
 

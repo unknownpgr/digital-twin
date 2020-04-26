@@ -8,9 +8,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          23.9100037,
+          3.021469,
           15.765,
-          -19.4917
+          -19.0269051
         ]
       },
       "State": 0
@@ -21,9 +21,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          9.908901,
+          9.232395,
           15.765,
-          25.0963116
+          26.1761646
         ]
       },
       "State": 0
@@ -34,9 +34,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          14.0047874,
+          7.89170456,
           15.765,
-          12.8151608
+          -18.1351871
         ]
       },
       "State": 0
@@ -48,9 +48,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          14.6024895,
+          15.602478,
           15.765,
-          -12.8931684
+          -11.4255085
         ]
       },
       "State": 0
@@ -61,9 +61,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          20.650135,
+          24.27071,
           15.765,
-          16.3043575
+          -19.8731537
         ]
       },
       "State": 0
@@ -74,9 +74,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          16.17509,
+          -27.3906326,
           15.765,
-          -17.54652
+          -9.714174
         ]
       },
       "State": 0

@@ -177,6 +177,9 @@ abstract public class NodeManager
         if (gameObject != null) GameObject.Destroy(gameObject);
         gameObject = (GameObject)GameObject.Instantiate(prefab);
 
+        // Rename gameObject
+        gameObject.name = PhysicalID;
+
         // Set visibility
         hide = state != NodeState.STATE_INITIALIZED;
         gameObject.SetActive(!hide);
