@@ -9,7 +9,7 @@ public class FunctionManager : MonoBehaviour
 {
     // Building information
     public static string BuildingPath;
-    public static string BuildingName = "ETRI"; // Set default building to ETRI
+    public static string BuildingName = "다층건물"; // Set default building to ETRI
 
     // Popup associated values
     private static Vector3 POPUP_SHOW = new Vector2(0, -100);
@@ -29,9 +29,10 @@ public class FunctionManager : MonoBehaviour
     // Sensor buttons of sensor window
     private Dictionary<string, GameObject> sensorButtons = new Dictionary<string, GameObject>();
 
-    // Text of Date And Time UI
-    public Text dateText;
-    public Text timeText;
+    // Texts of date and time UI
+    private Transform dtPanel;
+    private Text dateText;
+    private Text timeText;
 
     // Program mode
     private static bool isPlacingMode = true;
@@ -118,6 +119,10 @@ public class FunctionManager : MonoBehaviour
                 Find("scrollview_floors").gameObject.SetActive(false);
             }
 
+            dtPanel = Find("date_and_time");
+            dateText = dtPanel.GetChild(0).GetComponent<Text>();
+            timeText = dtPanel.GetChild(1).GetComponent<Text>();
+
             // Start clock
             StartCoroutine(UpdateDateAndTime());
         }
@@ -127,21 +132,31 @@ public class FunctionManager : MonoBehaviour
         string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
         NodeManager.InitiateFromFile(path);
 
-        // Initialize sensor buttons and create existing node
-        GameObject sensorButton = Find("button_sensor_ID").gameObject;
-        Transform sensorPanel = Find("panel_sensor");
-        GameObject newSensorBtn;
-        foreach (string physicalID in NodeManager.GetNodeIDs())
-        {
-            NodeManager nm = NodeManager.GetNodeByID(physicalID);
-            newSensorBtn = Instantiate(sensorButton);
-            newSensorBtn.transform.SetParent(sensorPanel, false);
-            newSensorBtn.transform.localPosition = Vector3.zero;
-            newSensorBtn.transform.GetChild(0).GetComponent<Text>().text = nm.DisplayName;
-            newSensorBtn.GetComponent<Button>().onClick.AddListener(() => OnSelectSensor(physicalID));
-            sensorButtons.Add(nm.PhysicalID, newSensorBtn);
+        { // 노드 로드하여 윈도우에 추가하는 부분
+            // Initialize sensor buttons and create existing node
+            GameObject sensorButton = Find("button_sensor_ID").gameObject;
+
+            Transform sensorPanel = Find("panel_sensor");
+            Transform areaPanel = Find("panel_area");
+            Transform exitPanel = Find("panel_exit");
+
+            GameObject newSensorBtn;
+            foreach (string physicalID in NodeManager.GetNodeIDs())
+            {
+                NodeManager nm = NodeManager.GetNodeByID(physicalID);
+                newSensorBtn = Instantiate(sensorButton);
+
+                if (nm is NodeFireSensor) newSensorBtn.transform.SetParent(sensorPanel, false);
+                if (nm is NodeArea) newSensorBtn.transform.SetParent(areaPanel, false);
+                if (nm is NodeExit) newSensorBtn.transform.SetParent(exitPanel, false);
+
+                newSensorBtn.transform.localPosition = Vector3.zero;
+                newSensorBtn.transform.GetChild(0).GetComponent<Text>().text = nm.DisplayName;
+                newSensorBtn.GetComponent<Button>().onClick.AddListener(() => OnSelectSensor(physicalID));
+                sensorButtons.Add(nm.PhysicalID, newSensorBtn);
+            }
+            Destroy(sensorButton);
         }
-        Destroy(sensorButton);
 
         // Add callback listener
         NodeManager.OnNodeStateChanged += OnSensorStateUpdated;
@@ -241,12 +256,14 @@ public class FunctionManager : MonoBehaviour
 
     public void OnCreateArea()
     {
-
+        WindowManager areaWindow = WindowManager.GetWindow("window_area");
+        areaWindow.SetVisible(true);
     }
 
     public void OnCreateExit()
     {
-
+        WindowManager exitWindow = WindowManager.GetWindow("window_exit");
+        exitWindow.SetVisible(true);
     }
 
     public void OnLoadJson()
@@ -282,6 +299,11 @@ public class FunctionManager : MonoBehaviour
         initWindow.SetVisible(true);
     }
 
+    public void OnInitializeNode()
+    {
+        foreach (NodeManager nm in NodeManager.GetAll()) nm.State = NodeManager.NodeState.STATE_UNINITIALIZED;
+    }
+
     public void OnClickInformation()
     {
         WindowManager informationWindow = WindowManager.GetWindow("window_information");
@@ -312,6 +334,7 @@ public class FunctionManager : MonoBehaviour
             // Placing mode to monitoring mode
             Find("text_mode").GetComponent<Text>().text = "배치 모드";
             Find("layout_buttons").gameObject.SetActive(false);
+            OnSetFloor(BuildingManager.FloorsCount - 1);
             ScenarioManager.singleTon.Init();
         }
         else
@@ -319,6 +342,7 @@ public class FunctionManager : MonoBehaviour
             // Monitoring mode to placing mode
             Find("text_mode").GetComponent<Text>().text = "모니터링 모드";
             Find("layout_buttons").gameObject.SetActive(true);
+            Find("warning_box").gameObject.SetActive(false);
             ScenarioManager.singleTon.SetDefault();
         }
 

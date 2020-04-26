@@ -4,8 +4,6 @@ services:
   mwsdb:
     image: mysql:5.7
     command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci 
-    ports:
-      - 3306:3306
     environment:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=etrimws
@@ -15,6 +13,8 @@ services:
   servicedb:
     image: mysql:5.7
     command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci 
+    ports:
+      - 3306:3306
     environment:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=etriservicebroker

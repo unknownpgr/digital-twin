@@ -117,6 +117,7 @@ public class objects_batch : MonoBehaviour
                 // DB Load
                 DBManager db = DBManager.GetComponent<DBManager>();
                 db.SensorLoad();
+                db.AreaLoad();
                 break;
             case 7:
                 // DB Save

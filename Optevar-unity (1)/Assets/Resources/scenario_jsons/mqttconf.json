@@ -1,6 +1,6 @@
 {
   "clientId": "testClient",
-  "brokerAddr": "mqtt-dashboard.com",
+  "brokerAddr": "mqtt-dashboard.com",//"localhost"
   "brokerPort": 1883,
   "userName": "12451test",
   "password": "test",

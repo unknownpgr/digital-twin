@@ -44,7 +44,7 @@ public class DockerManager : MonoBehaviour
             process.StartInfo = DockerProcessInfo;
             process.Start();
             //UnityEngine.Debug.Log("ㅇㅇ1");
-            process.StandardInput.Write(@"docker-compose up"+ Environment.NewLine);
+            process.StandardInput.Write(@"docker-compose start"+ Environment.NewLine);
             //process.StandardInput.Close();
             
             
@@ -71,9 +71,10 @@ public class DockerManager : MonoBehaviour
             process.Kill();// run_docker함수가 실행되는 곳이 update문이라면 start, kill같이 넣어도되지만/ 일회성이라면 따로 함수 구현
 
         }
-        process.Close();
+        
         */
         //return을 연결됐다는 표시
+        process.Close();
     }
     public void DockerTest(){
         string path = Application.dataPath + "/Resources/scenario_jsons/";

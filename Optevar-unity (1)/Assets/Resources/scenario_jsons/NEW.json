@@ -8,12 +8,12 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          2.58010483,
+          7.776066,
           15.765,
-          -11.571537
+          -11.8545532
         ]
       },
-      "State": 2
+      "State": 0
     },
     {
       "$type": "NodeExit, Assembly-CSharp",
@@ -21,9 +21,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          -12.7679882,
+          29.88676,
           15.765,
-          18.1955853
+          -9.792074
         ]
       },
       "State": 0
@@ -39,7 +39,7 @@
           -15.5722065
         ]
       },
-      "State": 2
+      "State": 0
     },
     {
       "$type": "NodeArea, Assembly-CSharp",
@@ -53,7 +53,7 @@
           27.4536686
         ]
       },
-      "State": 2
+      "State": 0
     },
     {
       "$type": "NodeExit, Assembly-CSharp",
@@ -66,7 +66,7 @@
           -19.2910652
         ]
       },
-      "State": 2
+      "State": 0
     },
     {
       "$type": "NodeDirection, Assembly-CSharp",
@@ -79,7 +79,7 @@
           14.8069439
         ]
       },
-      "State": 2
+      "State": 0
     }
   ]
 }

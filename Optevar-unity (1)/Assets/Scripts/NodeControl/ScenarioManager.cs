@@ -84,7 +84,7 @@ public class ScenarioManager : MonoBehaviour
         defaultPathPanel = GameObject.Find("panel_path");
         content = defaultPathPanel.transform.parent; // FunctionManager.Find("Content");
 
-        // (New) Get text of disaster warning UI                /*구현 추가하기*/
+        // (New) Get text of disaster warning UI
         warningBox = FunctionManager.Find("warning_box").gameObject;
         disatsterName = warningBox.transform.GetChild(1).GetComponent<Text>();
 
@@ -307,7 +307,8 @@ public class ScenarioManager : MonoBehaviour
 
                 // Set time
                 Text evacTimeText = newPanelTransform.GetChild(2).GetComponentInChildren<Text>();
-                evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
+                evacTimeText.text = "예상 시간 : " + string.Format("{0:F2}", pathImages[r].time) + "(초)";
+                // evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
             }
 
             // And show the panel

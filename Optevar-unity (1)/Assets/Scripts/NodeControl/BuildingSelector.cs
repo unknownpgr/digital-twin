@@ -11,7 +11,8 @@ using UnityEngine.SceneManagement;
 
 public class BuildingSelector : MonoBehaviour
 {
-    public RectTransform scrollList;
+    // public RectTransform scrollList;
+    public Transform content;
 
     // Start is called before the first frame update
     void Start()
@@ -93,7 +94,7 @@ public class BuildingSelector : MonoBehaviour
         GameObject prefab = (GameObject)Resources.Load("Prefabs/BuildingView");
         prefab = (GameObject)Instantiate(prefab);
 
-        prefab.transform.SetParent(scrollList.transform);
+        prefab.transform.SetParent(content);
         prefab.transform.localPosition = Vector3.zero;
         prefab.transform.localScale = new Vector3(1.0f, 1.0f);
 

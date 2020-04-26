@@ -17,7 +17,7 @@ class DBClass
     public string db_name = "";
     public string sensor_table = "";//'tb_sensornode'
     //public string sensor_value_table = "tb_sensingvalue";
-    //public string area_table = "mmwave_area";
+    public string area_table = "";
     public string sensor_id_table = "";
     public string port = "";
 }
@@ -45,7 +45,7 @@ public class DBManager : MonoBehaviour
         DockerManager DM = new DockerManager();
         DM.RunDocker();
 
-        db = jsonParser.Load<DBClass>("dbconf");//dbcon.jsonf를 통해 load한다(이 파일 수정하기)
+        db = jsonParser.Load<DBClass>("dbconf_temp");//dbcon.jsonf를 통해 load한다(이 파일 수정하기)
         if (db != null)
         {
             //Debug.Log("읽어옴");
@@ -149,71 +149,64 @@ public class DBManager : MonoBehaviour
     public string SensorLoad()// 화재센서 & 방향지시등센서 
     {
         string temp = "";
-        /*
-        string q = "" +
-            "SELECT node_address,location" +
-            " FROM " + db.sensor_table + ";";
-            */
-
-        //node_id, sensor_type
         string q = "" +
             "SELECT tb_sensornode_node_address, sensor_ids" +
             " FROM " + db.sensor_id_table +
            " WHERE sensor_ids IN (21, 22, 23, 27);";
-
-
-        //bool ret = false;
         Debug.Log("load쿼리문 : " + q);
 
-        if (conn.Ping())//conn.State == System.Data.ConnectionState.Open)// == true
+        if (conn.Ping())
         {
             MySqlCommand command = new MySqlCommand(q, conn);
             MySqlDataReader rdr = command.ExecuteReader();
-            //ret = false;
             temp = RdrToStr(rdr);
-            //ret = (temp != string.Empty);
-
             Debug.Log("센서 data : " + temp);
-            /*
-            <string>
-            13000001;(41.52,15.75,17.83)
-            13000002;(63.42,15.75,17.74)
-            13000003;(41.55,15.75,9.10)
-            13000004;(63.38,15.75,9.10)
-            13000005;(24.20,15.75,8.13)
-            13000006;(29.53,15.75,30.66)
-            13000007;(7.39,15.75,12.44)
-            현재 : 
-            sensor_node_ID;sensor_node_location
+            rdr.Close();
             
-            최종 : 
-            sensor_node_ID;sensor_node_type;sensor_node_location
-             */
-
         }
+        /*
+            nodeID; sensor_type
+            00010000;21
+            00010000;22
+            00010000;23
+            00020000;21
+            00020000;22
+            00030000;23
+            00030000;21
+            00030000;22
+            00020000;23
+            00040000;27
+            00050000;27
+            00060000;27
+         */
 
-        //conn.close();
         return temp;
     }
 
-    /*
-    public string AreaLoad()//area 구분자 Newline
+    
+    public string AreaLoad()
     {
         string temp = "";
         string q = "" +
             "SELECT area_id" +
             " FROM " + db.area_table + ";";
+        
         Debug.Log(q);
         if (conn.Ping())
         {
             MySqlCommand command = new MySqlCommand(q, conn);
-            //Debug.Log("command : " + command);
             MySqlDataReader rdr = command.ExecuteReader();
             temp = RdrToStr(rdr);
             Debug.Log("area data : " + temp);
+            rdr.Close();
         }
+        /*
+         room1
+         room2
+         room3
+         */
         return temp;
-    }*/
+    }
 
 
     private string RdrToStr(MySqlDataReader rdr)
