@@ -119,13 +119,16 @@ public class FunctionManager : MonoBehaviour
                 Find("scrollview_floors").gameObject.SetActive(false);
             }
 
-            dtPanel = Find("date_and_time");
-            dateText = dtPanel.GetChild(0).GetComponent<Text>();
-            timeText = dtPanel.GetChild(1).GetComponent<Text>();
-
-            // Start clock
-            StartCoroutine(UpdateDateAndTime());
+            // Show floors
+            OnSetFloor(BuildingManager.FloorsCount - 1);
         }
+
+        dtPanel = Find("date_and_time");
+        dateText = dtPanel.GetChild(0).GetComponent<Text>();
+        timeText = dtPanel.GetChild(1).GetComponent<Text>();
+
+        // Start clock
+        StartCoroutine(UpdateDateAndTime());
 
         // Load node data from database
         // 이 코드 대신에 DB에서 로드하는 코드가 들어가야 한다.
@@ -147,6 +150,7 @@ public class FunctionManager : MonoBehaviour
                 newSensorBtn = Instantiate(sensorButton);
 
                 if (nm is NodeFireSensor) newSensorBtn.transform.SetParent(sensorPanel, false);
+                if (nm is NodeDirection) newSensorBtn.transform.SetParent(sensorPanel, false);
                 if (nm is NodeArea) newSensorBtn.transform.SetParent(areaPanel, false);
                 if (nm is NodeExit) newSensorBtn.transform.SetParent(exitPanel, false);
 
@@ -176,8 +180,8 @@ public class FunctionManager : MonoBehaviour
             if (i <= floor) BuildingManager.Floors[i].SetActive(true);
             else BuildingManager.Floors[i].SetActive(false);
 
-            if (i != floor) floorButtons[i].GetComponent<Image>().color = new Color(200, 200, 200);
-            else floorButtons[i].GetComponent<Image>().color = Color.white;
+            if (BuildingManager.FloorsCount - i - 1 > floor) floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 0.5f);
+            else floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 1);
         }
 
         foreach (NodeManager node in NodeManager.GetAll())
@@ -302,6 +306,9 @@ public class FunctionManager : MonoBehaviour
     public void OnInitializeNode()
     {
         foreach (NodeManager nm in NodeManager.GetAll()) nm.State = NodeManager.NodeState.STATE_UNINITIALIZED;
+        WindowManager initWindow = WindowManager.GetWindow("window_init");
+        initWindow.SetVisible(false);
+        Popup("초기화되었습니다.");
     }
 
     public void OnClickInformation()
