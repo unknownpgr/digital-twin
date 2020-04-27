@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Windows;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+
 public class localFileTest_4 : MonoBehaviour
 {
     public List<string> file_path_list;
@@ -31,11 +32,12 @@ public class localFileTest_4 : MonoBehaviour
         ori_file_name_button.onClick.AddListener(file_name_clicked);
 
         string path = Application.dataPath + "/Resources/scenario_jsons";
-        
+
         DirectoryInfo folder = new DirectoryInfo(path);
         file_list.Clear();
         file_path_list.Clear();
-        if (file_list_button.Count>0) {
+        if (file_list_button.Count > 0)
+        {
             for (int y = 0; y < file_list_button.Count; y++)
             {
                 Destroy(file_list_button[y].gameObject);
@@ -47,12 +49,12 @@ public class localFileTest_4 : MonoBehaviour
         foreach (var file in folder.GetFiles("*.json"))
         {
             file_path = path + "/" + file.Name;
-            
+
             file_path_list.Add(file_path);
             file_list.Add(file.Name);
-            
+
         }
-        
+
         DrawLists(this.file_list);
     }
 
@@ -78,17 +80,20 @@ public class localFileTest_4 : MonoBehaviour
 
         }
     }
-    public void file_name_clicked() {//파일이름이 클릭될 때 button에 달아놓은 listener실행
+    public void file_name_clicked()
+    {//파일이름이 클릭될 때 button에 달아놓은 listener실행
         clicked_button_text = Application.dataPath + "/Resources/scenario_jsons/" + EventSystem.current.currentSelectedGameObject.GetComponentInChildren<Text>().text;//이게 클릭된 버튼에 제대로 접근하는지 확인
 
     }
-    public string get_clicked_file_name() {
+    public string get_clicked_file_name()
+    {
         return clicked_button_text;
     }
-    public void close_window() {
+    public void close_window()
+    {
 
     }
 
-    
+
 
 }

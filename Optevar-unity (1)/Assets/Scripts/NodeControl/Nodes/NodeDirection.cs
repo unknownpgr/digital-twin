@@ -7,7 +7,7 @@ public class NodeDirection : NodeManager
 {
     protected override string prefabName { get => "DirectionSensor"; }
 
-    public override string DisplayName { get => "탈출구 " + PhysicalID; }
+    public override string DisplayName { get => "방향지시등 " + PhysicalID; }
 
     // 화살표 오브젝트, default direction(=up)=z-axis direction.
     private GameObject directionObject;

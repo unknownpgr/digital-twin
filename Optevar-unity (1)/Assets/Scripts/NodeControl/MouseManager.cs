@@ -6,6 +6,10 @@ using UnityEngine.EventSystems;
 
 public class MouseManager : MonoBehaviour
 {
+    // Callback function
+    public delegate void Callback(NodeManager node);
+    public static Callback OnNodeClicked;
+
     public enum MouseMode
     {
         NORMAL,         // Normal mode. User can click object to see attribute or can use UI buttons.
@@ -108,7 +112,11 @@ public class MouseManager : MonoBehaviour
                 if (MouseState.IsLeftClicked)
                 {
                     GameObject target = MouseState.Target;
-
+                    if (target != null)
+                    {
+                        NodeManager nodeManager = NodeManager.GetNodeByID(target.name);
+                        if (nodeManager != null) OnNodeClicked?.Invoke(nodeManager);
+                    }
                 }
                 break;
 

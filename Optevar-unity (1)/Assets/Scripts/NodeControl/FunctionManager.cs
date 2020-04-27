@@ -18,7 +18,6 @@ public class FunctionManager : MonoBehaviour
     // Floor side display buttons
     private List<GameObject> floorButtons = new List<GameObject>();
     // Sensor buttons of sensor window
-    private Dictionary<string, GameObject> sensorButtons = new Dictionary<string, GameObject>();
 
     // Texts of date and time UI
     private Transform dtPanel;
@@ -115,46 +114,8 @@ public class FunctionManager : MonoBehaviour
         // Start clock
         StartCoroutine(UpdateDateAndTime());
 
-        // Load node data from database
-        // 이 코드 대신에 DB에서 로드하는 코드가 들어가야 한다.
-        string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
-        NodeManager.InitiateFromFile(path);
-
-        { // 노드 로드하여 윈도우에 추가하는 부분
-            // Initialize sensor buttons and create existing node
-            GameObject sensorButton = Find("button_sensor_ID").gameObject;
-
-            Transform sensorPanel = Find("panel_sensor");
-            Transform areaPanel = Find("panel_area");
-            Transform exitPanel = Find("panel_exit");
-
-            GameObject newSensorBtn;
-            foreach (string physicalID in NodeManager.GetNodeIDs())
-            {
-                NodeManager nm = NodeManager.GetNodeByID(physicalID);
-                newSensorBtn = Instantiate(sensorButton);
-
-                if (nm is NodeFireSensor) newSensorBtn.transform.SetParent(sensorPanel, false);
-                if (nm is NodeDirection) newSensorBtn.transform.SetParent(sensorPanel, false);
-                if (nm is NodeArea) newSensorBtn.transform.SetParent(areaPanel, false);
-                if (nm is NodeExit) newSensorBtn.transform.SetParent(exitPanel, false);
-
-                newSensorBtn.transform.localPosition = Vector3.zero;
-                newSensorBtn.transform.GetChild(0).GetComponent<Text>().text = nm.DisplayName;
-                newSensorBtn.GetComponent<Button>().onClick.AddListener(() => OnSelectSensor(physicalID));
-                sensorButtons.Add(nm.PhysicalID, newSensorBtn);
-            }
-            Destroy(sensorButton);
-        }
-
         // Add callback listener
-        NodeManager.OnNodeStateChanged += OnSensorStateUpdated;
-        OnSensorStateUpdated();
-
-        // json file list 가져오기
-        GameObject loadJsonWindow = uis["window_load_json"].gameObject;
-        localFileTest_4 localFileTest = loadJsonWindow.GetComponent<localFileTest_4>();
-        localFileTest.GetPathList();
+        MouseManager.OnNodeClicked += OnNodeSelected;
     }
 
     // floor starts from 0. 1st floor = 0
@@ -202,11 +163,6 @@ public class FunctionManager : MonoBehaviour
         sensorWindow.SetVisible(true);
     }
 
-    public void OnSelectSensor(string nodeID)
-    {
-        NodeManager node = NodeManager.GetNodeByID(nodeID);
-        MouseManager.ToNodePlaceMode(node);
-    }
 
     public void OnCreateArea()
     {
@@ -218,33 +174,6 @@ public class FunctionManager : MonoBehaviour
     {
         WindowManager exitWindow = WindowManager.GetWindow("window_exit");
         exitWindow.SetVisible(true);
-    }
-
-    public void OnLoadJson()
-    {
-        WindowManager loadJsonWindow = WindowManager.GetWindow("window_load_json");
-        loadJsonWindow.SetVisible(true);
-    }
-
-    public void OnLoadJsonFile()
-    {
-        //ToDo : Implement JSON load. given code is an example.
-        string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
-        NodeManager.InitiateFromFile(path);
-    }
-
-
-    public void OnSaveJson()
-    {
-        WindowManager loadJsonWindow = WindowManager.GetWindow("window_save_json");
-        loadJsonWindow.SetVisible(true);
-    }
-
-    public void OnSaveJsonFile()
-    {
-        // ToDo : Implement JSON save. given code is an example.
-        string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
-        File.WriteAllText(path, NodeManager.Jsonfy());
     }
 
     public void OnInitialize()
@@ -306,29 +235,8 @@ public class FunctionManager : MonoBehaviour
         isPlacingMode = !isPlacingMode;
     }
 
-    private void OnSensorStateUpdated()
+    private void OnNodeSelected(NodeManager node)
     {
-        foreach (string physicalID in sensorButtons.Keys)
-        {
-            NodeManager nm = NodeManager.GetNodeByID(physicalID);
-            Color color;
-            switch (nm.State)
-            {
-                case NodeManager.NodeState.STATE_INITIALIZED:
-                    color = new Color(.7f, .7f, 1);
-                    break;
-                case NodeManager.NodeState.STATE_PLACING:
-                    color = new Color(.7f, .7f, .7f);
-                    break;
-                default: // NodeManager.NodeState.STATE_UNINITIALIZED
-                    color = new Color(1, .7f, .7f);
-                    break;
-            }
-            sensorButtons[physicalID].GetComponent<Image>().color = color;
-        }
-
-        // Update json file
-        string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
-        File.WriteAllText(path, NodeManager.Jsonfy());
+        Debug.Log("Node is clicked : " + node.PhysicalID);
     }
 }

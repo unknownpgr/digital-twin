@@ -144,6 +144,8 @@ abstract public class NodeManager
 
     private void onNodeStateChanged()
     {
+        Debug.Log("NodeStateChanged");
+
         // Do not modify 'Hide' or 'State' in here. It would occur recursive function call stack overflow.
         hide = state != NodeState.STATE_INITIALIZED;    // Initialize 'hide' when node is not initialized.
         gameObject.SetActive(!hide);                    // If node is initialized and not hidden, show it.
@@ -177,9 +179,6 @@ abstract public class NodeManager
         if (gameObject != null) GameObject.Destroy(gameObject);
         gameObject = (GameObject)GameObject.Instantiate(prefab);
 
-        // Rename gameObject
-        gameObject.name = PhysicalID;
-
         // Set visibility
         hide = state != NodeState.STATE_INITIALIZED;
         gameObject.SetActive(!hide);
@@ -188,6 +187,9 @@ abstract public class NodeManager
     [OnDeserialized]
     internal void OnDeserializedMethod(StreamingContext context)
     {
+        // Rename gameObject
+        gameObject.name = PhysicalID;
+        onNodeStateChanged();
         Init();
     }
 
@@ -291,7 +293,7 @@ abstract public class NodeManager
     public void Destroy()
     {
         nodes.Remove(PhysicalID);
-        OnNodeStateChanged = null;
+        // OnNodeStateChanged = null;
         GameObject.Destroy(gameObject);
     }
 
