@@ -136,7 +136,7 @@ public class FunctionManager : MonoBehaviour
         }
     }
 
-    // Update date and time Text
+    // Update date and time Text of UI
     private IEnumerator UpdateDateAndTime()
     {
         while (true)
@@ -230,6 +230,10 @@ public class FunctionManager : MonoBehaviour
             Find("layout_buttons").gameObject.SetActive(true);
             Find("warning_box").gameObject.SetActive(false);
             ScenarioManager.singleTon.SetDefault();
+
+            // Initialize
+            DataManager dataManager = GetComponent<DataManager>();
+            dataManager.LoadDataFromDB();
         }
 
         isPlacingMode = !isPlacingMode;

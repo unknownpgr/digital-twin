@@ -4,12 +4,12 @@ using System.Threading;
 using System.IO;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System;
 
 public class DataManager : MonoBehaviour
 {
     private static List<FileInfo> jsonFileList = new List<FileInfo>();
     private static List<GameObject> jsonButtons = new List<GameObject>();
-    private static List<GameObject> nodeButtons = new List<GameObject>();
     private Dictionary<string, GameObject> sensorButtons = new Dictionary<string, GameObject>();
 
     private static GameObject jsonButton;
@@ -63,6 +63,7 @@ public class DataManager : MonoBehaviour
         }
     }
 
+    // Called when load json button of menu bar clicked
     public void OnLoadJson()
     {
         WindowManager loadJsonWindow = WindowManager.GetWindow("window_load_json");
@@ -70,6 +71,7 @@ public class DataManager : MonoBehaviour
         loadJsonWindow.SetVisible(true);
     }
 
+    // Called when user select json file and click load button
     public void OnLoadJsonFile()
     {
         if (selectedJsonFile == null)
@@ -77,6 +79,7 @@ public class DataManager : MonoBehaviour
             Popup.Show("JSON파일을 선택해주세요.");
             return;
         }
+        NodeManager.DestroyAll();
         NodeManager.InitiateFromFile(selectedJsonFile.FullName);
         RenderNodeButtons();
         saveFileName.text = Path.GetFileNameWithoutExtension(selectedJsonFile.FullName);
@@ -87,11 +90,45 @@ public class DataManager : MonoBehaviour
         selectedJsonFile = null;
     }
 
+    public void LoadDataFromDB()
+    {
+        // Destroy existing nodes
+        NodeManager.DestroyAll();
+
+        // Load nodes from database
+        DBManager dBManager = GameObject.Find("DBManager").GetComponent<DBManager>();
+        foreach (string sd in dBManager.SensorLoad(true).Split('\n'))
+        {
+            string sensorData = sd.Trim();
+            if (sensorData.Length < 3) continue;
+            string[] parts = sensorData.Split(';');
+            if (parts.Length < 2)
+            {
+                Debug.Log("Wrong sensor data string : " + sensorData);
+                continue;
+            }
+            string id = parts[0];
+            // 지금은 화재센서밖에 없으니까 그냥 하드코딩 해 놨는데, 일단은 typeNumber를 받아 둔다.
+            int typeNumber = int.Parse(parts[1]);
+            Type type = typeof(NodeFireSensor);
+
+            NodeManager.AddNode(id, type);
+        }
+
+        foreach (string ar in dBManager.AreaLoad(true).Split('\n'))
+        {
+            string areaID = ar.Trim();
+            if (areaID.Length < 2) continue;
+            NodeManager.AddNode(areaID, typeof(NodeArea));
+        }
+        RenderNodeButtons();
+    }
+
     private void RenderNodeButtons()
     {
         // Remove existing buttons
-        foreach (GameObject button in nodeButtons) GameObject.Destroy(button);
-        nodeButtons.Clear();
+        foreach (GameObject button in sensorButtons.Values) GameObject.Destroy(button);
+        sensorButtons.Clear();
 
         // 노드 로드하여 윈도우에 추가하는 부분
         // Initialize sensor buttons and create existing node
@@ -138,7 +175,7 @@ public class DataManager : MonoBehaviour
         string fileName = saveFileName.text;
         if (fileName == null || fileName.Length < 1)
         {
-            Popup.Show("파일 이름을 입력하지 않았거나, 너무 짧습니다.");
+            Popup.Show("파일 이름을 입력하지 않았습니다.");
             return;
         }
         string path = Application.dataPath + "/Resources/scenario_jsons/" + fileName + ".json";
@@ -156,6 +193,7 @@ public class DataManager : MonoBehaviour
         {
             Debug.Log(physicalID);
             NodeManager nm = NodeManager.GetNodeByID(physicalID);
+            if(nm==null)continue;
             Color color;
             switch (nm.State)
             {
@@ -173,21 +211,55 @@ public class DataManager : MonoBehaviour
         }
 
         // Update json file
-        string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
-        File.WriteAllText(path, NodeManager.Jsonfy());
+        // string path = Application.dataPath + "/Resources/scenario_jsons/NEW.json";
+        // File.WriteAllText(path, NodeManager.Jsonfy());
+    }
+
+    public void OnSensorManuallyCreate(InputField text)
+    {
+        string data = text.text;
+        string[] parsed = data.Split(';');
+        if (parsed.Length < 2) return;
+        string id = parsed[0].Trim();
+        int typeNumber = int.Parse(parsed[1].Trim());
+        Type type;
+        switch (typeNumber)
+        {
+            case 21:
+            case 22:
+            case 23:
+                type = typeof(NodeFireSensor);
+                break;
+            default:
+                type = typeof(NodeArea);
+                break;
+        }
+        if (NodeManager.AddNode(id, type))
+        {
+            Popup.Show("노드를 새로 추가하였습니다.");
+        }
+        else
+        {
+            Popup.Show("문제가 발생하여 노드를 새로 추가하지 못했습니다.");
+        }
+        RenderNodeButtons();
     }
 
     void Start()
     {
+        // Hide prefab
         jsonButton = GameObject.Find("button_json_file").gameObject;
         jsonButton.SetActive(false);
 
         sensorButton = GameObject.Find("button_sensor_ID").gameObject;
         sensorButton.SetActive(false);
 
+        // Register input feild
         saveFileName = GameObject.Find("input_save_file").GetComponent<InputField>();
-
         NodeManager.OnNodeStateChanged += OnSensorStateUpdated;
+
+        LoadDataFromDB();
+
         UpdateList();
     }
 }

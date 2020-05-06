@@ -112,6 +112,7 @@ public class MouseManager : MonoBehaviour
                 if (MouseState.IsLeftClicked)
                 {
                     GameObject target = MouseState.Target;
+                    Debug.Log(target);
                     if (target != null)
                     {
                         NodeManager nodeManager = NodeManager.GetNodeByID(target.name);
@@ -231,11 +232,11 @@ public class MouseManager : MonoBehaviour
         }
 
         // Tracking
-        if (dest.y > 0)
-        {
-            // If near enough, stop.
-            if ((cameraTransform.position - dest).magnitude < 10) dest.y = -1;
-            else cameraTransform.position = Vector3.SmoothDamp(cameraTransform.position, dest, ref velocity, 0.3f);
-        }
+        // if (dest.y > 0)
+        // {
+        //     // If near enough, stop.
+        //     if ((cameraTransform.position - dest).magnitude < 10) dest.y = -1;
+        //     else cameraTransform.position = Vector3.SmoothDamp(cameraTransform.position, dest, ref velocity, 0.3f);
+        // }
     }
 }

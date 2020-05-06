@@ -10,10 +10,8 @@ using System;
 class DBClass
 {
     public string ipAddress = "";
-
     public string db_id = "";
     public string db_pw = "";
-
     public string db_name = "";
     public string sensor_table = "";//'tb_sensornode'
     //public string sensor_value_table = "tb_sensingvalue";
@@ -146,8 +144,26 @@ public class DBManager : MonoBehaviour
         }
     }*/
 
-    public string SensorLoad()// 화재센서 & 방향지시등센서 
+    public string SensorLoad(bool test = false)// 화재센서 & 방향지시등센서 
     {
+        // Test mode setting. if true, just return hardcoded string
+        if (test)
+        {
+            return @"
+            00010000;21
+            00010000;22
+            00010000;23
+            00020000;21
+            00020000;22
+            00030000;23
+            00030000;21
+            00030000;22
+            00020000;23
+            00040000;27
+            00050000;27
+            00060000;27";
+        }
+
         string temp = "";
         string q = "" +
             "SELECT tb_sensornode_node_address, sensor_ids" +
@@ -162,35 +178,30 @@ public class DBManager : MonoBehaviour
             temp = RdrToStr(rdr);
             Debug.Log("센서 data : " + temp);
             rdr.Close();
-            
+
         }
-        /*
-            nodeID; sensor_type
-            00010000;21
-            00010000;22
-            00010000;23
-            00020000;21
-            00020000;22
-            00030000;23
-            00030000;21
-            00030000;22
-            00020000;23
-            00040000;27
-            00050000;27
-            00060000;27
-         */
 
         return temp;
     }
 
-    
-    public string AreaLoad()
+
+    public string AreaLoad(bool test = false)
     {
+        // Test mode setting. if true, just return hardcoded string
+        if (test)
+        {
+            return @"
+         room1
+         room2
+         room3
+         ";
+        }
+
         string temp = "";
         string q = "" +
             "SELECT area_id" +
             " FROM " + db.area_table + ";";
-        
+
         Debug.Log(q);
         if (conn.Ping())
         {
@@ -200,11 +211,6 @@ public class DBManager : MonoBehaviour
             Debug.Log("area data : " + temp);
             rdr.Close();
         }
-        /*
-         room1
-         room2
-         room3
-         */
         return temp;
     }
 

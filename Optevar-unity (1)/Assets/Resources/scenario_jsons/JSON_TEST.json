@@ -1,0 +1,125 @@
+{
+  "$type": "System.Collections.Generic.List`1[[NodeManager, Assembly-CSharp]], mscorlib",
+  "$values": [
+    {
+      "$type": "NodeFireSensor, Assembly-CSharp",
+      "PhysicalID": "00010000",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          8.156998,
+          15.765,
+          -15.55376
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeFireSensor, Assembly-CSharp",
+      "PhysicalID": "00020000",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "State": 0
+    },
+    {
+      "$type": "NodeFireSensor, Assembly-CSharp",
+      "PhysicalID": "00030000",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "State": 0
+    },
+    {
+      "$type": "NodeFireSensor, Assembly-CSharp",
+      "PhysicalID": "00040000",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "State": 0
+    },
+    {
+      "$type": "NodeFireSensor, Assembly-CSharp",
+      "PhysicalID": "00050000",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          9.557812,
+          15.765,
+          -10.7874737
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeFireSensor, Assembly-CSharp",
+      "PhysicalID": "00060000",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          20.4288177,
+          15.765,
+          -18.7178173
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeArea, Assembly-CSharp",
+      "Velocity": 4.0,
+      "PhysicalID": "room1",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          2.88574982,
+          15.765,
+          25.2401772
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeArea, Assembly-CSharp",
+      "Velocity": 4.0,
+      "PhysicalID": "room2",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          12.9339905,
+          15.765,
+          14.0604134
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeArea, Assembly-CSharp",
+      "Velocity": 4.0,
+      "PhysicalID": "room3",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -13.0304813,
+          15.765,
+          -19.2978363
+        ]
+      },
+      "State": 2
+    }
+  ]
+}

@@ -68,6 +68,10 @@ abstract public class NodeManager
             if (nodes.ContainsKey(value)) throw new Exception("Node " + value + " already exists");
             else nodes.Add(value, this);
             _physicalID = value;
+            if (gameObject != null)
+            {
+                gameObject.name = PhysicalID;
+            }
         }
     }
 
@@ -205,6 +209,11 @@ abstract public class NodeManager
         initiatable = false;
     }
 
+    public static void Instantiate()
+    {
+
+    }
+
     public static void InitiateFromFile(string path)
     {
         string nodeString = File.ReadAllText(path);
@@ -263,6 +272,7 @@ abstract public class NodeManager
     public static void ResetAll()
     {
         // ???...구현 왜이렇게 했더라?
+        // 아마도 리스트 수정이 있을 경우를 대비한 듯.
         string[] keys = new string[nodes.Count];
         nodes.Keys.CopyTo(keys, 0);
         foreach (string key in keys) nodes[key].Reset();
@@ -293,8 +303,22 @@ abstract public class NodeManager
     public void Destroy()
     {
         nodes.Remove(PhysicalID);
+        // 이거 내가 왜 주석처리했더라?
         // OnNodeStateChanged = null;
         GameObject.Destroy(gameObject);
+    }
+
+    public static bool AddNode(string id, Type type, NodeState state = NodeState.STATE_UNINITIALIZED)
+    {
+        if (nodes.ContainsKey(id)) return false;
+
+        initiatable = true;
+        NodeManager newNode = (NodeManager)Activator.CreateInstance(type);
+        newNode.PhysicalID = id;
+        newNode.Position = new Vector3(0, 0, 0);
+        newNode.State = state;
+        initiatable = false;
+        return true;
     }
 
     //===[ Function for test ]===========================================================================

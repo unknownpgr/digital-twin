@@ -97,6 +97,12 @@ public class ScenarioManager : MonoBehaviour
     {
         // ToDo : Init sensor value
         // Such as disaster mode setting of some sensors or area number of areas
+
+        // ToDo : Insert proper topic and message
+        mQTTManager.Publish("", ""); // Initialize siren
+        mQTTManager.Publish("", ""); // Initialzie direction sensor
+
+        // Close mqttManager
         mQTTManager?.Close();
     }
 
