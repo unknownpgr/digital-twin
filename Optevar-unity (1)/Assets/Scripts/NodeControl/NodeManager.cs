@@ -63,16 +63,7 @@ abstract public class NodeManager
     public string PhysicalID
     {
         get => _physicalID;
-        set
-        {
-            if (nodes.ContainsKey(value)) throw new Exception("Node " + value + " already exists");
-            else nodes.Add(value, this);
-            _physicalID = value;
-            if (gameObject != null)
-            {
-                gameObject.name = PhysicalID;
-            }
-        }
+        set { if (initiatable) { _physicalID = value; } else throw new Exception("You cannot edit physicalID of a node."); }
     }
 
     // Name of node type. default is class name. It is just for display.
@@ -84,10 +75,12 @@ abstract public class NodeManager
     // Position of node.
     // This can be serialized via 'position' wrapper variable.
     [JsonIgnore]
+    private Vector3 _position;
+    [JsonIgnore]
     public Vector3 Position
     {
-        get { return gameObject.transform.position; }
-        set { gameObject.transform.position = value; }
+        get { return _position; }
+        set { _position = value; if (gameObject != null) gameObject.transform.position = value; }
     }
 
     // Wrapper variable for serialize Position(Vector3)
@@ -144,11 +137,12 @@ abstract public class NodeManager
     //===[ Callbacks ]===========================================================================
 
     public delegate void Del();
+
     public static Del OnNodeStateChanged;
 
     private void onNodeStateChanged()
     {
-        Debug.Log("NodeStateChanged");
+        if (gameObject == null) return;
 
         // Do not modify 'Hide' or 'State' in here. It would occur recursive function call stack overflow.
         hide = state != NodeState.STATE_INITIALIZED;    // Initialize 'hide' when node is not initialized.
@@ -172,8 +166,23 @@ abstract public class NodeManager
 
     public NodeManager()
     {
+        // Called before deserialization
+
         // Check if initializable.
         if (!initiatable) throw new Exception("Cannot initialize the NodeManager(" + GetType() + ") with the new keyword.");
+    }
+
+    [OnDeserialized]
+    internal void OnDeserializedMethod(StreamingContext context)
+    {
+        InternalInit();
+    }
+
+    // 이 함수는 노드 생성이 완료되었을 경우 단 한 번 호출된다.
+    private void InternalInit()
+    {
+        if (nodes.ContainsKey(PhysicalID)) throw new Exception("Node " + PhysicalID + " already exists");
+        else nodes.Add(PhysicalID, this);
 
         // Load prefab from prefabName
         GameObject prefab = (GameObject)Resources.Load("Prefabs/" + prefabName);
@@ -182,19 +191,17 @@ abstract public class NodeManager
         // Attach gameObject to nodeManager
         if (gameObject != null) GameObject.Destroy(gameObject);
         gameObject = (GameObject)GameObject.Instantiate(prefab);
+        gameObject.name = PhysicalID;
+        gameObject.transform.position = _position;
 
         // Set visibility
         hide = state != NodeState.STATE_INITIALIZED;
         gameObject.SetActive(!hide);
-    }
 
-    // ToDo Initialize method 새로 만들기 - 너무 복잡해졌다.
-    [OnDeserialized]
-    internal void OnDeserializedMethod(StreamingContext context)
-    {
         // Rename gameObject
-        gameObject.name = PhysicalID;
         onNodeStateChanged();
+
+        // Call custom init method
         Init();
     }
 
@@ -203,8 +210,9 @@ abstract public class NodeManager
     // You only can make any instance of NodeManager's subclass by using this method.
     private static bool initiatable = false; // It is used to prevent nodemanager is created via new keyword.
 
-    public static void Instantiate(string json)
+    public static void InitiateFromString(string json)
     {
+        DestroyAll();
         initiatable = true;
         JsonConvert.DeserializeObject(json, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
         initiatable = false;
@@ -213,8 +221,7 @@ abstract public class NodeManager
     public static void InitiateFromFile(string path)
     {
         string nodeString = File.ReadAllText(path);
-        NodeManager.DestroyAll();
-        NodeManager.Instantiate(nodeString);
+        InitiateFromString(nodeString);
     }
 
     public static string Jsonfy()
@@ -264,7 +271,7 @@ abstract public class NodeManager
         return list;
     }
 
-    // Destroy every node and its properties.
+    // Reset every node
     public static void ResetAll()
     {
         // ???...구현 왜이렇게 했더라?
@@ -274,6 +281,7 @@ abstract public class NodeManager
         foreach (string key in keys) nodes[key].Reset();
     }
 
+    // Destroy every node and its properties.
     public static void DestroyAll()
     {
         string[] keys = nodes.Keys.ToArray();
@@ -309,16 +317,19 @@ abstract public class NodeManager
         if (nodes.ContainsKey(id)) return false;
 
         initiatable = true;
+
         NodeManager newNode = (NodeManager)Activator.CreateInstance(type);
         newNode.PhysicalID = id;
         newNode.Position = new Vector3(0, 0, 0);
         newNode.State = state;
+        newNode.InternalInit();
+
         initiatable = false;
-        // newNode.OnDeserializedMethod();
         return true;
     }
 
     //===[ Function for test ]===========================================================================
+
     public static string __TEST__GetTestNodes(int n)
     {
         initiatable = true;

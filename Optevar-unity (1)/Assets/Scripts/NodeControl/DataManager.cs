@@ -15,17 +15,15 @@ public class DataManager : MonoBehaviour
     private static GameObject jsonButton;
     private GameObject sensorButton;
 
-
     private InputField saveFileName;
     public static void UpdateList()
     {
         string root = Application.dataPath + "/Resources/scenario_jsons";
-        Thread t = new Thread(() =>
+        new Thread(() =>
         {
             DirectoryInfo folder = new DirectoryInfo(root);
             foreach (var file in folder.GetFiles("*.json")) jsonFileList.Add(file);
-        });
-        t.Start();
+        }).Start();
     }
     private static FileInfo selectedJsonFile;
 
@@ -179,8 +177,7 @@ public class DataManager : MonoBehaviour
         }
         string path = Application.dataPath + "/Resources/scenario_jsons/" + fileName + ".json";
         string data = NodeManager.Jsonfy();
-        Thread t = new Thread(() => File.WriteAllText(path, data));
-        t.Start();
+        new Thread(() => File.WriteAllText(path, data)).Start();
         Popup.Show("저장되었습니다.");
         WindowManager.GetWindow("window_save_json").SetVisible(false);
         UpdateList();
@@ -220,7 +217,7 @@ public class DataManager : MonoBehaviour
         if (parsed.Length < 2) return;
         string id = parsed[0].Trim();
         int typeNumber = int.Parse(parsed[1].Trim());
-        Type type;
+        Type type = null;
         switch (typeNumber)
         {
             case 21:
@@ -228,30 +225,33 @@ public class DataManager : MonoBehaviour
             case 23:
                 type = typeof(NodeFireSensor);
                 break;
-            case 50:
-                type = typeof(NodeEarthquakeSensor);
-                break;
-            case 51:
-                type = typeof(NodeFloodSensor);
-                break;
-            case 52:
-                type = typeof(NodeExit);
-                break;
+
             case 27:
                 type = typeof(NodeDirection);
                 break;
-            default:
+
+            case 50:
+                type = typeof(NodeEarthquakeSensor);
+                break;
+
+            case 51:
+                type = typeof(NodeFloodSensor);
+                break;
+
+            case 52:
+                type = typeof(NodeExit);
+                break;
+
+            case 53:
                 type = typeof(NodeArea);
                 break;
+
+            default:
+                Popup.Show("Unregistered node type " + typeNumber);
+                break;
         }
-        if (NodeManager.AddNode(id, type))
-        {
-            Popup.Show("노드를 새로 추가하였습니다.");
-        }
-        else
-        {
-            Popup.Show("문제가 발생하여 노드를 새로 추가하지 못했습니다.");
-        }
+        if (type != null && NodeManager.AddNode(id, type)) Popup.Show("노드를 새로 추가하였습니다.");
+        else Popup.Show("문제가 발생하여 노드를 새로 추가하지 못했습니다.");
         RenderNodeButtons();
     }
 

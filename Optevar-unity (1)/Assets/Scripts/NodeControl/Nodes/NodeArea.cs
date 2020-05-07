@@ -9,6 +9,8 @@ public class NodeArea : NodeManager
 
     public override string DisplayName { get => "대피자 구역 " + PhysicalID; }
 
+    private static Vector3 HUMANOID_DISTANCE = new Vector3(1.5f, 0, 0);
+
     // Do not directly access here.
     private int num = 0;
 
@@ -30,7 +32,7 @@ public class NodeArea : NodeManager
                 humanoidList[i].transform.localScale = Vector3.one;
             }
             humanoidList[visibleNumber].SetActive(value % 10 > 0);
-            humanoidList[visibleNumber].transform.localScale = Vector3.one * (value%10 > 5 ? 1 : .75f);
+            humanoidList[visibleNumber].transform.localScale = Vector3.one * (value % 10 > 5 ? 1 : .75f);
         }
     }
 
@@ -47,14 +49,14 @@ public class NodeArea : NodeManager
         textMesh = gameObject.GetComponent<TextMesh>();
 
         humanoidPrefab = (GameObject)Resources.Load("Prefabs/humanoid2D");
-        Vector3 distance = new Vector3(1.5f, 0, 0);
-        Vector3 offset = distance;
+        Vector3 offset = HUMANOID_DISTANCE;
         Vector3 origin = gameObject.transform.position;
         for (int i = 0; i < humanoidList.Length; i++)
         {
             humanoidList[i] = (GameObject)GameObject.Instantiate(humanoidPrefab);
+
             humanoidList[i].transform.position = origin + offset;
-            offset += distance;
+            offset += HUMANOID_DISTANCE;
         }
 
         Num = 0;

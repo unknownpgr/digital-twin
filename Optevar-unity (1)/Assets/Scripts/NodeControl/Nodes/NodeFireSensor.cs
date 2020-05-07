@@ -37,6 +37,9 @@ public class NodeFireSensor : NodeManager
         }
     }
 
+    // ToDo : Connect it with window
+    public float ValueTemp, ValueFire, ValueSmoke;
+
     // 3. 다음으로 구현해야 하는 것은 Init 함수이다. 이 역시 필수적으로 구현해야만 한다.(abstract)
     // Init함수는 constructor와 같은 역할을 한다고 보면 된다.
     // NodeManager는 Factory design pattern을 사용하므로 new keyword로 생성할 수 없다.
@@ -48,7 +51,7 @@ public class NodeFireSensor : NodeManager
         navObstacle = gameObject.GetComponent<UnityEngine.AI.NavMeshObstacle>();
         if (material == null) throw new System.Exception("Material is null");
         if (navObstacle == null) throw new System.Exception("NavObstacle is null");
-        
+
         gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
     }
 }

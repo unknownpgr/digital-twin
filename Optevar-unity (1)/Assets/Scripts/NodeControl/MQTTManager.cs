@@ -34,7 +34,7 @@ public class MQTTManager : MonoBehaviour
         [JsonProperty]
         private float value = 0;
         [JsonProperty]
-        private int sensorType = 0;
+        public int sensorType = 0;
         [JsonProperty]
         private bool isDisaster = false;
         [JsonProperty]
@@ -56,7 +56,7 @@ public class MQTTManager : MonoBehaviour
             if (data.nodeId == null || data.nodeId == "")
             {
                 data.PhysicalID = data.areaId;
-                data.sensorType = 100; // NodeArea
+                data.sensorType = 53; // NodeArea
             }
             else data.PhysicalID = data.nodeId;
             if (data.PhysicalID == null || data.PhysicalID == "") throw new Exception("MQTTMsgData without physical ID.");
@@ -96,55 +96,6 @@ public class MQTTManager : MonoBehaviour
         }
     }
 
-    private class Dispatcher : MonoBehaviour
-    {
-        /*
-        Dispatcher class for multithreading environment.
-        Most UnityEngine object does not works on non-main thread.
-        Methods can be invoked in main thread via this class.
-        This class is especially designed to deal with MQTT receive event.
-        */
-        private static Dispatcher singleTon;
-        private static List<Del> tasks = new List<Del>();
-        private static List<MQTTMsgData> parameters = new List<MQTTMsgData>();
-        private static GameObject dispatcherObject;
-
-        public static void Init()
-        {
-            if ((singleTon == null) != (dispatcherObject == null)) throw new Exception("The nullity of the singleton and the gameobject are different.");
-            if (dispatcherObject == null)
-            {
-                dispatcherObject = new GameObject();
-                singleTon = dispatcherObject.AddComponent<Dispatcher>();
-            }
-        }
-
-        public static void Invoke(Del action, MQTTMsgData param)
-        {
-            if (action == null) return;
-            lock (tasks)
-            {
-                tasks.Add(action);
-                parameters.Add(param);
-            }
-        }
-
-        private void Update()
-        {
-            lock (tasks)
-            {
-                if (tasks.Count != parameters.Count) throw new Exception("The number of the tasks and the parameters unmatches.");
-                for (int i = 0; i < tasks.Count; i++)
-                {
-                    try { tasks[i](parameters[i]); }
-                    catch (Exception e) { Debug.Log(e); }
-                }
-                tasks.Clear();
-                parameters.Clear();
-            }
-        }
-    }
-
     private MqttClient client;
     private MQTTClass mqttConf;
     private JsonParser jsonParser = new JsonParser();
@@ -158,7 +109,7 @@ public class MQTTManager : MonoBehaviour
     public void Init(string configuration = "mqttconf")
     {
         // Initialzie dispatcher. Must be called in main therad because it uses Unity Engine.
-        Dispatcher.Init();
+        // Dispatcher.Init();
 
         // Do blocking tasks in thread.
         mqttConfPath = Application.dataPath + "/Resources/scenario_jsons/mqttconf.json";
@@ -175,64 +126,51 @@ public class MQTTManager : MonoBehaviour
         mqttConf.clientId = Guid.NewGuid().ToString();//random string생성해 clientId입력
         Debug.Log("Connecting ... " + mqttConf.brokerAddr + ", " + mqttConf.clientId);
         Connect();
-
-        // Register event listener
-        client.MqttMsgPublishReceived += OnMQTTMsgReceived;
-        client.ConnectionClosed += OnConnectionClosed;
-
-        // Setting - I don't know what exactly it does.
-        byte[] qosLevels = { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE };
-        foreach (var t in mqttConf.topic)
-        {
-            client.Subscribe(new string[] { t }, qosLevels);
-        }
     }
 
     public void Publish(string topic, string msg)
     {
-        client.Publish(topic, Encoding.UTF8.GetBytes(msg), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+        new Thread(() => client.Publish(topic, Encoding.UTF8.GetBytes(msg), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false)).Start();
     }
 
-    public void PubDirectionOperation(string nodeId, string dir)//{"nodeId":"4","direction":"down"}
-    {
-        string json = "{'\"'nodeId\":\"{" + nodeId + "}\",\"direction\":\"{" + dir + "}\"}";
-        // DirectionOperation d = new DirectionOperation();
-        // d.nodeId = nodeId;
-        // d.direction = dir;
-        // string jd = JsonMapper.ToJson(d);
-        // Publish(MQTTConf.topic[3], jd);
-    }
-
-    public void PubAreaUpdate(string id)
-    {
-        string msg = "{'areaId':'" + id + "'}";
-        Publish(mqttConf.topic[5], msg);
-    }
     private void Connect()
     {
-        client = new MqttClient(mqttConf.brokerAddr);
-        try
+        new Thread(() =>
         {
-            client.Connect(mqttConf.clientId, mqttConf.userName, mqttConf.password, false, 0);
-            Debug.Log("Connected");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Connnection error: " + e);
-        }
+            client = new MqttClient(mqttConf.brokerAddr);
+            try
+            {
+                client.Connect(mqttConf.clientId, mqttConf.userName, mqttConf.password, false, 0);
+
+                // Register event listener
+                client.MqttMsgPublishReceived += OnMQTTMsgReceived;
+                client.ConnectionClosed += OnConnectionClosed;
+
+                // Setting - I don't know what exactly it does.
+                byte[] qosLevels = { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE };
+                foreach (var t in mqttConf.topic)
+                {
+                    client.Subscribe(new string[] { t }, qosLevels);
+                }
+
+                Dispatcher.Invoke(() => { Popup.Show("Connected to MQTT server."); });
+            }
+            catch (Exception e)
+            {
+                Dispatcher.Invoke(() => { Debug.Log("Error occurred : " + e); });
+            }
+        }).Start();
     }
 
     private void OnConnectionClosed(object sender, EventArgs e)
     {
         client.Connect(mqttConf.clientId);
-        Debug.Log("Connection closed...");
     }
 
     private void OnMQTTMsgReceived(object sender, MqttMsgPublishEventArgs e)
     {
         string msgStr = System.Text.Encoding.UTF8.GetString(e.Message);
         string topic = e.Topic;
-        Debug.Log("Received msg from " + topic + " : " + msgStr);
 
         if (topic == mqttConf.topic[0] ||   //mws/Notification/Periodic/SensingValueEvent
             topic == mqttConf.topic[1] ||   //mws/Notification/Periodic/DisasterEvent
@@ -240,7 +178,7 @@ public class MQTTManager : MonoBehaviour
             topic == mqttConf.topic[3])     //mws/Set/Direction
         {
             MQTTMsgData data = MQTTMsgData.GetMQTTMsgData(msgStr, topic == mqttConf.topic[1]);
-            Dispatcher.Invoke(OnNodeUpdated, data);
+            Dispatcher.Invoke(() => OnNodeUpdated?.Invoke(data));
         }
         else
         {
@@ -253,5 +191,27 @@ public class MQTTManager : MonoBehaviour
     {
         if (client.IsConnected)
             client.Disconnect();
+    }
+
+    // ===[ Specialized publish method ]===========================
+
+    public void PubDirectionOperation(string physicalID, string dir)
+    {
+        // e.g. {"nodeId":"4", "direction":"down"}
+        string json = "{\"nodeId\":\"" + physicalID + "\",\"direction\":\"" + dir + "\"}";
+        Publish(mqttConf.topic[3], json);
+    }
+
+    public void PubAreaUpdate(string id)
+    {
+        string msg = "{'areaId':'" + id + "'}";
+        Publish(mqttConf.topic[5], msg);
+    }
+
+    public void PubSiren(bool siren)
+    {
+        //ToDo : NodeID for siren
+        string json = "{\"nodeId\":\"000000\",\"sound\":\"" + (siren ? "on" : "off") + "\"}";
+        Publish("mws/Set/Sound", json);
     }
 }

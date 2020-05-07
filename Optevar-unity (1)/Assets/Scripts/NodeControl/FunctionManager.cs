@@ -176,7 +176,6 @@ public class FunctionManager : MonoBehaviour
         sensorWindow.SetVisible(true);
     }
 
-
     public void OnCreateArea()
     {
         WindowManager areaWindow = WindowManager.GetWindow("window_area");
@@ -266,7 +265,6 @@ public class FunctionManager : MonoBehaviour
 
     public void OnEndSimulation()
     {
-
         /*
         1. 모니터링 모드에 종료 버튼 추가 : 종료 시 DT의 전체 초기화 & 방향지시등, 가청경보기 off 신호 전달(MQTT)
          */

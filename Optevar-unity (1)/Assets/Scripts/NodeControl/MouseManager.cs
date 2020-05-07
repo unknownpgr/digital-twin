@@ -112,7 +112,6 @@ public class MouseManager : MonoBehaviour
                 if (MouseState.IsLeftClicked)
                 {
                     GameObject target = MouseState.Target;
-                    Debug.Log(target);
                     if (target != null)
                     {
                         NodeManager nodeManager = NodeManager.GetNodeByID(target.name);

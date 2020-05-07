@@ -17,7 +17,7 @@ public class ScenarioManager : MonoBehaviour
     // Current state.
     // true = at least one sensor is in disaster mode.
     // false = no sensor is in disaster mode.
-    private bool isDisaster = false;
+    private bool currentDisasterState = false;
 
     //Self data
     NavMeshPath p;
@@ -26,15 +26,8 @@ public class ScenarioManager : MonoBehaviour
     public bool isSensorUpdated;
     public bool isAreaChanged;
     public bool isSimulating = false;
-    bool isDanger = false;
 
     Camera subCamera;
-    /*
-    GameObject content;
-    Text time_text;
-    Image image_ob1;
-    */
-    AudioSource musicPlayer;
 
     // (New) Elements of path window UI
     GameObject defaultPathPanel;
@@ -81,18 +74,14 @@ public class ScenarioManager : MonoBehaviour
         // Register callback listener
         mQTTManager.OnNodeUpdated = OnNodeUpdated;
 
-        isDanger = false;
-        musicPlayer = gameObject.GetComponent<AudioSource>();
-
         // (New) Get exsisting path panel and transform of parent
         defaultPathPanel = GameObject.Find("panel_path");
-        content = defaultPathPanel.transform.parent; // FunctionManager.Find("Content");
+        content = GameObject.Find("window_path_content").transform;
 
         // (New) Get text of disaster warning UI
         warningBox = FunctionManager.Find("warning_box").gameObject;
         warningIcon = warningBox.transform.GetChild(0).GetComponent<Image>();
         disatsterName = warningBox.transform.GetChild(1).GetComponent<Text>();
-
 
         // (New) Get object of end simulation button
         endSimulBtn = FunctionManager.Find("button_end_simulation").gameObject;
@@ -106,15 +95,23 @@ public class ScenarioManager : MonoBehaviour
     {
         // Reset path
         grid.ResetFinalPaths();
+        grid.InitWeight();
         grid.ViewMinPath = false;
+        grid.InitLiner();
+
+        // Clear simulationManager
         simulationManager.EvacuatersList.Clear();
+
+        // Reset area number
+        foreach (NodeArea nodeArea in NodeManager.GetNodesByType<NodeArea>()) nodeArea.Num = 0;
+
+        SetSiren(false);
 
         // ToDo : Init sensor value
         // Such as disaster mode setting of some sensors or area number of areas
 
-        // ToDo : Insert proper topic and message
-        mQTTManager.Publish("", ""); // Initialize siren
-        mQTTManager.Publish("", ""); // Initialzie direction sensor
+        // Initialize direction sensor
+        foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>()) mQTTManager.PubDirectionOperation(node.PhysicalID, "null");
 
         // Close mqttManager
         mQTTManager?.Close();
@@ -122,45 +119,74 @@ public class ScenarioManager : MonoBehaviour
 
     void OnNodeUpdated(MQTTManager.MQTTMsgData data)
     {
-        Debug.Log(data);
-
-        // Check disaster.
         // false = every node is not in disaster mode
         // true = at least one node is in disaster mode
-        bool newDisasterState = false;
+        bool newDisasterState = false;  // Check disaster.
+        bool isAreaChanged = false;     // Check if area number has been changed.
 
-        // Check if area number has been changed.
-        bool isAreaChanged = false;
+        // Ignore wrong MQTT data
+        if (NodeManager.GetNodeByID(data.PhysicalID) == null)
+        {
+            Debug.Log("Unknown node : " + data.PhysicalID);
+            return;
+        }
+
+        NodeManager node = NodeManager.GetNodeByID(data.PhysicalID);
 
         // Apply changes on node and check current disaster state.
-        if (data.NodeType == typeof(NodeFireSensor))
+        if (node is NodeFireSensor)
         {
-            NodeFireSensor node = (NodeFireSensor)NodeManager.GetNodeByID(data.PhysicalID);
-            node.IsDisaster = data.IsDisaster;
+            NodeFireSensor nodeFire = (NodeFireSensor)node;
+            nodeFire.IsDisaster = data.IsDisaster;
+
+            switch (data.sensorType)
+            {
+                case 21:
+                    nodeFire.ValueTemp = data.Value;
+                    break;
+
+                case 22:
+                    nodeFire.ValueFire = data.Value;
+                    break;
+
+                case 23:
+                    nodeFire.ValueSmoke = data.Value;
+                    break;
+            }
+
             newDisasterState |= data.IsDisaster;
-            // (New) 재난 이름 설정하기
-            disatsterName.text = "화재 발생";
+            if (newDisasterState) disatsterName.text = "화재 발생";
         }
 
         // Check if number of people in area changed.
-        else if (data.NodeType == typeof(NodeArea))
+        else if (node is NodeArea)
         {
-            NodeArea node = (NodeArea)NodeManager.GetNodeByID(data.PhysicalID);
-            if (node.Num != data.Value)
+            NodeArea nodeArea = (NodeArea)node;
+            if (nodeArea.Num != data.Value)
             {
-                node.Num = (int)data.Value;
+                nodeArea.Num = (int)data.Value;
                 isAreaChanged = true;
             }
         }
 
-        // If state changed
-        if ((isDisaster != newDisasterState) | isAreaChanged)
+        // Set direction sensor
+        else if (node is NodeDirection)
         {
-            isDisaster = newDisasterState;
-            if (isDisaster)
+            NodeDirection nodeDirection = (NodeDirection)node;
+            nodeDirection.Direction = data.Direction;
+
+            // Do not change disaster state.
+            newDisasterState = currentDisasterState;
+        }
+
+        // If state changed
+        if ((currentDisasterState != newDisasterState) | isAreaChanged)
+        {
+            currentDisasterState = newDisasterState;
+            if (currentDisasterState)
             {
                 // Disaster is started, or the number of area changed.
-                Siren();
+                SetSiren(true);
                 WindowManager.GetWindow("window_path").SetVisible(true);
                 warningBox.SetActive(true);
                 endSimulBtn.SetActive(true);
@@ -171,11 +197,11 @@ public class ScenarioManager : MonoBehaviour
             else
             {
                 // Disaster has been finished.
+                // ToDo : Consider to put 'SetDefault()' here.
                 grid.InitWeight();
                 grid.ViewMinPath = false;
                 grid.InitLiner();
-                if (musicPlayer != null) musicPlayer.Stop();
-
+                SetSiren(false);
                 //mQTTManager.PubPeriod(360);
             }
         }
@@ -205,11 +231,13 @@ public class ScenarioManager : MonoBehaviour
         }
     }
 
-    void Siren()
+    private AudioSource sirenPlayer;
+    void SetSiren(bool play)
     {
-        //MusicPlayer.loop = true;
-        if (!musicPlayer.isPlaying)
-            musicPlayer.Play();
+        if (sirenPlayer == null) sirenPlayer = gameObject.GetComponent<AudioSource>();
+        if ((!sirenPlayer.isPlaying) && play) sirenPlayer.Play();
+        else if (sirenPlayer.isPlaying && !play) sirenPlayer.Stop();
+        mQTTManager.PubSiren(play);
     }
 
     IEnumerator InitSimulation()
@@ -220,9 +248,9 @@ public class ScenarioManager : MonoBehaviour
         // Init simulation manager
         simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
         simulationManager.SetGrid(grid);
+        simulationManager.EvacuatersList.Clear();
         grid.ResetFinalPaths();
         grid.ViewMinPath = false;
-        simulationManager.EvacuatersList.Clear();
 
         // Store paths
         foreach (NodeArea area in NodeManager.GetNodesByType<NodeArea>())
@@ -236,8 +264,6 @@ public class ScenarioManager : MonoBehaviour
             // for targets
             foreach (NodeExit exit in NodeManager.GetNodesByType<NodeExit>())
             {
-                Debug.Log(area.PhysicalID + "/" + exit.PhysicalID);
-
                 // Calculate path
                 List<Node3> path = new List<Node3>();
                 p = new NavMeshPath();
@@ -268,7 +294,6 @@ public class ScenarioManager : MonoBehaviour
         }
 
         // Now, path calculating finished.
-        Debug.Log(pathSize);
         simulationManager.InitSimParam(pathSize);
         pathImages.Clear();
         initEvacs = true;
@@ -296,7 +321,6 @@ public class ScenarioManager : MonoBehaviour
         screenShotTexture.Apply();
 
         screenShotData.scrshot = screenShotTexture;
-
         pathImages.Add(screenShotData);
 
         // If image is full
@@ -332,12 +356,8 @@ public class ScenarioManager : MonoBehaviour
                 evacTimeText.text = "예상 시간 : " + string.Format("{0:F2}", pathImages[r].time) + "(초)";
                 // evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
             }
-
-            // And show the panel
-            defaultPathPanel.SetActive(false);
         }
     }
-
 
     int GetTargetFloor(int startFloor, int[] dangerFloor, int floor)
     {
@@ -356,7 +376,7 @@ public class ScenarioManager : MonoBehaviour
         return -1;
     }
 
-    void SetDirectionSensor()//최적경로에 따른 대피유도신호로 바꾸기
+    void SetDirectionSensor() //최적경로에 따른 대피유도신호로 바꾸기
     {
         foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>())
         {
@@ -408,7 +428,7 @@ public class ScenarioManager : MonoBehaviour
         return ret;
     }
 
-    public IEnumerator SetTextOpacity()             
+    public IEnumerator SetTextOpacity()
     {
         warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
         disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
