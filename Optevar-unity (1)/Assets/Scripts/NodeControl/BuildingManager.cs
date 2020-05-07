@@ -37,14 +37,12 @@ public static class BuildingManager
     {
         void Start()
         {
-            Debug.Log("Coroutine bake");
             Invoke("BakeNavMesh", 0.1f);
         }
 
         // Bake NavMesh in runtime
         private void BakeNavMesh()
         {
-            Debug.Log("Start baking");
             NavMeshSurface surface = gameObject.AddComponent<NavMeshSurface>();
             NavMeshBuildSettings Setting = surface.GetBuildSettings();
             Setting.agentRadius = 0.22f;

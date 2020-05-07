@@ -42,7 +42,11 @@ public class ScenarioManager : MonoBehaviour
 
     // (New) Element of disaster warning UI
     GameObject warningBox;
+    Image warningIcon;
     Text disatsterName;
+
+    // (New) Game object of end simulation button
+    GameObject endSimulBtn;
 
     List<screenshot_attr> pathImages = new List<screenshot_attr>();
 
@@ -86,7 +90,12 @@ public class ScenarioManager : MonoBehaviour
 
         // (New) Get text of disaster warning UI
         warningBox = FunctionManager.Find("warning_box").gameObject;
+        warningIcon = warningBox.transform.GetChild(0).GetComponent<Image>();
         disatsterName = warningBox.transform.GetChild(1).GetComponent<Text>();
+
+
+        // (New) Get object of end simulation button
+        endSimulBtn = FunctionManager.Find("button_end_simulation").gameObject;
 
         // << BLOCKING TASK 3 >>
         simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
@@ -95,6 +104,11 @@ public class ScenarioManager : MonoBehaviour
 
     public void SetDefault()
     {
+        // Reset path
+        grid.ResetFinalPaths();
+        grid.ViewMinPath = false;
+        simulationManager.EvacuatersList.Clear();
+
         // ToDo : Init sensor value
         // Such as disaster mode setting of some sensors or area number of areas
 
@@ -146,10 +160,12 @@ public class ScenarioManager : MonoBehaviour
             if (isDisaster)
             {
                 // Disaster is started, or the number of area changed.
-                // (New) 대피 경로 window, warning box 활성화
+                Siren();
                 WindowManager.GetWindow("window_path").SetVisible(true);
                 warningBox.SetActive(true);
+                endSimulBtn.SetActive(true);
 
+                StartCoroutine(SetTextOpacity());
                 StartCoroutine(InitSimulation());
             }
             else
@@ -390,5 +406,23 @@ public class ScenarioManager : MonoBehaviour
             else ret = "left";
         }
         return ret;
+    }
+
+    public IEnumerator SetTextOpacity()             
+    {
+        warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+        disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+
+        yield return new WaitForSeconds(0.8f);
+        while (warningBox.activeSelf == true)       // isDisater == true
+        {
+            warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
+            disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
+            yield return new WaitForSeconds(0.6f);
+
+            warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+            disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+            yield return new WaitForSeconds(0.6f);
+        }
     }
 }

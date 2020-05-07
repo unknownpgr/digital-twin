@@ -6,10 +6,9 @@ public class NodeExit : NodeManager
 {
     protected override string prefabName { get => "ExitSign"; }
 
-    public override string DisplayName { get => "탈출구 " + PhysicalID; }
+    public override string DisplayName { get => "탈출구:" + PhysicalID; }
 
     protected override void Init()
     {
-
     }
 }

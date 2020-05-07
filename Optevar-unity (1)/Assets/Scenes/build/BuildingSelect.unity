@@ -484,7 +484,7 @@ MonoBehaviour:
   m_ChildAlignment: 1
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 333.8, y: 225.5}
+  m_CellSize: {x: 435.9, y: 294.6}
   m_Spacing: {x: 30, y: 30}
   m_Constraint: 0
   m_ConstraintCount: 2
@@ -921,8 +921,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 809.4, y: 502.6}
+  m_AnchoredPosition: {x: 0, y: 23.8}
+  m_SizeDelta: {x: 1291.4, y: 645.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1601169894
 MonoBehaviour:

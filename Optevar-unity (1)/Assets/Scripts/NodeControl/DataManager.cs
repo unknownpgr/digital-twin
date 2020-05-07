@@ -143,11 +143,10 @@ public class DataManager : MonoBehaviour
             NodeManager nm = NodeManager.GetNodeByID(physicalID);
             newButton = Instantiate(sensorButton);
             newButton.SetActive(true);
-
-            if (nm is NodeFireSensor) newButton.transform.SetParent(sensorPanel, false);
-            if (nm is NodeDirection) newButton.transform.SetParent(sensorPanel, false);
-            if (nm is NodeArea) newButton.transform.SetParent(areaPanel, false);
-            if (nm is NodeExit) newButton.transform.SetParent(exitPanel, false);
+            Transform panel = sensorPanel; // Default is sensorPanel
+            if (nm is NodeArea) panel = areaPanel;
+            if (nm is NodeExit) panel = exitPanel;
+            newButton.transform.SetParent(panel, false);
 
             newButton.transform.localPosition = Vector3.zero;
             newButton.transform.GetChild(0).GetComponent<Text>().text = nm.DisplayName;
@@ -191,9 +190,8 @@ public class DataManager : MonoBehaviour
     {
         foreach (string physicalID in sensorButtons.Keys)
         {
-            Debug.Log(physicalID);
             NodeManager nm = NodeManager.GetNodeByID(physicalID);
-            if(nm==null)continue;
+            if (nm == null) continue;
             Color color;
             switch (nm.State)
             {
@@ -229,6 +227,18 @@ public class DataManager : MonoBehaviour
             case 22:
             case 23:
                 type = typeof(NodeFireSensor);
+                break;
+            case 50:
+                type = typeof(NodeEarthquakeSensor);
+                break;
+            case 51:
+                type = typeof(NodeFloodSensor);
+                break;
+            case 52:
+                type = typeof(NodeExit);
+                break;
+            case 27:
+                type = typeof(NodeDirection);
                 break;
             default:
                 type = typeof(NodeArea);

@@ -188,6 +188,7 @@ abstract public class NodeManager
         gameObject.SetActive(!hide);
     }
 
+    // ToDo Initialize method 새로 만들기 - 너무 복잡해졌다.
     [OnDeserialized]
     internal void OnDeserializedMethod(StreamingContext context)
     {
@@ -207,11 +208,6 @@ abstract public class NodeManager
         initiatable = true;
         JsonConvert.DeserializeObject(json, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
         initiatable = false;
-    }
-
-    public static void Instantiate()
-    {
-
     }
 
     public static void InitiateFromFile(string path)
@@ -318,6 +314,7 @@ abstract public class NodeManager
         newNode.Position = new Vector3(0, 0, 0);
         newNode.State = state;
         initiatable = false;
+        // newNode.OnDeserializedMethod();
         return true;
     }
 

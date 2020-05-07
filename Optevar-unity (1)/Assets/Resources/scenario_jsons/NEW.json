@@ -2,31 +2,44 @@
   "$type": "System.Collections.Generic.List`1[[NodeManager, Assembly-CSharp]], mscorlib",
   "$values": [
     {
-      "$type": "NodeArea, Assembly-CSharp",
-      "Velocity": 4.0,
-      "PhysicalID": "room3",
+      "$type": "NodeDirection, Assembly-CSharp",
+      "PhysicalID": "directionSensor",
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          -13.8006668,
+          10.9909325,
           15.765,
-          -20.0667725
+          -19.6408844
         ]
       },
-      "State": 0
+      "State": 2
     },
     {
       "$type": "NodeExit, Assembly-CSharp",
-      "PhysicalID": "ID_TEST_1",
+      "PhysicalID": "ID_TEST_4",
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          -11.3681755,
+          -12.76577,
           15.765,
-          -17.1505
+          -19.4902134
         ]
       },
-      "State": 0
+      "State": 2
+    },
+    {
+      "$type": "NodeArea, Assembly-CSharp",
+      "Velocity": 4.0,
+      "PhysicalID": "ID_TEST_3",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          3.985283,
+          15.765,
+          -22.0003471
+        ]
+      },
+      "State": 2
     },
     {
       "$type": "NodeFireSensor, Assembly-CSharp",
@@ -42,44 +55,31 @@
       "State": 2
     },
     {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "ID_TEST_1",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          8.504326,
+          15.765,
+          14.5127983
+        ]
+      },
+      "State": 2
+    },
+    {
       "$type": "NodeArea, Assembly-CSharp",
       "Velocity": 4.0,
-      "PhysicalID": "ID_TEST_3",
+      "PhysicalID": "room3",
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          16.79126,
+          16.781971,
           15.765,
-          26.8041267
+          -9.863741
         ]
       },
-      "State": 0
-    },
-    {
-      "$type": "NodeExit, Assembly-CSharp",
-      "PhysicalID": "ID_TEST_4",
-      "position": {
-        "$type": "System.Single[], mscorlib",
-        "$values": [
-          -26.578167,
-          15.765,
-          -8.847622
-        ]
-      },
-      "State": 0
-    },
-    {
-      "$type": "NodeDirection, Assembly-CSharp",
-      "PhysicalID": "directionSensor",
-      "position": {
-        "$type": "System.Single[], mscorlib",
-        "$values": [
-          8.986355,
-          15.765,
-          27.4392166
-        ]
-      },
-      "State": 0
+      "State": 2
     }
   ]
 }

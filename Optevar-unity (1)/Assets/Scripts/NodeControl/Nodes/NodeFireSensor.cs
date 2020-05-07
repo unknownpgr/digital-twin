@@ -16,13 +16,14 @@ public class NodeFireSensor : NodeManager
 
     // 2. 다음으로는 이 Node가 버튼 등에 표시될 때 사용할 이름을 지정하는 것이다.
     // 이는 꼭 구현할 필요는 없다. 만약 이 부분을 구현하지 않으면, DisplayName은 클래스 이름이 된다.
-    public override string DisplayName { get => "화재 센서(Fire Sensor):" + PhysicalID; }
+    public override string DisplayName { get => "화재 센서:" + PhysicalID; }
 
     // 그 외의 변수는 필요에 따라 구현하면 되고, 자동으로 JSON에 반영된다.
     // public 변수는 기본적으로 반영이 된다. 반영이 안 되게 하고 싶으면 [JsonIgnore] 태그를 써 주면 된다.
     // private 변수는 [JsonProperty]라는 태그를 변수 위에 써 주면 반영이 된다.
     private UnityEngine.AI.NavMeshObstacle navObstacle;
     private Material material;
+    private Material nodeColor;
     private bool isDisaster = false;
     [JsonIgnore]
     public bool IsDisaster
@@ -47,5 +48,8 @@ public class NodeFireSensor : NodeManager
         navObstacle = gameObject.GetComponent<UnityEngine.AI.NavMeshObstacle>();
         if (material == null) throw new System.Exception("Material is null");
         if (navObstacle == null) throw new System.Exception("NavObstacle is null");
+        
+        gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
     }
 }
+
