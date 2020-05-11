@@ -13,10 +13,10 @@ class DBClass
     public string db_id = "";
     public string db_pw = "";
     public string db_name = "";
-    public string sensor_table = "";//'tb_sensornode'
+    public string sensor_table = "a";//'tb_sensornode'
     //public string sensor_value_table = "tb_sensingvalue";
-    public string area_table = "";
-    public string sensor_id_table = "";
+    public string area_table = "a";
+    public string sensor_id_table = "a";
     public string port = "";
 }
 
@@ -29,7 +29,7 @@ public class DBManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Init();
+        //Init();
     }
 
     // Update is called once per frame
@@ -38,15 +38,15 @@ public class DBManager : MonoBehaviour
 
     }
 
-    void Init()
+    public void Init()
     {
         DockerManager DM = new DockerManager();
         DM.RunDocker();
 
         db = jsonParser.Load<DBClass>("dbconf_temp");//dbcon.jsonf를 통해 load한다(이 파일 수정하기)
-        if (db != null)
+        if (db == null)
         {
-            //Debug.Log("읽어옴");
+            
         }
         string strConn = string.Format("server={0};port={1};uid={2};pwd={3};database={4};charset=utf8;",
                                db.ipAddress, db.port, db.db_id, db.db_pw, db.db_name);//연결형식
@@ -143,7 +143,27 @@ public class DBManager : MonoBehaviour
             
         }
     }*/
+    public string SensorLoad()// 화재센서 & 방향지시등센서 
+    {
+        string temp = "";
+        string q = "" +
+            "SELECT tb_sensornode_node_address, sensor_ids" +
+            " FROM " + db.sensor_id_table +
+           " WHERE sensor_ids IN (21, 22, 23, 26, 27);";
+        Debug.Log("load쿼리문 : " + q);
 
+        if (conn.Ping())
+        {
+            MySqlCommand command = new MySqlCommand(q, conn);
+            MySqlDataReader rdr = command.ExecuteReader();
+            temp = RdrToStr(rdr);
+            Debug.Log("센서 data : " + temp);
+            rdr.Close();
+
+        }
+
+        return temp;
+    }
     public string SensorLoad(bool test = false)// 화재센서 & 방향지시등센서 
     {
         // Test mode setting. if true, just return hardcoded string

@@ -30,7 +30,7 @@ public class FunctionManager : MonoBehaviour
     private InputField nodeID;
     private InputField nodeType;
     private Text nodeValue;
-    private NodeManager currentNode;
+    private Transform fireInfos;
 
     // Program mode
     private static bool isPlacingMode = true;
@@ -123,11 +123,13 @@ public class FunctionManager : MonoBehaviour
         nodeID = nodeInfos.GetChild(0).GetChild(1).GetComponent<InputField>();
         nodeType = nodeInfos.GetChild(1).GetChild(1).GetComponent<InputField>();
         nodeValue = nodeInfos.GetChild(2).GetChild(1).GetComponentInChildren<Text>();
+        fireInfos = nodeInfos.GetChild(3);
 
         // Start clock
         StartCoroutine(UpdateDateAndTime());
 
         // Add callback listener
+        MouseManager.OnNodeClicked -= OnNodeSelected; // Remove exsiting callback to prevent duplicated call
         MouseManager.OnNodeClicked += OnNodeSelected;
     }
 
@@ -247,47 +249,62 @@ public class FunctionManager : MonoBehaviour
 
             // Initialize
             DataManager dataManager = GetComponent<DataManager>();
-            dataManager.LoadDataFromDB();
+            // dataManager.LoadDataFromDB();
         }
 
         isPlacingMode = !isPlacingMode;
     }
 
+    NodeManager selectedNode = null;
     private void OnNodeSelected(NodeManager node)
     {
         Debug.Log("Node is clicked : " + node.PhysicalID);
-        currentNode = node;
-        LoadNodeInformation(currentNode);
-        WindowManager nodeInfoWindow = WindowManager.GetWindow("window_node_info");
+        selectedNode = node;
+        nodeID.text = node.PhysicalID;
 
+        bool isFireSensor = node is NodeFireSensor;
+
+        fireInfos.gameObject.SetActive(isFireSensor);
+
+        if (!isFireSensor) nodeType.text = GetSensorTypeString(node.DisplayName);
+        else
+        {
+            NodeFireSensor nodeFireSensor = (NodeFireSensor)node;
+
+            nodeType.text = "21(온도)";
+            fireInfos.GetChild(0).GetChild(1).GetComponent<InputField>().text = "22(불꽃)";
+            fireInfos.GetChild(2).GetChild(1).GetComponent<InputField>().text = "23(연무)";
+
+            UpdateNodeInfoWindow();
+        }
+
+        MQTTManager.OnNodeUpdated -= OnNodeUpdated; // Remove exsiting callback to prevent duplicated call
+        MQTTManager.OnNodeUpdated += OnNodeUpdated;
+        WindowManager nodeInfoWindow = WindowManager.GetWindow("window_node_info");
         nodeInfoWindow.SetVisible(true);
     }
 
-    public void OnEndSimulation()
+    // Called when node updated with MQTT data.
+    private void OnNodeUpdated(MQTTManager.MQTTMsgData data)
     {
-        /*
-        1. 모니터링 모드에 종료 버튼 추가 : 종료 시 DT의 전체 초기화 & 방향지시등, 가청경보기 off 신호 전달(MQTT)
-         */
+        if (selectedNode == null) return;
+        if (!selectedNode.PhysicalID.Equals(selectedNode.PhysicalID)) return;
+        UpdateNodeInfoWindow();
     }
 
-    private void LoadNodeInformation(NodeManager node)
+    private void UpdateNodeInfoWindow()
     {
-        nodeID.text = node.PhysicalID;
-        nodeType.text = GetSensorType(node.DisplayName);
-        // nodeValue.text =
+        if (selectedNode is NodeFireSensor)
+        {
+            NodeFireSensor nodeFireSensor = (NodeFireSensor)selectedNode;
+
+            nodeValue.text = nodeFireSensor.ValueTemp.ToString();
+            fireInfos.GetChild(1).GetChild(1).GetComponentInChildren<Text>().text = nodeFireSensor.ValueFire.ToString();
+            fireInfos.GetChild(3).GetChild(1).GetComponentInChildren<Text>().text = nodeFireSensor.ValueSmoke.ToString();
+        }
     }
 
-    private void SetNodeIDByInput()
-    {
-        // currentNode.PhysicalID = nodeID.text;
-    }
-
-    private void SetNodeTypeByInput(NodeManager node)
-    {
-        // string temp = node.PhysicalID;
-    }
-
-    private string GetSensorType(string displayName)
+    private string GetSensorTypeString(string displayName)
     {
         string[] temp = displayName.Split(':');
         string nodeType = temp[0];
@@ -296,13 +313,13 @@ public class FunctionManager : MonoBehaviour
         switch (nodeType)
         {
             case "화재 센서":
-                return "33(화재)";
+                return nodeType;
             case "방향지시등":
-                return "39(방향지시등)";
+                return "27(방향지시등)";
             case "수재해 센서":
-                return "2(수재해)";
+                return "51(수재해)";
             case "지진 센서":
-                return "3(지진)";
+                return "50(지진)";
             default:
                 return nodeType;
         }

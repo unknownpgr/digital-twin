@@ -101,7 +101,7 @@ public class MQTTManager : MonoBehaviour
     private JsonParser jsonParser = new JsonParser();
 
     public delegate void Del(MQTTMsgData data);
-    public Del OnNodeUpdated;
+    public static Del OnNodeUpdated;
 
     // Path of mqttconf. cannot call Application.dataPath in thread.
     private string mqttConfPath;
@@ -211,7 +211,10 @@ public class MQTTManager : MonoBehaviour
     public void PubSiren(bool siren)
     {
         //ToDo : NodeID for siren
-        string json = "{\"nodeId\":\"000000\",\"sound\":\"" + (siren ? "on" : "off") + "\"}";
-        Publish("mws/Set/Sound", json);
+        foreach (string sirenID in DataManager.GetSirenIDs())
+        {
+            string json = "{\"nodeId\":\"" + sirenID + "\",\"sound\":\"" + (siren ? "on" : "off") + "\"}";
+            Publish("mws/Set/Sound", json);
+        }
     }
 }

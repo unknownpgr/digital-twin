@@ -72,7 +72,7 @@ public class ScenarioManager : MonoBehaviour
         mQTTManager.Init();
 
         // Register callback listener
-        mQTTManager.OnNodeUpdated = OnNodeUpdated;
+        MQTTManager.OnNodeUpdated = OnNodeUpdated;
 
         // (New) Get exsisting path panel and transform of parent
         defaultPathPanel = GameObject.Find("panel_path");
@@ -104,14 +104,12 @@ public class ScenarioManager : MonoBehaviour
 
         // Reset area number
         foreach (NodeArea nodeArea in NodeManager.GetNodesByType<NodeArea>()) nodeArea.Num = 0;
+        foreach (NodeFireSensor fireSensor in NodeManager.GetNodesByType<NodeFireSensor>()) fireSensor.IsDisaster = false;
 
         SetSiren(false);
 
-        // ToDo : Init sensor value
-        // Such as disaster mode setting of some sensors or area number of areas
-
         // Initialize direction sensor
-        foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>()) mQTTManager.PubDirectionOperation(node.PhysicalID, "null");
+        foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>()) mQTTManager.PubDirectionOperation(node.PhysicalID, "off");
 
         // Close mqttManager
         mQTTManager?.Close();
@@ -153,6 +151,8 @@ public class ScenarioManager : MonoBehaviour
                     nodeFire.ValueSmoke = data.Value;
                     break;
             }
+
+            Debug.Log(nodeFire.ValueTemp);
 
             newDisasterState |= data.IsDisaster;
             if (newDisasterState) disatsterName.text = "화재 발생";
