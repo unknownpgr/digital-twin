@@ -46,7 +46,7 @@ public class DBManager : MonoBehaviour
         db = jsonParser.Load<DBClass>("dbconf_temp");//dbcon.jsonf를 통해 load한다(이 파일 수정하기)
         if (db == null)
         {
-            
+
         }
         string strConn = string.Format("server={0};port={1};uid={2};pwd={3};database={4};charset=utf8;",
                                db.ipAddress, db.port, db.db_id, db.db_pw, db.db_name);//연결형식
@@ -170,25 +170,30 @@ public class DBManager : MonoBehaviour
         if (test)
         {
             return @"
-            00010000;21
-            00010000;22
-            00010000;23
-            00020000;21
-            00020000;22
-            00030000;23
-            00030000;21
-            00030000;22
-            00020000;23
-            00040000;27
-            00050000;27
-            00060000;27";
+            00010000;0x21
+            00010000;0x22
+            00010000;0x23
+            00020000;0x21
+            00020000;0x22
+            00030000;0x23
+            00030000;0x21
+            00030000;0x22
+            00020000;0x23
+            00040000;0x27
+            00050000;0x27
+            00060000;0x27";
         }
 
         string temp = "";
         string q = "" +
             "SELECT tb_sensornode_node_address, sensor_ids" +
             " FROM " + db.sensor_id_table +
-           " WHERE sensor_ids IN (21, 22, 23, 27);";
+           " WHERE sensor_ids IN ("
+           + Const.NODE_SENSOR_TEMP + ","
+           + Const.NODE_SENSOR_FIRE + ","
+           + Const.NODE_SENSOR_SMOKE + ","
+           + Const.NODE_DIRECTION +
+           ");";
         Debug.Log("load쿼리문 : " + q);
 
         if (conn.Ping())

@@ -16,7 +16,7 @@ public class MQTTManager : MonoBehaviour
     {
         // Visible variable
         [JsonIgnore]
-        public Type NodeType { get => GetNodeType(sensorType); }
+        public Type NodeType { get => Const.GetNodeTypeFromNumber(sensorType); }
         [JsonIgnore]
         public string PhysicalID;
         [JsonIgnore]
@@ -61,26 +61,6 @@ public class MQTTManager : MonoBehaviour
             else data.PhysicalID = data.nodeId;
             if (data.PhysicalID == null || data.PhysicalID == "") throw new Exception("MQTTMsgData without physical ID.");
             return data;
-        }
-
-        private static Type GetNodeType(int nodeType)
-        {
-            // ToDo: Implement some other sensors including area.
-            switch (nodeType)
-            {
-                case 33:    // Fire, 16진수 21
-                    return typeof(NodeFireSensor);
-                case 2:     // Water
-                    return typeof(NodeFireSensor);
-                case 3:     // Eearthquake
-                    return typeof(NodeFireSensor);
-                case 39:    // Direction
-                    return typeof(NodeFireSensor);
-                case 100:   //Area
-                    return typeof(NodeArea);
-                default:
-                    return null;
-            }
         }
 
         public override string ToString()
@@ -130,6 +110,7 @@ public class MQTTManager : MonoBehaviour
 
     public void Publish(string topic, string msg)
     {
+        Debug.Log("Topic : "+topic+"\nMessage : "+msg);
         new Thread(() => client.Publish(topic, Encoding.UTF8.GetBytes(msg), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false)).Start();
     }
 

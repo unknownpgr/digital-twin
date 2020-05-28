@@ -139,15 +139,15 @@ public class ScenarioManager : MonoBehaviour
 
             switch (data.sensorType)
             {
-                case 21:
+                case Const.NODE_SENSOR_TEMP:
                     nodeFire.ValueTemp = data.Value;
                     break;
 
-                case 22:
+                case Const.NODE_SENSOR_FIRE:
                     nodeFire.ValueFire = data.Value;
                     break;
 
-                case 23:
+                case Const.NODE_SENSOR_SMOKE:
                     nodeFire.ValueSmoke = data.Value;
                     break;
             }
@@ -235,8 +235,11 @@ public class ScenarioManager : MonoBehaviour
     void SetSiren(bool play)
     {
         if (sirenPlayer == null) sirenPlayer = gameObject.GetComponent<AudioSource>();
+
         if ((!sirenPlayer.isPlaying) && play) sirenPlayer.Play();
-        else if (sirenPlayer.isPlaying && !play) sirenPlayer.Stop();
+        else if (sirenPlayer.isPlaying && (!play)) sirenPlayer.Stop();
+        // Then sirenPlayer.isPlaying==play
+        else return;
         mQTTManager.PubSiren(play);
     }
 

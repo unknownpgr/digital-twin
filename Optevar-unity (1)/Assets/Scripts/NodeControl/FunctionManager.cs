@@ -142,7 +142,7 @@ public class FunctionManager : MonoBehaviour
             else BuildingManager.Floors[i].SetActive(false);
 
             if (BuildingManager.FloorsCount - i - 1 > floor) floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 0.5f);
-            else floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 1);
+            else floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 0.9f);
         }
 
         foreach (NodeManager node in NodeManager.GetAll())
@@ -202,6 +202,12 @@ public class FunctionManager : MonoBehaviour
         WindowManager initWindow = WindowManager.GetWindow("window_init");
         initWindow.SetVisible(false);
         Popup.Show("초기화되었습니다.");
+    }
+
+    public void OnCreateVirtualNode()
+    {
+        WindowManager createVirtualWindow = WindowManager.GetWindow("window_create_virtual_node");
+        createVirtualWindow.SetVisible(true);
     }
 
     public void OnClickInformation()
@@ -271,9 +277,9 @@ public class FunctionManager : MonoBehaviour
         {
             NodeFireSensor nodeFireSensor = (NodeFireSensor)node;
 
-            nodeType.text = "21(온도)";
-            fireInfos.GetChild(0).GetChild(1).GetComponent<InputField>().text = "22(불꽃)";
-            fireInfos.GetChild(2).GetChild(1).GetComponent<InputField>().text = "23(연무)";
+            nodeType.text = Const.NODE_SENSOR_TEMP + "(온도)";
+            fireInfos.GetChild(0).GetChild(1).GetComponent<InputField>().text = Const.NODE_SENSOR_FIRE + "(불꽃)";
+            fireInfos.GetChild(2).GetChild(1).GetComponent<InputField>().text = Const.NODE_SENSOR_SMOKE + "(연무)";
 
             UpdateNodeInfoWindow();
         }
@@ -315,11 +321,11 @@ public class FunctionManager : MonoBehaviour
             case "화재 센서":
                 return nodeType;
             case "방향지시등":
-                return "27(방향지시등)";
+                return Const.NODE_DIRECTION + "(방향지시등)";
             case "수재해 센서":
-                return "51(수재해)";
+                return Const.NODE_SENSOR_FLOOD + "(수재해)";
             case "지진 센서":
-                return "50(지진)";
+                return Const.NODE_SENSOR_EARTHQUAKE + "(지진)";
             default:
                 return nodeType;
         }

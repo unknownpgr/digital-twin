@@ -20,7 +20,7 @@ public class SensorWindow : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
     public void Set(Vector3 position, int nodeType, float value = 0, int nodeId = -1)
     {

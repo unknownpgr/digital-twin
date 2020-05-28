@@ -8,18 +8,66 @@ using System;
 
 public class DataManager : MonoBehaviour
 {
+    // Root path for json file
+    private static string root;
+
     private static List<FileInfo> jsonFileList = new List<FileInfo>();
     private static List<string> sirenIDList = new List<string>();
 
 
     // UI related variables
-    private static List<GameObject> jsonButtons = new List<GameObject>();
-    private Dictionary<string, GameObject> sensorButtons = new Dictionary<string, GameObject>();
     private static GameObject jsonButton;
     private GameObject sensorButton;
-    private InputField saveFileName;
-    public void LoadDataFromDB()
+    private static List<GameObject> jsonButtons = new List<GameObject>();
+    private Dictionary<string, GameObject> sensorButtons = new Dictionary<string, GameObject>();
+    private InputField inputSaveFileName;
+
+    // Current json file
+    private static FileInfo currentJsonFile;
+
+    // DataManager 초기화
+    void Start()
     {
+        // Set root path
+        root = Application.dataPath + "/Resources/scenario_jsons/";
+
+        // Hide prefab
+        jsonButton = GameObject.Find("button_json_file").gameObject;
+        jsonButton.SetActive(false);
+        sensorButton = GameObject.Find("button_sensor_ID").gameObject;
+        sensorButton.SetActive(false);
+
+        // Register input feild
+        inputSaveFileName = GameObject.Find("input_save_file").GetComponent<InputField>();
+
+        // Register callback
+        NodeManager.OnNodeStateChanged += OnSensorStateUpdated;
+
+        currentJsonFile = null;
+        try
+        {
+            // 먼저 JSON파일에서 정보 로드를 시도함.
+            NodeManager.DestroyAll();
+            NodeManager.InitiateFromFile(root + "autoSave.json");
+            RenderNodeButtons();
+            inputSaveFileName.text = Path.GetFileNameWithoutExtension("autoSave.json");
+        }
+        catch
+        {
+            // 안되면 DB에서 로드
+            LoadDataFromDB();
+        }
+
+        // 세이브파일(.json파일)리스트 업데이트. 주기적으로 호출해주면 좋음.
+        UpdateSaveFileList();
+    }
+
+    // DB로부터 노드 데이터를 로드한다. 기존의 노드 버튼들 삭제, 버튼 렌더링 등 모든 과정들이 여기 다 포함된다.
+    public bool LoadDataFromDB()
+    {
+        // Check if data loaded
+        bool isDataLoaded = false;
+
         // Destroy existing nodes
         NodeManager.DestroyAll();
 
@@ -31,6 +79,7 @@ public class DataManager : MonoBehaviour
         {
             string sensorData = sd.Trim();
             if (sensorData.Length < 3) continue;
+            isDataLoaded = true;
             AddNodeFromString(sensorData);
         }
 
@@ -39,23 +88,26 @@ public class DataManager : MonoBehaviour
         {
             string areaID = ar.Trim();
             if (areaID.Length < 2) continue;
+            isDataLoaded = true;
             NodeManager.AddNode(areaID, typeof(NodeArea));
         }
 
         RenderNodeButtons();
+        return isDataLoaded;
     }
 
-    public static void UpdateList()
+    // 루트 디렉토리를 읽어서 json파일 리스트를 업데이트한다. 이 함수를 따로 만든 이유는, 자주 호출해야하는 반면 blocking되는 작업일 것 같아서.
+    public static void UpdateSaveFileList()
     {
-        string root = Application.dataPath + "/Resources/scenario_jsons";
         new Thread(() =>
         {
             DirectoryInfo folder = new DirectoryInfo(root);
             foreach (var file in folder.GetFiles("*.json")) jsonFileList.Add(file);
         }).Start();
     }
-    private static FileInfo selectedJsonFile;
-    public static void SetJosnFileList()
+
+    // 저장된 정보 파일 리스트 윈도우의 버튼들을 지우고 새로 만든다.
+    public static void RenderSaveFileButtons()
     {
         // Delete existing buttons
         foreach (GameObject g in jsonButtons) GameObject.Destroy(g);
@@ -77,7 +129,7 @@ public class DataManager : MonoBehaviour
             img.color = Color.grey;
             newButton.GetComponent<Button>().onClick.AddListener(() =>
             {
-                selectedJsonFile = new FileInfo(fi.FullName);
+                currentJsonFile = new FileInfo(fi.FullName);
                 foreach (GameObject button in jsonButtons)
                 {
                     Image image = button.GetComponent<Image>();
@@ -89,38 +141,13 @@ public class DataManager : MonoBehaviour
         }
     }
 
+    // 사이렌 ID 가져오기.
     public static string[] GetSirenIDs()
     {
         return sirenIDList.ToArray();
     }
 
-    // Called when load json button of menu bar clicked
-    public void OnLoadJson()
-    {
-        WindowManager loadJsonWindow = WindowManager.GetWindow("window_load_json");
-        SetJosnFileList();
-        loadJsonWindow.SetVisible(true);
-    }
-
-    // Called when user select json file and click load button
-    public void OnLoadJsonFile()
-    {
-        if (selectedJsonFile == null)
-        {
-            Popup.Show("JSON파일을 선택해주세요.");
-            return;
-        }
-        NodeManager.DestroyAll();
-        NodeManager.InitiateFromFile(selectedJsonFile.FullName);
-        RenderNodeButtons();
-        saveFileName.text = Path.GetFileNameWithoutExtension(selectedJsonFile.FullName);
-
-        Popup.Show("센서 설정을 로드하였습니다.");
-        WindowManager.GetWindow("window_load_json").SetVisible(false);
-
-        selectedJsonFile = null;
-    }
-
+    // 노드 설치 윈도우의 버튼들을 지우고 새로 만듬. 자주 호출하면 좋지 않음.
     private void RenderNodeButtons()
     {
         // Remove existing buttons
@@ -147,42 +174,31 @@ public class DataManager : MonoBehaviour
 
             newButton.transform.localPosition = Vector3.zero;
             newButton.transform.GetChild(0).GetComponent<Text>().text = nm.DisplayName;
-            newButton.GetComponent<Button>().onClick.AddListener(() => OnSelectSensor(physicalID));
+            newButton.GetComponent<Button>().onClick.AddListener(() => OnSelectNode(physicalID));
             sensorButtons.Add(nm.PhysicalID, newButton);
         }
 
-        OnSensorStateUpdated();
+        UpdateSensorButtonColor();
     }
 
-    public void OnSelectSensor(string nodeID)
+    // .autoSave.json파일에 정보를 백업함.
+    private object mutex = new object();
+    private void AutoSave()
     {
-        NodeManager node = NodeManager.GetNodeByID(nodeID);
-        MouseManager.ToNodePlaceMode(node);
-    }
-
-    public void OnSaveJson()
-    {
-        WindowManager loadJsonWindow = WindowManager.GetWindow("window_save_json");
-        loadJsonWindow.SetVisible(true);
-    }
-
-    public void OnSaveJsonFile()
-    {
-        string fileName = saveFileName.text;
-        if (fileName == null || fileName.Length < 1)
-        {
-            Popup.Show("파일 이름을 입력하지 않았습니다.");
-            return;
-        }
-        string path = Application.dataPath + "/Resources/scenario_jsons/" + fileName + ".json";
+        Debug.Log("AutoSave");
+        string path = root + "autoSave.json";
         string data = NodeManager.Jsonfy();
-        new Thread(() => File.WriteAllText(path, data)).Start();
-        Popup.Show("저장되었습니다.");
-        WindowManager.GetWindow("window_save_json").SetVisible(false);
-        UpdateList();
+        new Thread(() =>
+        {
+            lock (mutex)
+            {
+                File.WriteAllText(path, data);
+            }
+        }).Start();
     }
 
-    private void OnSensorStateUpdated()
+    // 센서 상태 변화에 따라, 센서 버튼 색깔을 업데이트
+    private void UpdateSensorButtonColor()
     {
         foreach (string physicalID in sensorButtons.Keys)
         {
@@ -205,14 +221,7 @@ public class DataManager : MonoBehaviour
         }
     }
 
-    public void OnSensorManuallyCreate(InputField text)
-    {
-        string data = text.text;
-        if (AddNodeFromString(data)) Popup.Show("노드를 새로 추가하였습니다.");
-        else Popup.Show("문제가 발생하여 노드를 새로 추가하지 못했습니다.");
-        RenderNodeButtons();
-    }
-
+    // String으로부터 새로운 노드를 추가
     private bool AddNodeFromString(string sensorString)
     {
         string[] parsed = sensorString.Split(';');
@@ -221,61 +230,147 @@ public class DataManager : MonoBehaviour
         string id = parsed[0].Trim();
         int typeNumber = int.Parse(parsed[1].Trim());
 
-        Type type = null;
-        switch (typeNumber)
+        if (typeNumber == Const.NODE_SIREN)
         {
-            case 21:
-            case 22:
-            case 23:
-                type = typeof(NodeFireSensor);
-                break;
-
-            case 26:
-                sirenIDList.Add(id);
-                break;
-
-            case 27:
-                type = typeof(NodeDirection);
-                break;
-
-            case 50:
-                type = typeof(NodeEarthquakeSensor);
-                break;
-
-            case 51:
-                type = typeof(NodeFloodSensor);
-                break;
-
-            case 52:
-                type = typeof(NodeExit);
-                break;
-
-            case 53:
-                type = typeof(NodeArea);
-                break;
-
-            default:
-                return false;
+            sirenIDList.Add(id);
+            return true;
         }
-        if (type != null && NodeManager.AddNode(id, type)) return true;
+
+        Type type = Const.GetNodeTypeFromNumber(typeNumber);
+        if (type == null) return false;
+        if (NodeManager.AddNode(id, type)) return true;
         return false;
     }
 
-    void Start()
+    // 센서 상태가 업데이트되었을 때의 콜백.
+    private void OnSensorStateUpdated()
     {
-        // Hide prefab
-        jsonButton = GameObject.Find("button_json_file").gameObject;
-        jsonButton.SetActive(false);
+        UpdateSensorButtonColor();
+        AutoSave();
+    }
 
-        sensorButton = GameObject.Find("button_sensor_ID").gameObject;
-        sensorButton.SetActive(false);
+    // Called when load json button of menu bar clicked
+    public void OnLoadJson()
+    {
+        WindowManager loadJsonWindow = WindowManager.GetWindow("window_load_json");
+        RenderSaveFileButtons();
+        loadJsonWindow.SetVisible(true);
+    }
 
-        // Register input feild
-        saveFileName = GameObject.Find("input_save_file").GetComponent<InputField>();
-        NodeManager.OnNodeStateChanged += OnSensorStateUpdated;
+    // Called when user select json file and click load button
+    public void OnLoadJsonFile()
+    {
+        if (currentJsonFile == null)
+        {
+            Popup.Show("JSON파일을 선택해주세요.");
+            return;
+        }
+        NodeManager.DestroyAll();
+        NodeManager.InitiateFromFile(currentJsonFile.FullName);
+        RenderNodeButtons();
+        inputSaveFileName.text = Path.GetFileNameWithoutExtension(currentJsonFile.FullName);
 
-        LoadDataFromDB();
+        Popup.Show("센서 설정을 로드하였습니다.");
+        WindowManager.GetWindow("window_load_json").SetVisible(false);
 
-        UpdateList();
+        currentJsonFile = null;
+    }
+
+    // 센서 수동 생성 윈도우에서 생성할 때 발생 - ToDo : 나중에 이름 Node로 고칠 것.
+    public void OnSensorManuallyCreate(InputField text)
+    {
+        string data = text.text;
+        if (AddNodeFromString(data)) Popup.Show("노드를 새로 추가하였습니다.");
+        else Popup.Show("문제가 발생하여 노드를 새로 추가하지 못했습니다.");
+        RenderNodeButtons();
+    }
+
+    // 노드 설치 윈도우에서 노드 설치했을 경우 발생. 굳이 함수로 안 꺼내고, Lambda로 집어넣어버리는 것도 고려할 것.
+    public void OnSelectNode(string nodeID)
+    {
+        NodeManager node = NodeManager.GetNodeByID(nodeID);
+        MouseManager.ToNodePlaceMode(node);
+    }
+
+    // 상단 메뉴의 저장 버튼을 눌렀을 때 발생
+    public void OnSaveJson()
+    {
+        WindowManager loadJsonWindow = WindowManager.GetWindow("window_save_json");
+        loadJsonWindow.SetVisible(true);
+    }
+
+    // 저장 윈도우에서 저장 버튼을 눌렀을 때 발생
+    public void OnSaveJsonFile()
+    {
+        // 파일이름 확인
+        string fileName = inputSaveFileName.text;
+        if (fileName == null || fileName.Length < 1)
+        {
+            Popup.Show("파일 이름을 입력하지 않았습니다.");
+            return;
+        }
+
+        // 노드 정보 저장
+        string path = root + fileName + ".json";
+        string data = NodeManager.Jsonfy();
+        new Thread(() => File.WriteAllText(path, data)).Start();
+
+        // 팝업 띄우고
+        Popup.Show("저장되었습니다.");
+        WindowManager.GetWindow("window_save_json").SetVisible(false);
+
+        // 세이브파일 리스트 업데이트.
+        UpdateSaveFileList();
+    }
+
+    // (임시) 'DB Load' 버튼을 눌렀을 때 발생
+    public void OnLoadFromDBClicked()
+    {
+        if (LoadDataFromDB()) Popup.Show("데이터가 성공적으로 DB에서 로드되었습니다.");
+        else Popup.Show("DB에서 데이터를 로드하는 데 실패했습니다.");
+    }
+}
+
+class Headcounter
+{
+    public class HeadCountInfo
+    {
+        public int column;
+        public int number;
+        public float time;
+    }
+
+    private List<HeadCountInfo> data = new List<HeadCountInfo>();
+    private List<int> columns = new List<int>();
+
+    public void Init()
+    {
+        data.Clear();
+    }
+
+    public void AddData(int column, int number, float time)
+    {
+        HeadCountInfo hci = new HeadCountInfo();
+        hci.column = column;
+        hci.number = number;
+        hci.time = time;
+        data.Add(hci);
+
+        if (!columns.Contains(column)) columns.Add(column);
+    }
+
+    public int[] GetColumns()
+    {
+        return columns.ToArray();
+    }
+
+    public HeadCountInfo[] GetData(int column)
+    {
+        List<HeadCountInfo> o = new List<HeadCountInfo>();
+        foreach (HeadCountInfo hci in data)
+        {
+            if (hci.column == column) o.Add(hci);
+        }
+        return o.ToArray();
     }
 }

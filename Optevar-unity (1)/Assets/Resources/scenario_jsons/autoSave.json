@@ -1,0 +1,104 @@
+{
+  "$type": "System.Collections.Generic.List`1[[NodeManager, Assembly-CSharp]], mscorlib",
+  "$values": [
+    {
+      "$type": "NodeDirection, Assembly-CSharp",
+      "PhysicalID": "directionSensor",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          10.9909325,
+          15.765,
+          -19.6408844
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "ID_TEST_4",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -12.76577,
+          15.765,
+          -19.4902134
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeArea, Assembly-CSharp",
+      "Velocity": 4.0,
+      "PhysicalID": "ID_TEST_3",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          3.985283,
+          15.765,
+          -22.0003471
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeFireSensor, Assembly-CSharp",
+      "ValueTemp": 0.0,
+      "ValueFire": 0.0,
+      "ValueSmoke": 0.0,
+      "PhysicalID": "13000001",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          8.231155,
+          15.765,
+          -10.9998589
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "ID_TEST_1",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          8.504326,
+          15.765,
+          14.5127983
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeArea, Assembly-CSharp",
+      "Velocity": 4.0,
+      "PhysicalID": "room3",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          16.781971,
+          15.765,
+          -9.863741
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeFireSensor, Assembly-CSharp",
+      "ValueTemp": 0.0,
+      "ValueFire": 0.0,
+      "ValueSmoke": 0.0,
+      "PhysicalID": "111222",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          0.445056915,
+          15.765,
+          -12.73388
+        ]
+      },
+      "State": 2
+    }
+  ]
+}
