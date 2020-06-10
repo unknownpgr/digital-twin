@@ -38,10 +38,11 @@ public class NodeArea : NodeManager
 
             // Update list
             int currentHeadCount = 0;
-            foreach(NodeArea node in NodeManager.GetNodesByType<NodeArea>())
+            foreach(NodeArea node in GetNodesByType<NodeArea>())
             {
                 currentHeadCount += node.num;
             }
+
             headCount.Add(new Vector2(headCount.Count, currentHeadCount));
             if (gm != null) gm.SetGraph(headCount);
         }
@@ -64,7 +65,7 @@ public class NodeArea : NodeManager
         Vector3 origin = gameObject.transform.position;
         for (int i = 0; i < humanoidList.Length; i++)
         {
-            humanoidList[i] = (GameObject)GameObject.Instantiate(humanoidPrefab);
+            humanoidList[i] = Object.Instantiate(humanoidPrefab);
 
             humanoidList[i].transform.position = origin + offset;
             offset += HUMANOID_DISTANCE;

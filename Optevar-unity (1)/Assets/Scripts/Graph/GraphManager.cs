@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class GraphManager : MonoBehaviour
 {
+    private const int POINT_NUM = 30;
+
     readonly List<RectTransform> points = new List<RectTransform>();
     Rect size;
 
@@ -13,7 +15,7 @@ public class GraphManager : MonoBehaviour
     {
         size = GetComponent<RectTransform>().rect;
         Color color = new Color(Random.Range(0, 255) / 255.0f, Random.Range(0, 255) / 255.0f, Random.Range(0, 255) / 255.0f);
-        for (int i = 0; i < 30; i++)
+        for (int i = 0; i < POINT_NUM; i++)
         {
             GameObject NewObj = new GameObject();
             Image NewImage = NewObj.AddComponent<Image>();
@@ -35,8 +37,7 @@ public class GraphManager : MonoBehaviour
 
     public void SetGraph(List<Vector2> newPoints)
     {
-        // 일단은 그래프는 끈다.
-        return;
+        if (points.Count < POINT_NUM) return;
 
         Vector2 maxValue = new Vector2(-999999, -999999);
 
@@ -67,7 +68,7 @@ public class GraphManager : MonoBehaviour
             rect.localPosition = pointA;
             rect.localRotation = Quaternion.Euler(0, 0, angle);
         }
-        for (int i = end; i < 30; i++)
+        for (int i = end; i < POINT_NUM; i++)
         {
             points[i].gameObject.SetActive(false);
         }

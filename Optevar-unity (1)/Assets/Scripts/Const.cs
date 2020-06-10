@@ -20,7 +20,7 @@ public static class Const
     public static string GetAutoSaveFileName(string buildingName)
     {
         buildingName = buildingName.Split('.')[0];
-        return String.Format(AUTOSAVE_NAME_FORMAT, buildingName);
+        return string.Format(AUTOSAVE_NAME_FORMAT, buildingName);
     }
 
     public static Type GetNodeTypeFromNumber(int typeNumber)

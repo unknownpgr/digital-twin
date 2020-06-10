@@ -268,11 +268,14 @@ public class FunctionManager : MonoBehaviour
 
         if (IsPlacingMode)
         {
-            SetModeButtonColor(!IsPlacingMode);
-
             // Placing mode to monitoring mode
+
+            SetModeButtonColor(!IsPlacingMode);
             Find("layout_buttons").gameObject.SetActive(false);
-            // Find("window_graph").gameObject.GetComponent<WindowManager>().SetVisible(true);
+            
+            // Show
+            Find("window_graph").gameObject.GetComponent<WindowManager>().SetVisible(true);
+          
             Find("button_end_simulation").gameObject.SetActive(true);
             OnSetFloor(BuildingManager.FloorsCount - 1);
             ScenarioManager.singleTon.Init();
@@ -290,7 +293,7 @@ public class FunctionManager : MonoBehaviour
             if (terminateAll) ScenarioManager.singleTon.SetDefault();
 
             // Initialize
-            DataManager dataManager = GetComponent<DataManager>();
+            // DataManager dataManager = GetComponent<DataManager>();
             // dataManager.LoadDataFromDB();
         }
 
