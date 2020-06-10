@@ -143,56 +143,22 @@ public class DBManager : MonoBehaviour
             
         }
     }*/
-    public string SensorLoad()// 화재센서 & 방향지시등센서 
-    {
-        string temp = "";
-        string q = "" +
-            "SELECT tb_sensornode_node_address, sensor_ids" +
-            " FROM " + db.sensor_id_table +
-           " WHERE sensor_ids IN (21, 22, 23, 26, 27);";
-        Debug.Log("load쿼리문 : " + q);
 
-        if (conn.Ping())
-        {
-            MySqlCommand command = new MySqlCommand(q, conn);
-            MySqlDataReader rdr = command.ExecuteReader();
-            temp = RdrToStr(rdr);
-            Debug.Log("센서 data : " + temp);
-            rdr.Close();
-
-        }
-
-        return temp;
-    }
     public string SensorLoad(bool test = false)// 화재센서 & 방향지시등센서 
     {
         // Test mode setting. if true, just return hardcoded string
-        if (test)
-        {
-            return @"
-            00010000;0x21
-            00010000;0x22
-            00010000;0x23
-            00020000;0x21
-            00020000;0x22
-            00030000;0x23
-            00030000;0x21
-            00030000;0x22
-            00020000;0x23
-            00040000;0x27
-            00050000;0x27
-            00060000;0x27";
-        }
+        string result = "";
 
-        string temp = "";
+        // DB에 저장 / 로드할 때에는 10진수로 생각함.
         string q = "" +
             "SELECT tb_sensornode_node_address, sensor_ids" +
             " FROM " + db.sensor_id_table +
            " WHERE sensor_ids IN ("
-           + Const.NODE_SENSOR_TEMP + ","
-           + Const.NODE_SENSOR_FIRE + ","
-           + Const.NODE_SENSOR_SMOKE + ","
-           + Const.NODE_DIRECTION +
+           + Remove0x(Const.NODE_SENSOR_TEMP) + ","
+           + Remove0x(Const.NODE_SENSOR_FIRE) + ","
+           + Remove0x(Const.NODE_SENSOR_SMOKE) + ","
+           + Remove0x(Const.NODE_SIREN) + ","
+           + Remove0x(Const.NODE_DIRECTION) +
            ");";
         Debug.Log("load쿼리문 : " + q);
 
@@ -200,13 +166,17 @@ public class DBManager : MonoBehaviour
         {
             MySqlCommand command = new MySqlCommand(q, conn);
             MySqlDataReader rdr = command.ExecuteReader();
-            temp = RdrToStr(rdr);
-            Debug.Log("센서 data : " + temp);
-            rdr.Close();
 
+            while (rdr.Read())
+            {
+                result += rdr[0] + ";" + Convert.ToInt32("" + rdr[1], 16).ToString() + "\n";
+            }
+
+            rdr.Close();
         }
 
-        return temp;
+        Debug.Log("센서 data : " + result);
+        return result;
     }
 
 
@@ -262,5 +232,11 @@ public class DBManager : MonoBehaviour
             temp = "No return";
         }
         return temp;
+    }
+
+    // e.g. 0x30 => 30
+    private int Remove0x(int hex)
+    {
+        return Int32.Parse(hex.ToString("X").Replace("0x", ""));
     }
 }

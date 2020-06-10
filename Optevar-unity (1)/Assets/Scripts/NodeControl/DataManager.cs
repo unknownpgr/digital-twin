@@ -10,10 +10,7 @@ public class DataManager : MonoBehaviour
 {
     // Root path for json file
     private static string root;
-
-    private static List<FileInfo> jsonFileList = new List<FileInfo>();
-    private static List<string> sirenIDList = new List<string>();
-
+    private static readonly List<FileInfo> jsonFileList = new List<FileInfo>();
 
     // UI related variables
     private static GameObject jsonButton;
@@ -24,6 +21,9 @@ public class DataManager : MonoBehaviour
 
     // Current json file
     private static FileInfo currentJsonFile;
+
+    // DBManager
+    private DBManager dBManager;
 
     // DataManager 초기화
     void Start()
@@ -42,6 +42,10 @@ public class DataManager : MonoBehaviour
 
         // Register callback
         NodeManager.OnNodeStateChanged += OnSensorStateUpdated;
+
+        // Initialize dbmanager before use.
+        dBManager = GameObject.Find("DBManager").GetComponent<DBManager>();
+        dBManager.Init();
 
         currentJsonFile = null;
         try
@@ -72,9 +76,6 @@ public class DataManager : MonoBehaviour
         NodeManager.DestroyAll();
 
         // Load nodes from database
-        DBManager dBManager = GameObject.Find("DBManager").GetComponent<DBManager>();
-        dBManager.Init();
-
         foreach (string sd in dBManager.SensorLoad().Split('\n'))
         {
             string sensorData = sd.Trim();
@@ -141,12 +142,6 @@ public class DataManager : MonoBehaviour
         }
     }
 
-    // 사이렌 ID 가져오기.
-    public static string[] GetSirenIDs()
-    {
-        return sirenIDList.ToArray();
-    }
-
     // 노드 설치 윈도우의 버튼들을 지우고 새로 만듬. 자주 호출하면 좋지 않음.
     private void RenderNodeButtons()
     {
@@ -165,8 +160,13 @@ public class DataManager : MonoBehaviour
         foreach (string physicalID in NodeManager.GetNodeIDs())
         {
             NodeManager nm = NodeManager.GetNodeByID(physicalID);
+
+            // Siren은 만들지 않음.
+            if (nm is NodeSound) continue;
+
             newButton = Instantiate(sensorButton);
             newButton.SetActive(true);
+
             Transform panel = sensorPanel; // Default is sensorPanel
             if (nm is NodeArea) panel = areaPanel;
             if (nm is NodeExit) panel = exitPanel;
@@ -229,12 +229,6 @@ public class DataManager : MonoBehaviour
 
         string id = parsed[0].Trim();
         int typeNumber = int.Parse(parsed[1].Trim());
-
-        if (typeNumber == Const.NODE_SIREN)
-        {
-            sirenIDList.Add(id);
-            return true;
-        }
 
         Type type = Const.GetNodeTypeFromNumber(typeNumber);
         if (type == null) return false;

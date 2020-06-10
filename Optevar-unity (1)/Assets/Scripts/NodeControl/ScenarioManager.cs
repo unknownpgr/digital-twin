@@ -232,15 +232,21 @@ public class ScenarioManager : MonoBehaviour
     }
 
     private AudioSource sirenPlayer;
-    void SetSiren(bool play)
+    public void SetSiren(bool play)
     {
+        // If there are no 
         if (sirenPlayer == null) sirenPlayer = gameObject.GetComponent<AudioSource>();
 
-        if ((!sirenPlayer.isPlaying) && play) sirenPlayer.Play();
-        else if (sirenPlayer.isPlaying && (!play)) sirenPlayer.Stop();
-        // Then sirenPlayer.isPlaying==play
-        else return;
-        mQTTManager.PubSiren(play);
+        if ((!sirenPlayer.isPlaying) && play)
+        {
+            mQTTManager.PubSiren(true);
+            sirenPlayer.Play();
+        }
+        else if (sirenPlayer.isPlaying && (!play))
+        {
+            mQTTManager.PubSiren(false);
+            sirenPlayer.Stop();
+        }
     }
 
     IEnumerator InitSimulation()

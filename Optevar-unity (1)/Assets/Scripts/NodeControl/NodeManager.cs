@@ -184,19 +184,27 @@ abstract public class NodeManager
         if (nodes.ContainsKey(PhysicalID)) throw new Exception("Node " + PhysicalID + " already exists");
         else nodes.Add(PhysicalID, this);
 
-        // Load prefab from prefabName
-        GameObject prefab = (GameObject)Resources.Load("Prefabs/" + prefabName);
-        if (prefab == null) throw new Exception("No such prefab(" + prefabName + ") exists.");
+        // 만약 prefabName이 null이면 실체가 없는 hidden node로 간주한다.
+        if (prefabName != null)
+        {
+            // Load prefab from prefabName
+            GameObject prefab = (GameObject)Resources.Load("Prefabs/" + prefabName);
+            if (prefab == null) throw new Exception("No such prefab(" + prefabName + ") exists.");
 
-        // Attach gameObject to nodeManager
-        if (gameObject != null) GameObject.Destroy(gameObject);
-        gameObject = (GameObject)GameObject.Instantiate(prefab);
-        gameObject.name = PhysicalID;
-        gameObject.transform.position = _position;
+            // Attach gameObject to nodeManager
+            if (gameObject != null) GameObject.Destroy(gameObject);
+            gameObject = (GameObject)GameObject.Instantiate(prefab);
+            gameObject.name = PhysicalID;
+            gameObject.transform.position = _position;
 
-        // Set visibility
-        hide = state != NodeState.STATE_INITIALIZED;
-        gameObject.SetActive(!hide);
+            // Set visibility
+            hide = state != NodeState.STATE_INITIALIZED;
+            gameObject.SetActive(!hide);
+        }
+        else
+        {
+            Debug.Log("Hidden node loaded : " + PhysicalID);
+        }
 
         // Rename gameObject
         onNodeStateChanged();

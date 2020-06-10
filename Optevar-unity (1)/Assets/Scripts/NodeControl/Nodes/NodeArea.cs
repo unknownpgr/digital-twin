@@ -11,6 +11,9 @@ public class NodeArea : NodeManager
 
     private static Vector3 HUMANOID_DISTANCE = new Vector3(1.5f, 0, 0);
 
+    private GraphManager gm=null;
+    private List<Vector2> headCount = new List<Vector2>();
+
     // Do not directly access here.
     private int num = 0;
 
@@ -23,7 +26,6 @@ public class NodeArea : NodeManager
             num = value;
             textMesh.text = value + "";
 
-            // Like candles of birthday cake.
             int visibleNumber = value / 10;
             if (visibleNumber >= humanoidList.Length) visibleNumber = humanoidList.Length - 1;
             for (int i = 0; i < humanoidList.Length; i++)
@@ -33,6 +35,15 @@ public class NodeArea : NodeManager
             }
             humanoidList[visibleNumber].SetActive(value % 10 > 0);
             humanoidList[visibleNumber].transform.localScale = Vector3.one * (value % 10 > 5 ? 1 : .75f);
+
+            // Update list
+            int currentHeadCount = 0;
+            foreach(NodeArea node in NodeManager.GetNodesByType<NodeArea>())
+            {
+                currentHeadCount += node.num;
+            }
+            headCount.Add(new Vector2(headCount.Count, currentHeadCount));
+            if (gm != null) gm.SetGraph(headCount);
         }
     }
 
@@ -60,5 +71,6 @@ public class NodeArea : NodeManager
         }
 
         Num = 0;
+        gm = GameObject.Find("graph").AddComponent<GraphManager>();
     }
 }

@@ -110,7 +110,7 @@ public class MQTTManager : MonoBehaviour
 
     public void Publish(string topic, string msg)
     {
-        Debug.Log("Topic : "+topic+"\nMessage : "+msg);
+        Debug.Log("Topic : " + topic + "\nMessage : " + msg);
         new Thread(() => client.Publish(topic, Encoding.UTF8.GetBytes(msg), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false)).Start();
     }
 
@@ -153,6 +153,10 @@ public class MQTTManager : MonoBehaviour
         string msgStr = System.Text.Encoding.UTF8.GetString(e.Message);
         string topic = e.Topic;
 
+
+        Debug.Log("Topic : "+topic+"\nMessage : "+msgStr);
+
+
         if (topic == mqttConf.topic[0] ||   //mws/Notification/Periodic/SensingValueEvent
             topic == mqttConf.topic[1] ||   //mws/Notification/Periodic/DisasterEvent
             topic == mqttConf.topic[2] ||   //mws/Notification/Periodic/EvacueeEvent
@@ -192,9 +196,9 @@ public class MQTTManager : MonoBehaviour
     public void PubSiren(bool siren)
     {
         //ToDo : NodeID for siren
-        foreach (string sirenID in DataManager.GetSirenIDs())
+        foreach (NodeSound ns in NodeManager.GetNodesByType<NodeSound>())
         {
-            string json = "{\"nodeId\":\"" + sirenID + "\",\"sound\":\"" + (siren ? "on" : "off") + "\"}";
+            string json = "{\"nodeId\":\"" + ns.PhysicalID + "\",\"sound\":\"" + (siren ? "on" : "off") + "\"}";
             Publish("mws/Set/Sound", json);
         }
     }

@@ -17,7 +17,7 @@ public static class Const
 
     public static Type GetNodeTypeFromNumber(int typeNumber)
     {
-        Type type = null;
+        Type type;
 
         switch (typeNumber)
         {
@@ -45,6 +45,10 @@ public static class Const
 
             case NODE_AREA:
                 type = typeof(NodeArea);
+                break;
+
+            case NODE_SIREN:
+                type = typeof(NodeSound);
                 break;
 
             default:

@@ -18,7 +18,7 @@ public class ToggleController : MonoBehaviour
 	private CanvasGroup moniteringCG;
 
 	// for handle moving
-	public float speed;
+	private float speed = 1.0f;
 	private float t = 0.0f;
 
 	// handle position
