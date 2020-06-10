@@ -126,24 +126,20 @@ public static class BuildingManager
         // Set building floors
         floorsCount = building.transform.childCount;
 
-        // If building has multiple floors
-        if (floorsCount > 1)
+        // Convert gameobject to floor object and append to list
+        Floors = new List<Floor>();
+        foreach (Transform floor in building.transform)
         {
-            // Convert gameobject to floor object and append to list
-            Floors = new List<Floor>();
-            foreach (Transform floor in building.transform)
-            {
-                Floors.Add(new Floor(floor.gameObject));
-            }
-
-            // Sort by height
-            Floors.Sort(delegate (Floor c1, Floor c2)
-            {
-                if (c1.Height > c2.Height) return 1;
-                if (c1.Height < c2.Height) return -1;
-                throw new Exception("Same height floor");
-            });
+            Floors.Add(new Floor(floor.gameObject));
         }
+
+        // Sort by height
+        Floors.Sort(delegate (Floor c1, Floor c2)
+        {
+            if (c1.Height > c2.Height) return 1;
+            if (c1.Height < c2.Height) return -1;
+            throw new Exception("Same height floor");
+        });
 
         // Invoke bakeNavMesh after delay
         NavMeshBaker.BakeNavMesh(building);

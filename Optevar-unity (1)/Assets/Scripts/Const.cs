@@ -15,6 +15,14 @@ public static class Const
     public const int NODE_SIREN = 0x26;
     public const int NODE_DIRECTION = 0x27;
 
+    public const string AUTOSAVE_NAME_FORMAT = "AutoSave_{0}.json";
+
+    public static string GetAutoSaveFileName(string buildingName)
+    {
+        buildingName = buildingName.Split('.')[0];
+        return String.Format(AUTOSAVE_NAME_FORMAT, buildingName);
+    }
+
     public static Type GetNodeTypeFromNumber(int typeNumber)
     {
         Type type;

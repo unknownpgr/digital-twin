@@ -32,6 +32,14 @@ public class FunctionManager : MonoBehaviour
     private Text nodeValue;
     private Transform fireInfos;
 
+
+    private Button placingBtn;
+    private Button moniteringBtn;
+    private Image placingBtnImage;
+    private Image moniteringBtnImage;
+    private CanvasGroup placingBtnCG;
+    private CanvasGroup moniteringBtnCG;
+
     // Program mode
     private static bool isPlacingMode = true;
     public static bool IsPlacingMode
@@ -115,15 +123,31 @@ public class FunctionManager : MonoBehaviour
             OnSetFloor(BuildingManager.FloorsCount - 1);
         }
 
+        // Set date and time texts
         dtPanel = Find("date_and_time");
         dateText = dtPanel.GetChild(0).GetComponent<Text>();
         timeText = dtPanel.GetChild(1).GetComponent<Text>();
 
+        // Get elements of node information window
         nodeInfos = Find("window_node_info").GetChild(1);
         nodeID = nodeInfos.GetChild(0).GetChild(1).GetComponent<InputField>();
         nodeType = nodeInfos.GetChild(1).GetChild(1).GetComponent<InputField>();
         nodeValue = nodeInfos.GetChild(2).GetChild(1).GetComponentInChildren<Text>();
         fireInfos = nodeInfos.GetChild(3);
+
+
+        Transform modeBtnTransform = Find("button_mode");
+        GameObject placingPart = modeBtnTransform.GetChild(0).gameObject;
+        GameObject moniteringPart = modeBtnTransform.GetChild(1).gameObject;
+
+        placingBtn = placingPart.GetComponent<Button>();
+        moniteringBtn = moniteringPart.GetComponent<Button>();
+        placingBtnImage = placingPart.GetComponent<Image>();
+        moniteringBtnImage = moniteringPart.GetComponent<Image>();
+        placingBtnCG = placingPart.GetComponent<CanvasGroup>();
+        moniteringBtnCG = moniteringPart.GetComponent<CanvasGroup>();
+
+        SetModeButtonColor(IsPlacingMode);
 
         // Start clock
         StartCoroutine(UpdateDateAndTime());
@@ -136,6 +160,9 @@ public class FunctionManager : MonoBehaviour
     // floor starts from 0. 1st floor = 0
     private void OnSetFloor(int floor)
     {
+        // If given building has only one floor, ignore floor setting.
+        if (BuildingManager.FloorsCount == 1) return;
+
         for (int i = 0; i < BuildingManager.FloorsCount; i++)
         {
             if (i <= floor) BuildingManager.Floors[i].SetActive(true);
@@ -241,6 +268,8 @@ public class FunctionManager : MonoBehaviour
 
         if (IsPlacingMode)
         {
+            SetModeButtonColor(!IsPlacingMode);
+
             // Placing mode to monitoring mode
             Find("layout_buttons").gameObject.SetActive(false);
             // Find("window_graph").gameObject.GetComponent<WindowManager>().SetVisible(true);
@@ -250,16 +279,15 @@ public class FunctionManager : MonoBehaviour
         }
         else
         {
+            SetModeButtonColor(!IsPlacingMode);
+
             // Monitoring mode to placing mode
             Find("layout_buttons").gameObject.SetActive(true);
             Find("warning_box").gameObject.SetActive(false);
             Find("button_end_simulation").gameObject.SetActive(false);
 
-            // ToDo : 이거 좀 깔끔하게 바꾸자.
-            Find("button_mode").gameObject.GetComponent<ToggleController>().SwitchModeValue();
-
             // 초기화는 terminateAll일 때에만 한다.
-            if(terminateAll) ScenarioManager.singleTon.SetDefault();
+            if (terminateAll) ScenarioManager.singleTon.SetDefault();
 
             // Initialize
             DataManager dataManager = GetComponent<DataManager>();
@@ -336,6 +364,32 @@ public class FunctionManager : MonoBehaviour
                 return Const.NODE_SENSOR_EARTHQUAKE + "(지진)";
             default:
                 return nodeType;
+        }
+    }
+
+    private void SetModeButtonColor(bool isPlacingMode)
+    {
+        if (isPlacingMode)
+        {
+            placingBtn.interactable = false;
+            moniteringBtn.interactable = true;
+
+            placingBtnImage.color = new Color(27 / 255f, 103 / 255f, 255 / 255f);
+            moniteringBtnImage.color = new Color(157 / 255f, 157 / 255f, 157 / 255f);
+
+            placingBtnCG.alpha = 1.0f;
+            moniteringBtnCG.alpha = 0.67f;
+        }
+        else
+        {
+            placingBtn.interactable = true;
+            moniteringBtn.interactable = false;
+
+            placingBtnImage.color = new Color(157 / 255f, 157 / 255f, 157 / 255f);
+            moniteringBtnImage.color = new Color(27 / 255f, 103 / 255f, 255 / 255f);
+
+            placingBtnCG.alpha = 0.67f;
+            moniteringBtnCG.alpha = 1.0f;
         }
     }
 }

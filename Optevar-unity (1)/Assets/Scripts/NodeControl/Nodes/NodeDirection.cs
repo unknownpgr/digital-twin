@@ -20,7 +20,7 @@ public class NodeDirection : NodeManager
         get => direction;
         set
         {
-            Debug.Log("Direction : " + value);
+            //Debug.Log("Direction : " + value);
 
             direction = value;
             directionObject.SetActive(true);

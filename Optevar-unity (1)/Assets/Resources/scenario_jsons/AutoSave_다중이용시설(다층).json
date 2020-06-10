@@ -1,0 +1,21 @@
+{
+  "$type": "System.Collections.Generic.List`1[[NodeManager, Assembly-CSharp]], mscorlib",
+  "$values": [
+    {
+      "$type": "NodeFireSensor, Assembly-CSharp",
+      "ValueTemp": 0.0,
+      "ValueFire": 0.0,
+      "ValueSmoke": 0.0,
+      "PhysicalID": "1111",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          9.043388,
+          15.765,
+          -16.9730053
+        ]
+      },
+      "State": 2
+    }
+  ]
+}

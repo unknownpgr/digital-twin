@@ -16,12 +16,13 @@ public class close_app : MonoBehaviour
         
     }
     public void close_app_button_clicked() {
-        WindowManager closeWindow = WindowManager.GetWindow("window_close");
-        closeWindow.SetVisible(true);
+        Application.Quit();
+        //WindowManager closeWindow = WindowManager.GetWindow("window_close");
+        //closeWindow.SetVisible(true);
     }
 
     public void CloseMainWindow()
     {
-        Application.Quit();
+        //Application.Quit();
     }
 }

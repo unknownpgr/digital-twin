@@ -22,6 +22,9 @@ public class DataManager : MonoBehaviour
     // Current json file
     private static FileInfo currentJsonFile;
 
+    // AutoSave file path
+    private static string autoSaveFilePath;
+
     // DBManager
     private DBManager dBManager;
 
@@ -30,6 +33,8 @@ public class DataManager : MonoBehaviour
     {
         // Set root path
         root = Application.dataPath + "/Resources/scenario_jsons/";
+        // Set autosave file path
+        autoSaveFilePath = root + Const.GetAutoSaveFileName(FunctionManager.BuildingName);
 
         // Hide prefab
         jsonButton = GameObject.Find("button_json_file").gameObject;
@@ -52,9 +57,9 @@ public class DataManager : MonoBehaviour
         {
             // 먼저 JSON파일에서 정보 로드를 시도함.
             NodeManager.DestroyAll();
-            NodeManager.InitiateFromFile(root + "autoSave.json");
+            NodeManager.InitiateFromFile(autoSaveFilePath);
             RenderNodeButtons();
-            inputSaveFileName.text = Path.GetFileNameWithoutExtension("autoSave.json");
+            inputSaveFileName.text = Path.GetFileNameWithoutExtension(autoSaveFilePath);
         }
         catch
         {
@@ -186,13 +191,12 @@ public class DataManager : MonoBehaviour
     private void AutoSave()
     {
         Debug.Log("AutoSave");
-        string path = root + "autoSave.json";
         string data = NodeManager.Jsonfy();
         new Thread(() =>
         {
             lock (mutex)
             {
-                File.WriteAllText(path, data);
+                File.WriteAllText(autoSaveFilePath, data);
             }
         }).Start();
     }
