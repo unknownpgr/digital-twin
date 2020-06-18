@@ -258,7 +258,7 @@ public class FunctionManager : MonoBehaviour
 
     }
 
-    public void OnModeChange(bool terminateAll)
+    public void OnModeChange()
     {
         // ToDo : 
         // terminateAll은 임시로 설정해둔 변수다.
@@ -269,13 +269,12 @@ public class FunctionManager : MonoBehaviour
         if (IsPlacingMode)
         {
             // Placing mode to monitoring mode
-
             SetModeButtonColor(!IsPlacingMode);
             Find("layout_buttons").gameObject.SetActive(false);
-            
+
             // Show
             Find("window_graph").gameObject.GetComponent<WindowManager>().SetVisible(true);
-          
+
             Find("button_end_simulation").gameObject.SetActive(true);
             OnSetFloor(BuildingManager.FloorsCount - 1);
             ScenarioManager.singleTon.Init();
@@ -289,8 +288,7 @@ public class FunctionManager : MonoBehaviour
             Find("warning_box").gameObject.SetActive(false);
             Find("button_end_simulation").gameObject.SetActive(false);
 
-            // 초기화는 terminateAll일 때에만 한다.
-            if (terminateAll) ScenarioManager.singleTon.SetDefault();
+            ScenarioManager.singleTon.SetDefault();
 
             // Initialize
             // DataManager dataManager = GetComponent<DataManager>();

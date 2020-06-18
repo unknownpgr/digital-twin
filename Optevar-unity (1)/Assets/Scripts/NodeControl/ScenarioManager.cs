@@ -19,6 +19,9 @@ public class ScenarioManager : MonoBehaviour
     // false = no sensor is in disaster mode.
     private bool currentDisasterState = false;
 
+    // Check if disaster occurred during simulation.
+    private bool disasterOccurred = false;
+
     //Self data
     NavMeshPath p;
     public SimulationManager3 simulationManager = null;
@@ -89,6 +92,9 @@ public class ScenarioManager : MonoBehaviour
         // << BLOCKING TASK 3 >>
         simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
         simulationManager.SetGrid(grid);
+
+        // Initialize disaster state
+        disasterOccurred = false;
     }
 
     public void SetDefault()
@@ -106,10 +112,15 @@ public class ScenarioManager : MonoBehaviour
         foreach (NodeArea nodeArea in NodeManager.GetNodesByType<NodeArea>()) nodeArea.Num = 0;
         foreach (NodeFireSensor fireSensor in NodeManager.GetNodesByType<NodeFireSensor>()) fireSensor.IsDisaster = false;
 
-        SetSiren(false);
+        // If a disaster has occurred, reset the sensor. else, skip this process.
+        if (disasterOccurred)
+        {
+            // Initialize siren
+            SetSiren(false);
 
-        // Initialize direction sensor
-        foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>()) mQTTManager.PubDirectionOperation(node.PhysicalID, "off");
+            // Initialize direction sensor
+            foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>()) mQTTManager.PubDirectionOperation(node.PhysicalID, "off");
+        }
 
         // Close mqttManager
         mQTTManager?.Close();

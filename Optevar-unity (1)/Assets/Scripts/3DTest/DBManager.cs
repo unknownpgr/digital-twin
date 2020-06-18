@@ -40,10 +40,10 @@ public class DBManager : MonoBehaviour
 
     public void Init()
     {
-        DockerManager DM = new DockerManager();
-        DM.RunDocker();
+        //DockerManager DM = new DockerManager();
+        //DM.RunDocker();
 
-        db = jsonParser.Load<DBClass>("dbconf_temp");//dbcon.jsonf를 통해 load한다(이 파일 수정하기)
+        db = jsonParser.Load<DBClass>("dbconf");//dbcon.jsonf를 통해 load한다(이 파일 수정하기)
         if (db == null)
         {
 
