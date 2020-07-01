@@ -36,12 +36,12 @@ EditorBuildSettings:
     path: "Assets/Scenes/build/Buildings/\uB2E8\uCE35 \uAC74\uBB3C.unity"
     guid: 02b18219979bf2741b8ead105facfcfc
   - enabled: 1
-    path: Assets/Scenes/build/BuildingSelect.unity
+    path: Assets/Scenes/BuildingSelect.unity
     guid: e061eb525c6461f4389b9eac0be47ebe
   - enabled: 0
     path: 
     guid: 00000000000000000000000000000000
   - enabled: 1
-    path: Assets/Scenes/build/PlacingMode.unity
+    path: Assets/Scenes/PlacingMode.unity
     guid: 5b68e8719bea50e47a1b1c075fd87e43
   m_configObjects: {}

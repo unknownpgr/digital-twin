@@ -20079,6 +20079,11 @@ PrefabInstance:
       propertyPath: m_FontData.m_FontStyle
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6254872311383892524, guid: 45d31e6d8094e4a47ad21acb8ac1340b,
+        type: 3}
+      propertyPath: m_Delegates.Array.data[0].callback.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: CloseButtonClicked
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 45d31e6d8094e4a47ad21acb8ac1340b, type: 3}
 --- !u!1001 &6994844107945938297
