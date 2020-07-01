@@ -203,3 +203,42 @@ public class MQTTManager : MonoBehaviour
         }
     }
 }
+
+class MQTTClass
+{
+    public string clientId = "testClient";
+    public string brokerAddr = "13.124.77.110";
+    public int brokerPort = 8883;
+    public string userName = "testId";
+    public string password = "test";
+    public string[] topic;
+
+    override public string ToString()
+    {
+        string ret = "";
+        ret += "Client ID: " + clientId + "\n";
+        ret += "broker Addr: " + brokerAddr + "\n";
+        ret += "broker Port: " + brokerPort + "\n";
+        ret += "userName: " + userName + "\n";
+        ret += "password: " + password + "\n";
+        ret += "topics: \n";
+        for (int i = 0; i < topic.Length; i++)
+            ret += "  " + topic[i] + "\n";
+        return ret;
+    }
+    public void Set(string _str)
+    {
+        string[] str = _str.Split('\n');
+        Debug.Log(str[0]);
+        this.clientId = str[0].Split(':')[1].Trim();
+        this.brokerAddr = str[1].Split(':')[1].Trim();
+        this.brokerPort = int.Parse(str[2].Split(':')[1].Trim());
+        this.userName = str[3].Split(':')[1].Trim();
+        this.password = str[4].Split(':')[1].Trim();
+        List<string> tmp = new List<string>();
+        for (int i = 6; i < str.Length; i++)
+            tmp.Add(str[i].Trim());
+        this.topic = tmp.ToArray();
+        Debug.Log(this.ToString());
+    }
+}
