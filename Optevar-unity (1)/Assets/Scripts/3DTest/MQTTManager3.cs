@@ -106,9 +106,9 @@ public class MQTTManager3 : MonoBehaviour
             if (md.nodeId != null)
                 if (scenarioManager.SensorDictionary.ContainsKey(md.nodeId))
                 {
-                    scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.value1 = md.value;
-                    scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.disaster = false;
-                    scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.nodeType = md.sensorType;
+                    // scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.value1 = md.value;
+                    // scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.disaster = false;
+                    // scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.nodeType = md.sensorType;
 
                     //scenarioManager.sensorNodeJsons[md.nodeId].nodeType = md.sensorType;
                     //scenarioManager.TestSetSensorValue(md.nodeId, md.value, md.sensorType);
@@ -130,8 +130,8 @@ public class MQTTManager3 : MonoBehaviour
             if (md.nodeId != null)
                 if (scenarioManager.SensorDictionary.ContainsKey(md.nodeId))
                 {
-                    scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.value1 = md.value;
-                    scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.disaster = true;
+                    // scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.value1 = md.value;
+                    // scenarioManager.SensorDictionary[md.nodeId].sensor_Attribute.one_sensor.disaster = true;
                     scenarioManager.isSensorUpdated = true;
                 }
         }
@@ -173,7 +173,7 @@ public class MQTTManager3 : MonoBehaviour
 
             if (scenarioManager.SensorDictionary.ContainsKey(d.nodeId))
             {
-                scenarioManager.SensorDictionary[d.nodeId].sensor_Attribute.one_sensor.value1 =
+                // scenarioManager.SensorDictionary[d.nodeId].sensor_Attribute.one_sensor.value1 =
                     d.GetDirection();//string형*
             }
             scenarioManager.isSensorUpdated = true;

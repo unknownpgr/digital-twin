@@ -12,7 +12,7 @@ public class Sensors
 {
     public GameObject gameObject { get; set; }
     public NavMeshObstacle navMeshObstacle { get; set; }
-    public sensor_attribute sensor_Attribute { get; set; }
+    // public sensor_attribute sensor_Attribute { get; set; }
     public Material Material { get; set; }
     public Material Effect { get; set; }
 
@@ -53,7 +53,7 @@ public class Sensors
     public bool SensorValue()
     {
         bool ret = true;
-
+        /*
         switch (sensor_Attribute.one_sensor.nodeType)
         {
             case 33://16진수 21
@@ -84,6 +84,8 @@ public class Sensors
                     dir.OnOff((int)sensor_Attribute.one_sensor.value1 - 4, true, true);
                 break;
         }
+         */
+
         return ret;
     }
 
@@ -554,7 +556,7 @@ public class ScenarioManager3 : MonoBehaviour
             Sensors tmp = new Sensors
             {
                 gameObject = sensorObjs[i],
-                sensor_Attribute = sensorObjs[i].GetComponent<sensor_attribute>()
+                // sensor_Attribute = sensorObjs[i].GetComponent<sensor_attribute>()
             };
             if (tmp.gameObject.GetComponent<MeshRenderer>() != null)
                 tmp.Material = tmp.gameObject.GetComponent<MeshRenderer>().material;
@@ -609,7 +611,7 @@ public class ScenarioManager3 : MonoBehaviour
         foreach (string k in SensorDictionary.Keys)
         {
             ret &= SensorDictionary[k].SensorValue();///////////////////////////
-
+            /*
             if (SensorDictionary[k].sensor_Attribute.one_sensor.disaster)//DisasterEvent일 때
             {
 
@@ -663,6 +665,8 @@ public class ScenarioManager3 : MonoBehaviour
                 }
 
             }
+             */
+
         }
 
 
@@ -779,6 +783,7 @@ public class ScenarioManager3 : MonoBehaviour
         // 모든 방향 지시등 센서마다.
         for (int i = 0; i < sensorObjs.Count; i++)
         {
+            /*
             if (sensorObjs[i].GetComponent<sensor_attribute>().one_sensor.nodeType == 39) // 방향 지시등 일 때
             {
                 DirectionSensorScript dir = sensorObjs[i].GetComponent<DirectionSensorScript>();
@@ -792,6 +797,7 @@ public class ScenarioManager3 : MonoBehaviour
                         p.corners[1] - p.corners[0]));
                 }
             }
+             */
         }
     }
 
