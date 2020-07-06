@@ -138,7 +138,8 @@ public static class BuildingManager
         {
             if (c1.Height > c2.Height) return 1;
             if (c1.Height < c2.Height) return -1;
-            throw new Exception("Same height floor");
+            Debug.Log("Floor with same height detected.");
+            return 0;
         });
 
         // Invoke bakeNavMesh after delay

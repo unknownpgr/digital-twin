@@ -155,6 +155,13 @@ public class FunctionManager : MonoBehaviour
         // Add callback listener
         MouseManager.OnNodeClicked -= OnNodeSelected; // Remove exsiting callback to prevent duplicated call
         MouseManager.OnNodeClicked += OnNodeSelected;
+
+        // Take a screenshot of the building
+        ScreenshotManager.ScreenShot(this, texture =>
+         {
+             byte[] _bytes = texture.EncodeToPNG();
+             File.WriteAllBytes(Application.dataPath + "/Textures/" + BuildingName + ".png", _bytes);
+         });
     }
 
     // floor starts from 0. 1st floor = 0

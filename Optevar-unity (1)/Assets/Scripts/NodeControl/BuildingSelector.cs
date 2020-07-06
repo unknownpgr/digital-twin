@@ -105,7 +105,27 @@ public class BuildingSelector : MonoBehaviour
                             .GetChild(0)
                             .GetComponent<Text>();
         buildingName.text = name;
-        // ToDo : Set image
+
+        // Load image from file
+        string filePath = Application.dataPath + "/textures/" + name + ".png";
+        byte[] fileData;
+        if (File.Exists(filePath))
+        {
+            fileData = File.ReadAllBytes(filePath);
+            Texture2D tex = new Texture2D(2, 2);
+            tex.LoadImage(fileData);
+
+            // Convert it to sprite
+            Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+
+            // Apply
+            prefab.GetComponent<Image>().sprite = sprite;
+        }
+        else
+        {
+            Debug.Log("Thumbnail image " + filePath + " does not exist.");
+        }
+
         return prefab;
     }
 }

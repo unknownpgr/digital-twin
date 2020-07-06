@@ -56,20 +56,6 @@
         ]
       },
       "State": 0
-    },
-    {
-      "$type": "NodeArea, Assembly-CSharp",
-      "Velocity": 4.0,
-      "PhysicalID": "area2",
-      "position": {
-        "$type": "System.Single[], mscorlib",
-        "$values": [
-          0.0,
-          0.0,
-          0.0
-        ]
-      },
-      "State": 0
     }
   ]
 }

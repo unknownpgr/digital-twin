@@ -23,7 +23,7 @@ public class ScenarioManager : MonoBehaviour
     private bool disasterOccurred = false;
 
     //Self data
-    NavMeshPath p;
+    NavMeshPath navMeshPath;
     public SimulationManager3 simulationManager = null;
     int pathSize = 0;
     public bool isSensorUpdated;
@@ -286,13 +286,13 @@ public class ScenarioManager : MonoBehaviour
             {
                 // Calculate path
                 List<Node3> path = new List<Node3>();
-                p = new NavMeshPath();
+                navMeshPath = new NavMeshPath();
 
                 // Calculate path from every area to every exit
-                NavMesh.CalculatePath(area.Position, exit.Position, -1, p);
-                for (int o = 0; o < p.corners.Length - 1; o++)
+                NavMesh.CalculatePath(area.Position, exit.Position, -1, navMeshPath);
+                for (int o = 0; o < navMeshPath.corners.Length - 1; o++)
                 {
-                    path.AddRange(grid.GetNodesFromLine(p.corners[o], p.corners[o + 1]));
+                    path.AddRange(grid.GetNodesFromLine(navMeshPath.corners[o], navMeshPath.corners[o + 1]));
                 }
 
                 // Remove duplicated location
