@@ -44,7 +44,7 @@ public class ScenarioManager : MonoBehaviour
     // (New) Game object of end simulation button
     GameObject endSimulBtn;
 
-    List<screenshot_attr> pathImages = new List<screenshot_attr>();
+    List<ScreenshotAttr> pathImages = new List<ScreenshotAttr>();
 
     // ???
     bool initEvacs = false;
@@ -150,15 +150,15 @@ public class ScenarioManager : MonoBehaviour
 
             switch (data.sensorType)
             {
-                case Const.NODE_SENSOR_TEMP:
+                case Constants.NODE_SENSOR_TEMP:
                     nodeFire.ValueTemp = data.Value;
                     break;
 
-                case Const.NODE_SENSOR_FIRE:
+                case Constants.NODE_SENSOR_FIRE:
                     nodeFire.ValueFire = data.Value;
                     break;
 
-                case Const.NODE_SENSOR_SMOKE:
+                case Constants.NODE_SENSOR_SMOKE:
                     nodeFire.ValueSmoke = data.Value;
                     break;
             }
@@ -324,8 +324,10 @@ public class ScenarioManager : MonoBehaviour
 
     IEnumerator ScreenShot(float time)
     {
-        screenshot_attr screenShotData = new screenshot_attr();
-        screenShotData.time = time;
+        ScreenshotAttr screenShotData = new ScreenshotAttr
+        {
+            time = time
+        };
 
         // Take picture
         subCamera.enabled = true;
@@ -346,7 +348,7 @@ public class ScenarioManager : MonoBehaviour
         // If image is full
         if (pathSize == pathImages.Count)
         {
-            pathImages.Sort(delegate (screenshot_attr x, screenshot_attr y)
+            pathImages.Sort(delegate (ScreenshotAttr x, ScreenshotAttr y)
             {
                 if (x.time > y.time) return 1;
                 else if (x.time < y.time) return -1;

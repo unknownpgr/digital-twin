@@ -34,7 +34,7 @@ public class DataManager : MonoBehaviour
         // Set root path
         root = Application.dataPath + "/Resources/scenario_jsons/";
         // Set autosave file path
-        autoSaveFilePath = root + Const.GetAutoSaveFileName(FunctionManager.BuildingName);
+        autoSaveFilePath = root + Constants.GetAutoSaveFileName(FunctionManager.BuildingName);
 
         // Hide prefab
         jsonButton = GameObject.Find("button_json_file").gameObject;
@@ -234,7 +234,7 @@ public class DataManager : MonoBehaviour
         string id = parsed[0].Trim();
         int typeNumber = int.Parse(parsed[1].Trim());
 
-        Type type = Const.GetNodeTypeFromNumber(typeNumber);
+        Type type = Constants.GetNodeTypeFromNumber(typeNumber);
         if (type == null) return false;
         if (NodeManager.AddNode(id, type)) return true;
         return false;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public static class Const
+public static class Constants
 {
     public const int NODE_SENSOR_TEMP = 0x21;
     public const int NODE_SENSOR_FIRE = 0x22;

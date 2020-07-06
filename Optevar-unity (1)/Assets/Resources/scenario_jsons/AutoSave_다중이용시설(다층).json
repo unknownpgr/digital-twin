@@ -56,59 +56,6 @@
         ]
       },
       "State": 2
-    },
-    {
-      "$type": "NodeArea, Assembly-CSharp",
-      "Velocity": 4.0,
-      "PhysicalID": "area2",
-      "position": {
-        "$type": "System.Single[], mscorlib",
-        "$values": [
-          -27.2673454,
-          15.765,
-          -9.479189
-        ]
-      },
-      "State": 2
-    },
-    {
-      "$type": "NodeExit, Assembly-CSharp",
-      "PhysicalID": "exit1",
-      "position": {
-        "$type": "System.Single[], mscorlib",
-        "$values": [
-          -14.47332,
-          1.665,
-          -9.105444
-        ]
-      },
-      "State": 2
-    },
-    {
-      "$type": "NodeExit, Assembly-CSharp",
-      "PhysicalID": "exit2",
-      "position": {
-        "$type": "System.Single[], mscorlib",
-        "$values": [
-          35.0532,
-          1.66500008,
-          -9.889931
-        ]
-      },
-      "State": 2
-    },
-    {
-      "$type": "NodeExit, Assembly-CSharp",
-      "PhysicalID": "exit3",
-      "position": {
-        "$type": "System.Single[], mscorlib",
-        "$values": [
-          12.4240112,
-          15.765,
-          -15.5092192
-        ]
-      },
-      "State": 2
     }
   ]
 }

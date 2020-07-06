@@ -314,9 +314,9 @@ public class FunctionManager : MonoBehaviour
         {
             NodeFireSensor nodeFireSensor = (NodeFireSensor)node;
 
-            nodeType.text = Const.NODE_SENSOR_TEMP + "(온도)";
-            fireInfos.GetChild(0).GetChild(1).GetComponent<InputField>().text = Const.NODE_SENSOR_FIRE + "(불꽃)";
-            fireInfos.GetChild(2).GetChild(1).GetComponent<InputField>().text = Const.NODE_SENSOR_SMOKE + "(연무)";
+            nodeType.text = Constants.NODE_SENSOR_TEMP + "(온도)";
+            fireInfos.GetChild(0).GetChild(1).GetComponent<InputField>().text = Constants.NODE_SENSOR_FIRE + "(불꽃)";
+            fireInfos.GetChild(2).GetChild(1).GetComponent<InputField>().text = Constants.NODE_SENSOR_SMOKE + "(연무)";
 
             UpdateNodeInfoWindow();
         }
@@ -337,10 +337,8 @@ public class FunctionManager : MonoBehaviour
 
     private void UpdateNodeInfoWindow()
     {
-        if (selectedNode is NodeFireSensor)
+        if (selectedNode is NodeFireSensor nodeFireSensor)
         {
-            NodeFireSensor nodeFireSensor = (NodeFireSensor)selectedNode;
-
             nodeValue.text = nodeFireSensor.ValueTemp.ToString();
             fireInfos.GetChild(1).GetChild(1).GetComponentInChildren<Text>().text = nodeFireSensor.ValueFire.ToString();
             fireInfos.GetChild(3).GetChild(1).GetComponentInChildren<Text>().text = nodeFireSensor.ValueSmoke.ToString();
@@ -358,11 +356,11 @@ public class FunctionManager : MonoBehaviour
             case "화재 센서":
                 return nodeType;
             case "방향지시등":
-                return Const.NODE_DIRECTION + "(방향지시등)";
+                return Constants.NODE_DIRECTION + "(방향지시등)";
             case "수재해 센서":
-                return Const.NODE_SENSOR_FLOOD + "(수재해)";
+                return Constants.NODE_SENSOR_FLOOD + "(수재해)";
             case "지진 센서":
-                return Const.NODE_SENSOR_EARTHQUAKE + "(지진)";
+                return Constants.NODE_SENSOR_EARTHQUAKE + "(지진)";
             default:
                 return nodeType;
         }

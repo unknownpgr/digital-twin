@@ -16,7 +16,7 @@ public class MQTTManager : MonoBehaviour
     {
         // Visible variable
         [JsonIgnore]
-        public Type NodeType { get => Const.GetNodeTypeFromNumber(sensorType); }
+        public Type NodeType { get => Constants.GetNodeTypeFromNumber(sensorType); }
         [JsonIgnore]
         public string PhysicalID;
         [JsonIgnore]

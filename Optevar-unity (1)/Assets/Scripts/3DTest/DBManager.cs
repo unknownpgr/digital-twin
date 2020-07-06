@@ -154,11 +154,11 @@ public class DBManager : MonoBehaviour
             "SELECT tb_sensornode_node_address, sensor_ids" +
             " FROM " + db.sensor_id_table +
            " WHERE sensor_ids IN ("
-           + Remove0x(Const.NODE_SENSOR_TEMP) + ","
-           + Remove0x(Const.NODE_SENSOR_FIRE) + ","
-           + Remove0x(Const.NODE_SENSOR_SMOKE) + ","
-           + Remove0x(Const.NODE_SIREN) + ","
-           + Remove0x(Const.NODE_DIRECTION) +
+           + Remove0x(Constants.NODE_SENSOR_TEMP) + ","
+           + Remove0x(Constants.NODE_SENSOR_FIRE) + ","
+           + Remove0x(Constants.NODE_SENSOR_SMOKE) + ","
+           + Remove0x(Constants.NODE_SIREN) + ","
+           + Remove0x(Constants.NODE_DIRECTION) +
            ");";
         Debug.Log("load쿼리문 : " + q);
 

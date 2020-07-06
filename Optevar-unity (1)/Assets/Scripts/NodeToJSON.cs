@@ -105,7 +105,7 @@ public class Scenario
 }*/
 
 [Serializable]
-public class screenshot_attr
+public class ScreenshotAttr
 {
     public Texture2D scrshot;
     public float time;
