@@ -49,6 +49,9 @@ public class GraphManager : MonoBehaviour
             maxValue.y = Mathf.Max(maxValue.y, point.y);
         }
 
+        // If one of the maximum value is 0, then that graph is meaningless.
+        if (maxValue.x == 0 || maxValue.y == 0) return;
+
         Vector2 scaler = new Vector2(size.width / maxValue.x, size.height / maxValue.y);
 
         for (int i = 0; i < end; i++)
