@@ -6,7 +6,7 @@ public class ScreenshotManager
 {
     public delegate void ScreenshotCallBack(Texture2D screenShot);
 
-    // 3. Make it static.
+    // 2. Wrap it.
     public static void ScreenShot(MonoBehaviour context, ScreenshotCallBack callback)
     {
         context.StartCoroutine(ScreenShotCoroutine(callback));

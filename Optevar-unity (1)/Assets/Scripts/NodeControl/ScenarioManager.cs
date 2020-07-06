@@ -41,9 +41,6 @@ public class ScenarioManager : MonoBehaviour
     Image warningIcon;
     Text disatsterName;
 
-    // (New) Game object of end simulation button
-    GameObject endSimulBtn;
-
     List<ScreenshotAttr> pathImages = new List<ScreenshotAttr>();
 
     // ???
@@ -85,9 +82,6 @@ public class ScenarioManager : MonoBehaviour
         warningBox = FunctionManager.Find("warning_box").gameObject;
         warningIcon = warningBox.transform.GetChild(0).GetComponent<Image>();
         disatsterName = warningBox.transform.GetChild(1).GetComponent<Text>();
-
-        // (New) Get object of end simulation button
-        endSimulBtn = FunctionManager.Find("button_end_simulation").gameObject;
 
         // << BLOCKING TASK 3 >>
         simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
@@ -200,7 +194,6 @@ public class ScenarioManager : MonoBehaviour
                 SetSiren(true);
                 WindowManager.GetWindow("window_path").SetVisible(true);
                 warningBox.SetActive(true);
-                endSimulBtn.SetActive(true);
 
                 StartCoroutine(SetTextOpacity());
                 StartCoroutine(InitSimulation());

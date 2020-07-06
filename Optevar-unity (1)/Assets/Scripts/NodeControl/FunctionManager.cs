@@ -282,7 +282,6 @@ public class FunctionManager : MonoBehaviour
             // Show
             Find("window_graph").gameObject.GetComponent<WindowManager>().SetVisible(true);
 
-            Find("button_end_simulation").gameObject.SetActive(true);
             OnSetFloor(BuildingManager.FloorsCount - 1);
             ScenarioManager.singleTon.Init();
         }
@@ -293,7 +292,6 @@ public class FunctionManager : MonoBehaviour
             // Monitoring mode to placing mode
             Find("layout_buttons").gameObject.SetActive(true);
             Find("warning_box").gameObject.SetActive(false);
-            Find("button_end_simulation").gameObject.SetActive(false);
 
             ScenarioManager.singleTon.SetDefault();
 
