@@ -11,7 +11,6 @@ public class NodeArea : NodeManager
 
     private static Vector3 HUMANOID_DISTANCE = new Vector3(1.5f, 0, 0);
 
-    private GraphManager gm=null;
     private List<Vector2> headCount = new List<Vector2>();
 
     // Do not directly access here.
@@ -44,7 +43,6 @@ public class NodeArea : NodeManager
             }
 
             headCount.Add(new Vector2(headCount.Count, currentHeadCount));
-            if (gm != null) gm.SetGraph(headCount);
         }
     }
 
@@ -72,6 +70,5 @@ public class NodeArea : NodeManager
         }
 
         Num = 0;
-        gm = GameObject.Find("graph").AddComponent<GraphManager>();
     }
 }
