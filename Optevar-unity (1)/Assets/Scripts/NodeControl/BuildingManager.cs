@@ -27,9 +27,9 @@ public static class BuildingManager
             this.Height = bounds.center.y;
         }
 
-        public void SetActive(bool activation)
+        public void SetVisible(bool visibility)
         {
-            gameObject.SetActive(activation);
+            gameObject.SetActive(visibility);
         }
     }
 
@@ -40,7 +40,7 @@ public static class BuildingManager
             Invoke("BakeNavMesh", 0.1f);
         }
 
-        // Bake NavMesh in runtime
+        // Bake NavMesh in runtime. Caution : It is used in Start method.
         private void BakeNavMesh()
         {
             NavMeshSurface surface = gameObject.AddComponent<NavMeshSurface>();
@@ -171,10 +171,7 @@ public static class BuildingManager
     private static void RecursiveSetLayer(int layer, GameObject obj)
     {
         obj.layer = layer;
-        for (int i = 0; i < obj.transform.childCount; i++)
-        {
-            RecursiveSetLayer(layer, obj.transform.GetChild(i).gameObject);
-        }
+        foreach (Transform child in obj.transform) RecursiveSetLayer(layer, child.gameObject);
     }
 
     // Recursively set collider on gameobject
@@ -187,11 +184,7 @@ public static class BuildingManager
             tmp.convex = false;
             // tmp.static = true;
         }
-
-        for (int i = 0; i < obj.transform.childCount; i++)
-        {
-            RecursiveSetCollider(obj.transform.GetChild(i).gameObject);
-        }
+        foreach (Transform child in obj.transform) RecursiveSetCollider(child.gameObject);
     }
 
     // Get Bound of give obejct
@@ -201,30 +194,66 @@ public static class BuildingManager
 
         // Get renderers
         MeshRenderer[] renderers = gameObject.GetComponentsInChildren<MeshRenderer>();
-        if (renderers.Length > 0)
-        {
-            int i = 0;
 
-            // Get a bound
-            for (; i < renderers.Length; i++)
+        // Get first enabled bound
+        foreach (MeshRenderer renderer in renderers)
+            if (renderer.enabled)
             {
-                if (renderers[i].enabled)
-                {
-                    bounds = renderers[i].bounds;
-                    break;
-                }
+                bounds = renderer.bounds;
+                break;
             }
 
-            // Extend bound to include another bounds
-            for (; i < renderers.Length; i++)
+        // Extend bound to include another bounds
+        foreach (MeshRenderer renderer in renderers)
+            if (renderer.enabled)
             {
-                if (renderers[i].enabled)
-                {
-                    bounds.Encapsulate(renderers[i].bounds);
-                }
+                bounds.Encapsulate(renderer.bounds);
             }
-        }
         return bounds;
     }
-}
 
+    // Set transparency of given object
+    private static void SetTransparency(Transform obj, bool transparency)
+    {
+        // Use DFS to recursivly set the transparency of given object and its childrens
+        Queue<Transform> queue = new Queue<Transform>();
+        queue.Enqueue(obj);
+        Transform current;
+        while (queue.Count > 0)
+        {
+            current = queue.Dequeue();
+            foreach (Renderer renderer in current.GetComponents<Renderer>())
+            {
+                foreach (Material material in renderer.materials)
+                {
+                    Color matColor = material.color;
+                    if (transparency)
+                    {
+                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                        material.SetInt("_ZWrite", 0);
+                        material.DisableKeyword("_ALPHATEST_ON");
+                        material.DisableKeyword("_ALPHABLEND_ON");
+                        material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+                        material.renderQueue = 3000;
+                        matColor.a = 0;
+                    }
+                    else
+                    {
+                        material.SetOverrideTag("RenderType", "");
+                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                        material.SetInt("_ZWrite", 1);
+                        material.DisableKeyword("_ALPHATEST_ON");
+                        material.DisableKeyword("_ALPHABLEND_ON");
+                        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                        material.renderQueue = -1;
+                        matColor.a = 1;
+                    }
+                    material.color = matColor;
+                }
+            }
+            foreach (Transform child in current) queue.Enqueue(child);
+        }
+    }
+}

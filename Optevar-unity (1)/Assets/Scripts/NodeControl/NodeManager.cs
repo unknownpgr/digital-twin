@@ -144,8 +144,8 @@ abstract public class NodeManager
     {
         if (gameObject == null) return;
 
-        // Do not modify 'Hide' or 'State' in here. It would occur recursive function call stack overflow.
-        hide = state != NodeState.STATE_INITIALIZED;    // Initialize 'hide' when node is not initialized.
+        // Do not modify 'Hide' or 'State' variable at here. It would occur stack overflow by recursive function call.
+        if (state != NodeState.STATE_INITIALIZED) hide = true;
         gameObject.SetActive(!hide);                    // If node is initialized and not hidden, show it.
         OnNodeStateChanged?.Invoke();                   // Invoke callback
     }

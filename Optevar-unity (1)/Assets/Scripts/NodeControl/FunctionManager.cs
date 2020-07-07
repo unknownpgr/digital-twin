@@ -172,8 +172,8 @@ public class FunctionManager : MonoBehaviour
 
         for (int i = 0; i < BuildingManager.FloorsCount; i++)
         {
-            if (i <= floor) BuildingManager.Floors[i].SetActive(true);
-            else BuildingManager.Floors[i].SetActive(false);
+            if (i <= floor) BuildingManager.Floors[i].SetVisible(true);
+            else BuildingManager.Floors[i].SetVisible(false);
 
             if (BuildingManager.FloorsCount - i - 1 > floor) floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 0.5f);
             else floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 0.9f);
