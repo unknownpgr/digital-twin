@@ -122,7 +122,11 @@ abstract public class NodeManager
     public NodeState State
     {
         get => state;
-        set { if (state == value) return; state = value; onNodeStateChanged(); }
+        set { if (state == value) return;
+            // Unhide when placed
+            if (value == NodeState.STATE_INITIALIZED) hide = false;
+            state = value; onNodeStateChanged(); 
+        }
     }
 
     // ===[ Protected = child-only properties of node ]==========================================================================

@@ -56,6 +56,97 @@
         ]
       },
       "State": 2
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "EXIT 4",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -12.3586807,
+          15.765,
+          -19.4648857
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "EXIT 5",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          25.07811,
+          15.765,
+          15.8741035
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "EXIT 6",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          3.53482056,
+          15.765,
+          -13.4422846
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "EXIT 7",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          11.0474052,
+          15.765,
+          -8.509449
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "EXIT 8",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          1.4756279,
+          15.765,
+          -18.0720367
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "EXIT 9",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          10.3381042,
+          15.765,
+          -20.2190228
+        ]
+      },
+      "State": 2
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "EXIT 10",
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -14.3412838,
+          15.765,
+          20.2379951
+        ]
+      },
+      "State": 2
     }
   ]
 }

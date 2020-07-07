@@ -23,7 +23,7 @@ public class ArrowRenderer : MonoBehaviour
 	Vector3 upwards = Vector3.up;
 
 	Transform arrow;
-	private readonly List<Transform> segments = new List<Transform>();
+	List<Transform> segments = new List<Transform>();
 
 	public void SetPositions(Vector3 start, Vector3 end)
 	{

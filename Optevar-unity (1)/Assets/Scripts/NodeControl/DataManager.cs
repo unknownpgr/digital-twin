@@ -283,6 +283,15 @@ public class DataManager : MonoBehaviour
         RenderNodeButtons();
     }
 
+    // 탈출구 생성 버튼을 눌렀을 때 발생
+    public void OnExitCreate()
+    {
+        string newExitID = "EXIT " + NodeManager.GetNodeIDs().Length;
+        if (NodeManager.AddNode(newExitID, typeof(NodeExit))) Popup.Show("탈출구를 새로 추가하였습니다.");
+        else Popup.Show("문제가 발생하여 탈출구를 새로 추가하지 못했습니다.");
+        RenderNodeButtons();
+    }
+
     // 노드 설치 윈도우에서 노드 설치했을 경우 발생. 굳이 함수로 안 꺼내고, Lambda로 집어넣어버리는 것도 고려할 것.
     public void OnSelectNode(string nodeID)
     {
