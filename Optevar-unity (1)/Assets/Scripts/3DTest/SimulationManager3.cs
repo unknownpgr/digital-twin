@@ -142,7 +142,6 @@ public class SimulationManager3 : ScriptableObject
         float t = 0f;
         if (EvacuatersList.Count > 0)
         {
-            float dt = 0.1f;
             List<float> timeList = new List<float>();
             List<List<int>> evacNumList = new List<List<int>>();
             for (int i = 0; i < EvacuatersList.Count; i++) evacNumList.Add(new List<int>());

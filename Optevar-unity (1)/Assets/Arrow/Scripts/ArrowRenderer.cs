@@ -10,9 +10,9 @@ public class ArrowRenderer : MonoBehaviour
 	public float speed = 1f;
 	
 	[SerializeField]
-	GameObject arrowPrefab;
+	private GameObject arrowPrefab;
 	[SerializeField]
-	GameObject segmentPrefab;
+	private GameObject segmentPrefab;
 	
 	[Space]
 	[SerializeField]
@@ -23,7 +23,7 @@ public class ArrowRenderer : MonoBehaviour
 	Vector3 upwards = Vector3.up;
 
 	Transform arrow;
-	List<Transform> segments = new List<Transform>();
+	private readonly List<Transform> segments = new List<Transform>();
 
 	public void SetPositions(Vector3 start, Vector3 end)
 	{

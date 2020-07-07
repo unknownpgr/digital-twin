@@ -20,6 +20,10 @@ public class FunctionManager : MonoBehaviour
     private List<GameObject> floorButtons = new List<GameObject>();
     // Sensor buttons of sensor window
 
+    //=============================================================
+    // Pre-loaded UI
+    //=============================================================
+
     // Texts of date and time UI
     private Transform dtPanel;
     private Text dateText;
@@ -31,7 +35,6 @@ public class FunctionManager : MonoBehaviour
     private InputField nodeType;
     private Text nodeValue;
     private Transform fireInfos;
-
 
     private Button placingBtn;
     private Button moniteringBtn;
@@ -106,7 +109,7 @@ public class FunctionManager : MonoBehaviour
 
                     // var i must be copied, or it would be always FloorsCount-1 as it is used from inline functions that share context.
                     int k = i;
-                    newButton.GetComponent<Button>().onClick.AddListener(() => { OnSetFloor(k); });
+                    newButton.GetComponent<Button>().onClick.AddListener(() => { SetFloorVisibility(k); });
                     floorButtons.Add(newButton);
                 }
 
@@ -120,7 +123,7 @@ public class FunctionManager : MonoBehaviour
             }
 
             // Show floors
-            OnSetFloor(BuildingManager.FloorsCount - 1);
+            SetFloorVisibility(BuildingManager.FloorsCount - 1);
         }
 
         // Set date and time texts
@@ -165,7 +168,7 @@ public class FunctionManager : MonoBehaviour
     }
 
     // floor starts from 0. 1st floor = 0
-    private void OnSetFloor(int floor)
+    public static void SetFloorVisibility(int floor)
     {
         // If given building has only one floor, ignore floor setting.
         if (BuildingManager.FloorsCount == 1) return;
@@ -175,8 +178,8 @@ public class FunctionManager : MonoBehaviour
             if (i <= floor) BuildingManager.Floors[i].SetVisible(true);
             else BuildingManager.Floors[i].SetVisible(false);
 
-            if (BuildingManager.FloorsCount - i - 1 > floor) floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 0.5f);
-            else floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 0.9f);
+            if (BuildingManager.FloorsCount - i - 1 > floor) self.floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 0.5f);
+            else self.floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 0.9f);
         }
 
         foreach (NodeManager node in NodeManager.GetAll())
@@ -279,10 +282,8 @@ public class FunctionManager : MonoBehaviour
             SetModeButtonColor(!IsPlacingMode);
             Find("layout_buttons").gameObject.SetActive(false);
 
-            // Show
-            Find("window_graph").gameObject.GetComponent<WindowManager>().SetVisible(true);
-
-            OnSetFloor(BuildingManager.FloorsCount - 1);
+            // Show all floors
+            SetFloorVisibility(BuildingManager.FloorsCount - 1);
             ScenarioManager.singleTon.Init();
         }
         else

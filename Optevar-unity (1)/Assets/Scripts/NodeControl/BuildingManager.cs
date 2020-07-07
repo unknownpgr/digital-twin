@@ -30,6 +30,7 @@ public static class BuildingManager
         public void SetVisible(bool visibility)
         {
             gameObject.SetActive(visibility);
+//            SetTransparency(gameObject.transform,visibility);
         }
     }
 
@@ -213,7 +214,7 @@ public static class BuildingManager
     }
 
     // Set transparency of given object
-    private static void SetTransparency(Transform obj, bool transparency)
+    private static void SetTransparency(Transform obj, bool visible)
     {
         // Use DFS to recursivly set the transparency of given object and its childrens
         Queue<Transform> queue = new Queue<Transform>();
@@ -227,18 +228,7 @@ public static class BuildingManager
                 foreach (Material material in renderer.materials)
                 {
                     Color matColor = material.color;
-                    if (transparency)
-                    {
-                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                        material.SetInt("_ZWrite", 0);
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
-                        material.renderQueue = 3000;
-                        matColor.a = 0;
-                    }
-                    else
+                    if (visible)
                     {
                         material.SetOverrideTag("RenderType", "");
                         material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
@@ -249,6 +239,18 @@ public static class BuildingManager
                         material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
                         material.renderQueue = -1;
                         matColor.a = 1;
+                    }
+                    else
+                    {
+                        material.SetOverrideTag("RenderType", "Transparent");
+                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                        material.SetInt("_ZWrite", 0);
+                        material.DisableKeyword("_ALPHATEST_ON");
+                        material.EnableKeyword("_ALPHABLEND_ON");
+                        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                        matColor.a = 0;
                     }
                     material.color = matColor;
                 }

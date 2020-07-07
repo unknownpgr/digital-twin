@@ -190,11 +190,13 @@ public class ScenarioManager : MonoBehaviour
             currentDisasterState = newDisasterState;
             if (currentDisasterState)
             {
-                // Disaster is started, or the number of area changed.
+                // Disaster is started(false->true), or the number of area changed while disatser is true.
                 SetSiren(true);
                 WindowManager.GetWindow("window_path").SetVisible(true);
                 warningBox.SetActive(true);
 
+                // Set all floor visible
+                FunctionManager.SetFloorVisibility(999);
                 StartCoroutine(SetTextOpacity());
                 StartCoroutine(InitSimulation());
             }
