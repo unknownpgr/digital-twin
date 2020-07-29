@@ -17,14 +17,13 @@ public class Evacuaters3
     int curPStart;
     Node3 startNode;
     List<Node3> evacList;
-    float distanceOfCell;
+    float distanceOfCell = 0;
     float[][] distancesOfCell;
     float delayed;
     float velocity = 1f; // std velo
     float upVelo = 0.3f;
     float downVelo = 0.38f;
     bool isWait;
-    bool isInit;
 
     public bool isEvacuating;
     public float WaitingTime = 0f;
@@ -39,7 +38,6 @@ public class Evacuaters3
         startNode = grid.GetNodeFromPosition(start);
         evacList = new List<Node3>();
         isWait = false;
-        isInit = false;
     }
 
     public void InitPath()

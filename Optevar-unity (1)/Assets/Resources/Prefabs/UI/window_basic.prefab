@@ -760,6 +760,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WindowName: Test_Window
   WINDOW_VISIBLE_POSITION: {x: 0, y: -100, z: 0}
+  DefaultShow: 0
 --- !u!1 &2903194737275408071
 GameObject:
   m_ObjectHideFlags: 0

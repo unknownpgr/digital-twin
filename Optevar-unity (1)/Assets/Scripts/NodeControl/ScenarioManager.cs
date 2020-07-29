@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.AI;
 using System.Linq;
 using System;
+using System.IO;
 
 public class ScenarioManager : MonoBehaviour
 {
@@ -26,25 +27,20 @@ public class ScenarioManager : MonoBehaviour
     NavMeshPath navMeshPath;
     public SimulationManager3 simulationManager = null;
     int pathSize = 0;
-    public bool isSensorUpdated;
-    public bool isAreaChanged;
     public bool isSimulating = false;
 
     Camera subCamera;
 
-    // (New) Elements of path window UI
+    // Elements of path window UI
     GameObject defaultPathPanel;
-    Transform content;
+    Transform pathWindowcontent;
 
-    // (New) Element of disaster warning UI
+    // Element of disaster warning UI
     GameObject warningBox;
     Image warningIcon;
     Text disatsterName;
 
     List<ScreenshotAttr> pathImages = new List<ScreenshotAttr>();
-
-    // ???
-    bool initEvacs = false;
 
     public void Start()
     {
@@ -74,11 +70,11 @@ public class ScenarioManager : MonoBehaviour
         // Register callback listener
         MQTTManager.OnNodeUpdated = OnNodeUpdated;
 
-        // (New) Get exsisting path panel and transform of parent
+        // Get exsisting path panel and transform of parent
         defaultPathPanel = GameObject.Find("panel_path");
-        content = GameObject.Find("window_path_content").transform;
+        pathWindowcontent = GameObject.Find("window_path_content").transform;
 
-        // (New) Get text of disaster warning UI
+        // Get text of disaster warning UI
         warningBox = FunctionManager.Find("warning_box").gameObject;
         warningIcon = warningBox.transform.GetChild(0).GetComponent<Image>();
         disatsterName = warningBox.transform.GetChild(1).GetComponent<Text>();
@@ -122,11 +118,6 @@ public class ScenarioManager : MonoBehaviour
 
     void OnNodeUpdated(MQTTManager.MQTTMsgData data)
     {
-        // false = every node is not in disaster mode
-        // true = at least one node is in disaster mode
-        bool newDisasterState = false;  // Check disaster.
-        bool isAreaChanged = false;     // Check if area number has been changed.
-
         // Ignore wrong MQTT data
         if (NodeManager.GetNodeByID(data.PhysicalID) == null)
         {
@@ -134,6 +125,9 @@ public class ScenarioManager : MonoBehaviour
             return;
         }
 
+        // false = every node is not in disaster mode
+        // true = at least one node is in disaster mode
+        bool isAreaChanged = false;     // Check if area number has been changed.
         NodeManager node = NodeManager.GetNodeByID(data.PhysicalID);
 
         // Apply changes on node and check current disaster state.
@@ -159,18 +153,18 @@ public class ScenarioManager : MonoBehaviour
 
             Debug.Log(nodeFire.ValueTemp);
 
-            newDisasterState |= data.IsDisaster;
-            if (newDisasterState) disatsterName.text = "화재 발생";
+            if (nodeFire.IsDisaster) disatsterName.text = "화재 발생";
         }
 
-        // Check if number of people in area changed.
         else if (node is NodeArea)
         {
             NodeArea nodeArea = (NodeArea)node;
             if (nodeArea.Num != data.Value)
             {
                 nodeArea.Num = (int)data.Value;
-                isAreaChanged = true;
+                // Check if number of people in area changed.
+                // isAreaChanged는 인원수가 0인지 아닌지 변했을 때에만 trigger된다.
+                isAreaChanged = ((nodeArea.Num + data.Value) > 0) && (nodeArea.Num * data.Value == 0);
             }
         }
 
@@ -179,15 +173,19 @@ public class ScenarioManager : MonoBehaviour
         {
             NodeDirection nodeDirection = (NodeDirection)node;
             nodeDirection.Direction = data.Direction;
+        }
 
-            // Do not change disaster state.
-            newDisasterState = currentDisasterState;
+        // Get new disaster state
+        bool newDisasterState = false;
+        foreach (NodeFireSensor nodeFire in NodeManager.GetNodesByType<NodeFireSensor>())
+        {
+            newDisasterState |= nodeFire.IsDisaster;
         }
 
         // If state changed
-        if ((currentDisasterState != newDisasterState) | isAreaChanged)
+        if ((currentDisasterState ^ newDisasterState) | isAreaChanged)
         {
-            currentDisasterState = newDisasterState;
+            // In this scope, disaster state changed or area number is changed.
             if (currentDisasterState)
             {
                 // Disaster is started(false->true), or the number of area changed while disatser is true.
@@ -200,8 +198,9 @@ public class ScenarioManager : MonoBehaviour
                 StartCoroutine(SetTextOpacity());
                 StartCoroutine(InitSimulation());
             }
-            else
+            else if(isAreaChanged)
             {
+                // 
                 // Disaster has been finished.
                 // ToDo : Consider to put 'SetDefault()' here.
                 grid.InitWeight();
@@ -210,7 +209,14 @@ public class ScenarioManager : MonoBehaviour
                 SetSiren(false);
                 //mQTTManager.PubPeriod(360);
             }
+            else
+            {
+
+            }
         }
+
+        // Update current disaster state
+        currentDisasterState = newDisasterState;
     }
 
     // Update is called once per frame
@@ -229,7 +235,6 @@ public class ScenarioManager : MonoBehaviour
                     grid.Liner();
                     isSimulating = false;
                     simulationManager.PrintOut("");
-                    initEvacs = false;
                     SetDirectionSensor();
                 }
                 StartCoroutine(ScreenShot(simulationManager.delayList[simulationManager.delayList.Count - 1]));
@@ -240,9 +245,10 @@ public class ScenarioManager : MonoBehaviour
     private AudioSource sirenPlayer;
     public void SetSiren(bool play)
     {
-        // If there are no 
+        // If there are no player, make one.
         if (sirenPlayer == null) sirenPlayer = gameObject.GetComponent<AudioSource>();
 
+        // Publish siren signal only when state changes.
         if ((!sirenPlayer.isPlaying) && play)
         {
             mQTTManager.PubSiren(true);
@@ -311,8 +317,7 @@ public class ScenarioManager : MonoBehaviour
         // Now, path calculating finished.
         simulationManager.InitSimParam(pathSize);
         pathImages.Clear();
-        initEvacs = true;
-
+        
         // Start simulating
         isSimulating = true;
     }
@@ -337,6 +342,9 @@ public class ScenarioManager : MonoBehaviour
         screenShotTexture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0, true);
         screenShotTexture.Apply();
 
+        byte[] bytes = screenShotTexture.EncodeToPNG();
+        File.WriteAllBytes(Application.dataPath + "/Resources/최적경로.png", bytes);
+
         screenShotData.scrshot = screenShotTexture;
         pathImages.Add(screenShotData);
 
@@ -350,6 +358,12 @@ public class ScenarioManager : MonoBehaviour
                 return 0;
             });
 
+            // Remove existing panels
+            foreach (Transform child in pathWindowcontent.transform)
+            {
+                GameObject.Destroy(child.gameObject);
+            }
+
             // Show top-10 fastest pathes on panel
             int listCount = Math.Min(pathImages.Count, 10);
             for (int r = 0; r < listCount; r++)
@@ -357,7 +371,7 @@ public class ScenarioManager : MonoBehaviour
                 // Create new image
                 GameObject newPathPanel = Instantiate(defaultPathPanel);
                 Transform newPanelTransform = newPathPanel.transform;
-                newPanelTransform.SetParent(content, false);
+                newPanelTransform.SetParent(pathWindowcontent, false);
                 newPanelTransform.localPosition = Vector3.zero;
 
                 // Set image
@@ -374,9 +388,12 @@ public class ScenarioManager : MonoBehaviour
                 // evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
             }
         }
-    }
+    }/*
+    IEnumerator SendMessage() {
+        return 0;
+    }*/
 
-    int GetTargetFloor(int startFloor, int[] dangerFloor, int floor)
+    static int GetTargetFloor(int startFloor, int[] dangerFloor, int floor)
     {
         if (startFloor == -1) return -1;
         bool toDown, toUp;

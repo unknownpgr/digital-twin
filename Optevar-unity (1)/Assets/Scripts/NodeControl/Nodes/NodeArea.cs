@@ -1,17 +1,19 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
 
 public class NodeArea : NodeManager
 {
+    private static Vector3 HUMANOID_DISTANCE = new Vector3(1.5f, 0, 0);
+    private static int totalHeadCount = 0;
+    private static List<Vector2> headCount = new List<Vector2>();
+    private static DateTime baseTime = DateTime.MinValue;
+    
     protected override string prefabName { get => "AreaNumber"; }
 
     public override string DisplayName { get => "대피자 구역 " + PhysicalID; }
-
-    private static Vector3 HUMANOID_DISTANCE = new Vector3(1.5f, 0, 0);
-
-    private List<Vector2> headCount = new List<Vector2>();
 
     // Do not directly access here.
     private int num = 0;
@@ -36,13 +38,11 @@ public class NodeArea : NodeManager
             humanoidList[visibleNumber].transform.localScale = Vector3.one * (value % 10 > 5 ? 1 : .75f);
 
             // Update list
-            int currentHeadCount = 0;
-            foreach(NodeArea node in GetNodesByType<NodeArea>())
-            {
-                currentHeadCount += node.num;
-            }
+            foreach (NodeArea node in GetNodesByType<NodeArea>()) totalHeadCount += node.num;
+            if (baseTime == DateTime.MinValue) baseTime = DateTime.Now;
+            headCount.Add(new Vector2((float)((DateTime.Now - baseTime).TotalMilliseconds), totalHeadCount));
 
-            headCount.Add(new Vector2(headCount.Count, currentHeadCount));
+            GraphManager.StaticSetGraph(headCount);
         }
     }
 
@@ -63,7 +63,7 @@ public class NodeArea : NodeManager
         Vector3 origin = gameObject.transform.position;
         for (int i = 0; i < humanoidList.Length; i++)
         {
-            humanoidList[i] = Object.Instantiate(humanoidPrefab);
+            humanoidList[i] = UnityEngine.Object.Instantiate(humanoidPrefab);
 
             humanoidList[i].transform.position = origin + offset;
             offset += HUMANOID_DISTANCE;

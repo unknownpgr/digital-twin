@@ -6,11 +6,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 [Serializable]
-class NodePositions
-{
-    public Vector3[] positions;
-}
-[Serializable]
 public class AreaPositions
 {
     public string areaId = "";

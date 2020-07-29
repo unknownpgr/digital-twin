@@ -8,12 +8,7 @@ public class ArrowRenderer : MonoBehaviour
 	public float segmentLength = 0.5f;
 	public float fadeDistance = 0.35f;
 	public float speed = 1f;
-	
-	[SerializeField]
-	private GameObject arrowPrefab;
-	[SerializeField]
-	private GameObject segmentPrefab;
-	
+		
 	[Space]
 	[SerializeField]
 	Vector3 start;
@@ -22,7 +17,6 @@ public class ArrowRenderer : MonoBehaviour
 	[SerializeField]
 	Vector3 upwards = Vector3.up;
 
-	Transform arrow;
 	List<Transform> segments = new List<Transform>();
 
 	public void SetPositions(Vector3 start, Vector3 end)
@@ -73,12 +67,6 @@ public class ArrowRenderer : MonoBehaviour
 			color.a = GetAlpha(pos.z - left.z, right.z - fadeDistance - pos.z, fadeStartDistance);
 			rend.material.SetColor("_Color", color);
 		}
-
-		if (!arrow)
-			arrow = Instantiate(arrowPrefab, transform).transform;
-
-		arrow.localPosition = right;
-		arrow.localRotation = Quaternion.FromToRotation(Vector3.up, right - center);
 		
 		transform.position = start;
 		transform.rotation = Quaternion.LookRotation(end - start, upwards);
@@ -86,9 +74,6 @@ public class ArrowRenderer : MonoBehaviour
 	
 	void CheckSegments(int segmentsCount)
 	{
-		while (segments.Count < segmentsCount)
-			segments.Add(Instantiate(segmentPrefab, transform).transform);
-
 		for (int i = 0; i < segments.Count; i++)
 		{
 			GameObject segment = segments[i].gameObject;

@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using System.IO;
 using UnityEngine.SceneManagement;
 using System;
+using UnityEngine.EventSystems;
 
 public class FunctionManager : MonoBehaviour
 {
@@ -24,10 +25,13 @@ public class FunctionManager : MonoBehaviour
     // Pre-loaded UI
     //=============================================================
 
-    // Texts of date and time UI
+    // Elements of date and time UI
     private Transform dtPanel;
     private Text dateText;
     private Text timeText;
+
+    // Elements of information window
+    Transform infoWindowPanelParnet;
 
     // elements of node information window
     private Transform nodeInfos;
@@ -131,13 +135,15 @@ public class FunctionManager : MonoBehaviour
         dateText = dtPanel.GetChild(0).GetComponent<Text>();
         timeText = dtPanel.GetChild(1).GetComponent<Text>();
 
+        // Get transform of information window
+        infoWindowPanelParnet = Find("window_information").GetChild(3);
+
         // Get elements of node information window
         nodeInfos = Find("window_node_info").GetChild(1);
         nodeID = nodeInfos.GetChild(0).GetChild(1).GetComponent<InputField>();
         nodeType = nodeInfos.GetChild(1).GetChild(1).GetComponent<InputField>();
         nodeValue = nodeInfos.GetChild(2).GetChild(1).GetComponentInChildren<Text>();
         fireInfos = nodeInfos.GetChild(3);
-
 
         Transform modeBtnTransform = Find("button_mode");
         GameObject placingPart = modeBtnTransform.GetChild(0).gameObject;
@@ -247,25 +253,40 @@ public class FunctionManager : MonoBehaviour
         createVirtualWindow.SetVisible(true);
     }
 
-    public void OnClickInformation()
+    public void OnClickInformationIcon()
     {
+        // Move transform of building information panel to the end
+        // to be seen first when information window popped out
+        infoWindowPanelParnet.Find("panel_building_info").SetAsLastSibling();
+
         WindowManager informationWindow = WindowManager.GetWindow("window_information");
         informationWindow.SetVisible(true);
     }
 
-    public void OnLoadBuildingInfo()
+    public void OnClickInformationWindowMenu()
     {
+        // Transform of panel about clicked button
+        Transform selectedPanelTransform;
+        // Name of clicked button
+        string buttonName = EventSystem.current.currentSelectedGameObject.name;
+        /*
+         * button name : button_****
+         * panel name : panel_****
+         */
+        string[] parsed = buttonName.Split('_');
+        string panelName = "panel";
 
-    }
+        // Make panel name with parsed button name
+        for (int i=1;i<parsed.Length;i++)
+        {
+            string temp = "_" + parsed[i];
+            panelName += temp;
+        }
 
-    public void OnLoadMQTTInfo()
-    {
-
-    }
-
-    public void OnLoadSystemInfo()
-    {
-
+        // Find panel with panel name using parent transform
+        selectedPanelTransform = infoWindowPanelParnet.Find(panelName);
+        // Set panel transform to the end of the transform list
+        selectedPanelTransform.SetAsLastSibling();
     }
 
     public void OnModeChange()
@@ -285,6 +306,10 @@ public class FunctionManager : MonoBehaviour
             // Show all floors
             SetFloorVisibility(BuildingManager.FloorsCount - 1);
             ScenarioManager.singleTon.Init();
+
+            // Show graph
+            WindowManager graphManager = WindowManager.GetWindow("window_graph");
+            graphManager.SetVisible(true);
         }
         else
         {
