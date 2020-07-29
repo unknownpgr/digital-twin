@@ -45,6 +45,7 @@ public class ScenarioManager : MonoBehaviour
     public void Start()
     {
         singleTon = this;
+        StartCoroutine(StartTimer());
     }
 
     public void Init()
@@ -127,7 +128,6 @@ public class ScenarioManager : MonoBehaviour
 
         // false = every node is not in disaster mode
         // true = at least one node is in disaster mode
-        bool isAreaChanged = false;     // Check if area number has been changed.
         NodeManager node = NodeManager.GetNodeByID(data.PhysicalID);
 
         // Apply changes on node and check current disaster state.
@@ -156,6 +156,7 @@ public class ScenarioManager : MonoBehaviour
             if (nodeFire.IsDisaster) disatsterName.text = "화재 발생";
         }
 
+        // Update node
         else if (node is NodeArea)
         {
             NodeArea nodeArea = (NodeArea)node;
@@ -164,7 +165,6 @@ public class ScenarioManager : MonoBehaviour
                 nodeArea.Num = (int)data.Value;
                 // Check if number of people in area changed.
                 // isAreaChanged는 인원수가 0인지 아닌지 변했을 때에만 trigger된다.
-                isAreaChanged = ((nodeArea.Num + data.Value) > 0) && (nodeArea.Num * data.Value == 0);
             }
         }
 
@@ -174,21 +174,31 @@ public class ScenarioManager : MonoBehaviour
             NodeDirection nodeDirection = (NodeDirection)node;
             nodeDirection.Direction = data.Direction;
         }
+    }
 
-        // Get new disaster state
-        bool newDisasterState = false;
-        foreach (NodeFireSensor nodeFire in NodeManager.GetNodesByType<NodeFireSensor>())
+    IEnumerator StartTimer()
+    {
+        while (true)
         {
-            newDisasterState |= nodeFire.IsDisaster;
-        }
-
-        // If state changed
-        if ((currentDisasterState ^ newDisasterState) | isAreaChanged)
-        {
-            // In this scope, disaster state changed or area number is changed.
-            if (currentDisasterState)
+            // Get new disaster state
+            bool newDisasterState = false;
+            foreach (NodeFireSensor nodeFire in NodeManager.GetNodesByType<NodeFireSensor>())
             {
-                // Disaster is started(false->true), or the number of area changed while disatser is true.
+                newDisasterState |= nodeFire.IsDisaster;
+            }
+            if (currentDisasterState ^ newDisasterState)
+            {
+                if (!newDisasterState)
+                {
+                    grid.InitWeight();
+                    grid.ViewMinPath = false;
+                    grid.InitLiner();
+                    SetSiren(false);
+                }
+            }
+            if (newDisasterState)
+            {
+                // Disaster is started(false->true)
                 SetSiren(true);
                 WindowManager.GetWindow("window_path").SetVisible(true);
                 warningBox.SetActive(true);
@@ -198,25 +208,10 @@ public class ScenarioManager : MonoBehaviour
                 StartCoroutine(SetTextOpacity());
                 StartCoroutine(InitSimulation());
             }
-            else if(isAreaChanged)
-            {
-                // 
-                // Disaster has been finished.
-                // ToDo : Consider to put 'SetDefault()' here.
-                grid.InitWeight();
-                grid.ViewMinPath = false;
-                grid.InitLiner();
-                SetSiren(false);
-                //mQTTManager.PubPeriod(360);
-            }
-            else
-            {
+            currentDisasterState = newDisasterState;
 
-            }
+            yield return new WaitForSeconds(10);
         }
-
-        // Update current disaster state
-        currentDisasterState = newDisasterState;
     }
 
     // Update is called once per frame
@@ -388,10 +383,7 @@ public class ScenarioManager : MonoBehaviour
                 // evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
             }
         }
-    }/*
-    IEnumerator SendMessage() {
-        return 0;
-    }*/
+    }
 
     static int GetTargetFloor(int startFloor, int[] dangerFloor, int floor)
     {
