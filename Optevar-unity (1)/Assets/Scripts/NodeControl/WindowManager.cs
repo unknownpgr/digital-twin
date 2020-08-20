@@ -41,7 +41,7 @@ public class WindowManager : MonoBehaviour
         rectTransform = gameObject.GetComponent<RectTransform>();
         parantTransform = transform.parent.GetComponent<RectTransform>();
 
-        WINDOW_HIDE_POSITION = new Vector2(0, rectTransform.sizeDelta.y + 100);
+        WINDOW_HIDE_POSITION = new Vector2(0, rectTransform.sizeDelta.y + 120);
 
         // Move current window to given position
         if(DefaultShow){

@@ -20,10 +20,9 @@ public class ScenarioManager : MonoBehaviour
     // false = no sensor is in disaster mode.
     private bool currentDisasterState = false;
 
-    // Check if disaster occurred during simulation.
+    // Check if disaster occurred at least once during simulation.
     private bool disasterOccurred = false;
 
-    //Self data
     NavMeshPath navMeshPath;
     public SimulationManager3 simulationManager = null;
     int pathSize = 0;
@@ -40,12 +39,15 @@ public class ScenarioManager : MonoBehaviour
     Image warningIcon;
     Text disatsterName;
 
+    // Element of video window
+    
+
     List<ScreenshotAttr> pathImages = new List<ScreenshotAttr>();
 
     public void Start()
     {
         singleTon = this;
-        StartCoroutine(StartTimer());
+        StartCoroutine(PeriodicCheck());
     }
 
     public void Init()
@@ -60,7 +62,7 @@ public class ScenarioManager : MonoBehaviour
         cameraPosition.y = 100;
         subCamera.transform.position = cameraPosition;
 
-        // << BLOCKING TASK 1 >>
+        // << BLOCKING TASK 1 >> Make new navgrid
         if (grid == null) grid = transform.GetComponent<Grid3>();
         NavMeshTriangulation tri = NavMesh.CalculateTriangulation();
         grid.CreateGrid(tri.vertices, BuildingManager.FloorsCount);
@@ -68,7 +70,7 @@ public class ScenarioManager : MonoBehaviour
         if (mQTTManager == null) mQTTManager = GetComponent<MQTTManager>();
         mQTTManager.Init();
 
-        // Register callback listener
+        // Register node update callback listener
         MQTTManager.OnNodeUpdated = OnNodeUpdated;
 
         // Get exsisting path panel and transform of parent
@@ -80,7 +82,7 @@ public class ScenarioManager : MonoBehaviour
         warningIcon = warningBox.transform.GetChild(0).GetComponent<Image>();
         disatsterName = warningBox.transform.GetChild(1).GetComponent<Text>();
 
-        // << BLOCKING TASK 3 >>
+        // << BLOCKING TASK 2 >> Add sgrid
         simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
         simulationManager.SetGrid(grid);
 
@@ -88,7 +90,8 @@ public class ScenarioManager : MonoBehaviour
         disasterOccurred = false;
     }
 
-    public void SetDefault()
+    // End simulation and initialize associated variables. (SetDefault() function in previous versions)
+    public void EndSimulation()
     {
         // Reset path
         grid.ResetFinalPaths();
@@ -103,13 +106,11 @@ public class ScenarioManager : MonoBehaviour
         foreach (NodeArea nodeArea in NodeManager.GetNodesByType<NodeArea>()) nodeArea.Num = 0;
         foreach (NodeFireSensor fireSensor in NodeManager.GetNodesByType<NodeFireSensor>()) fireSensor.IsDisaster = false;
 
-        // If a disaster has occurred, reset the sensor. else, skip this process.
+        // If a disaster has occurred at least once, reset the sensor. else, skip this process.
         if (disasterOccurred)
         {
-            // Initialize siren
+            // Turn off all siren and all direction sensors
             SetSiren(false);
-
-            // Initialize direction sensor
             foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>()) mQTTManager.PubDirectionOperation(node.PhysicalID, "off");
         }
 
@@ -176,41 +177,51 @@ public class ScenarioManager : MonoBehaviour
         }
     }
 
-    IEnumerator StartTimer()
+    IEnumerator PeriodicCheck()
     {
-        while (true)
+        for (int i = 0; ; i++)
         {
             // Get new disaster state
             bool newDisasterState = false;
             foreach (NodeFireSensor nodeFire in NodeManager.GetNodesByType<NodeFireSensor>())
-            {
                 newDisasterState |= nodeFire.IsDisaster;
-            }
-            if (currentDisasterState ^ newDisasterState)
+
+            // Disaster started(false->true) or during disaster, per 60s.
+            if (newDisasterState & (!currentDisasterState || (i % 60 == 0)))
             {
-                if (!newDisasterState)
-                {
-                    grid.InitWeight();
-                    grid.ViewMinPath = false;
-                    grid.InitLiner();
-                    SetSiren(false);
-                }
-            }
-            if (newDisasterState)
-            {
-                // Disaster is started(false->true)
+                // Start siren, show path window, activate warning box.
                 SetSiren(true);
                 WindowManager.GetWindow("window_path").SetVisible(true);
+                WindowManager.GetWindow("window_video").SetVisible(true);   
                 warningBox.SetActive(true);
 
-                // Set all floor visible
-                FunctionManager.SetFloorVisibility(999);
+                // Set all floor visible and start simulation.
+                FunctionManager.SetFloorVisibility(int.MaxValue);
+                StartCoroutine(StartSimulation());
                 StartCoroutine(SetTextOpacity());
-                StartCoroutine(InitSimulation());
+
+                // Set disaster occurred flag
+                disasterOccurred = true;
             }
+
+            // Disaster is finished(true->false)
+            if (currentDisasterState & !newDisasterState)
+            {
+                // Turn off siren
+                SetSiren(false);
+
+                // Init grid(should make this process simpler)
+                grid.InitWeight();
+                grid.ViewMinPath = false;
+                grid.InitLiner();
+
+                // Deactivate warning box
+                warningBox.SetActive(false);
+            }
+
             currentDisasterState = newDisasterState;
 
-            yield return new WaitForSeconds(10);
+            yield return new WaitForSeconds(1);
         }
     }
 
@@ -256,7 +267,7 @@ public class ScenarioManager : MonoBehaviour
         }
     }
 
-    IEnumerator InitSimulation()
+    IEnumerator StartSimulation()
     {
         yield return new WaitForEndOfFrame();
         yield return new WaitForEndOfFrame();
@@ -312,7 +323,7 @@ public class ScenarioManager : MonoBehaviour
         // Now, path calculating finished.
         simulationManager.InitSimParam(pathSize);
         pathImages.Clear();
-        
+
         // Start simulating
         isSimulating = true;
     }
@@ -454,13 +465,13 @@ public class ScenarioManager : MonoBehaviour
         return ret;
     }
 
-    public IEnumerator SetTextOpacity()
+    private IEnumerator SetTextOpacity()
     {
         warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
         disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
 
         yield return new WaitForSeconds(0.8f);
-        while (warningBox.activeSelf == true)       // isDisater == true
+        while (currentDisasterState) // Please avoid using indirect stat flag. (warningBox.activeSelf)
         {
             warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
             disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);

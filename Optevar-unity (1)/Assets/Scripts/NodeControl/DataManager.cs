@@ -132,16 +132,16 @@ public class DataManager : MonoBehaviour
             newButton.transform.GetChild(0).GetComponent<Text>().text = fi.Name;
 
             Image img = newButton.GetComponent<Image>();
-            img.color = Color.grey;
+            img.color = Color.white;
             newButton.GetComponent<Button>().onClick.AddListener(() =>
             {
                 currentJsonFile = new FileInfo(fi.FullName);
                 foreach (GameObject button in jsonButtons)
                 {
                     Image image = button.GetComponent<Image>();
-                    image.color = Color.grey;
+                    image.color = Color.white;
                 }
-                img.color = Color.white;
+                img.color = new Color(0.9764706f, 0.5921569f, 0.454902f, 1f);   // #F99774
             });
             jsonButtons.Add(newButton);
         }

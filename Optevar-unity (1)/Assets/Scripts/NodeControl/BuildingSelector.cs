@@ -11,6 +11,134 @@ using UnityEngine.SceneManagement;
 
 public class BuildingSelector : MonoBehaviour
 {
+    // This is Dropdown component of Dropdown for selecting building
+    public Dropdown dropdown;
+
+    // These are Button components of Start Button
+    public GameObject startButtonObject;
+    private Button startButton;
+    private Image startButtonImage;
+
+    // a List of Dropdown options (building name)
+    private List<string> buildingNames = new List<string>();
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        // Get components of start button
+        startButton = startButtonObject.GetComponent<Button>();
+        startButtonImage = startButtonObject.GetComponent<Image>();
+
+        // Set Dropdown options with building names
+        SetDropdownOptions();
+    }
+
+    // Get building skp files and building names
+    // and Set Dropdown options to building names
+    private void SetDropdownOptions()
+    {
+        // Clear the old options of the Dropdown menu
+        dropdown.ClearOptions();
+
+        // Add preface text for dropdown 
+        buildingNames.Add("건물 선택하기");
+
+        // Get building skp file location
+        string root = Application.dataPath;
+        string buildings = root + "/Resources/Models";
+
+        // Get building skp list
+        foreach (string filePath in Directory.GetFiles(buildings))
+        {
+            // Check if given file is skp file
+            if (!filePath.Contains(".skp")) continue;
+            if (filePath.Contains(".meta")) continue;
+
+            // Get name of building
+            string buildingName = GetBuildingName(filePath);
+            // Add name of building to list
+            buildingNames.Add(buildingName);
+        }
+
+        // Add list of building name to dropdown options
+        dropdown.AddOptions(buildingNames);
+    }
+
+    // This method is attached to dropdown
+    public void SetStartButton()
+    {
+        // Get building skp file location
+        string root = Application.dataPath;
+        string buildings = root + "/Resources/Models";
+
+        // This is the index number of the current selection in the Dropdown
+        int index = dropdown.value;
+
+        // the value at index zero is not building name, so
+        // If index isn't zero then 
+        // Set start button with valid building file 
+        if (index != 0)
+        {
+            // Find building in list using index
+            string selectedBuildingName = buildingNames[index];
+            Debug.Log("selected building name: " + selectedBuildingName);
+
+            // If start button is not interactable
+            // then Set it to be interactable
+            if (startButton.interactable == false)
+            {
+                startButton.interactable = true;
+            }
+            // and Set button image color to #E0E1FF   
+            startButtonImage.color = new Color(0.1882353f, 0.2117647f, 0.6666667f);
+
+            // Remove all listeners
+            // and Add listener that start system with selected building
+            startButton.onClick.RemoveAllListeners();
+            startButton.onClick.AddListener(() => OnBuildingSelected(buildings, selectedBuildingName));
+        }
+        else if (index == 0)
+        {
+            // If start button is interactable
+            // then Set it to be not interactiable
+            if (startButton.interactable == true)
+            {
+                startButton.interactable = false;
+            }
+            // and Set button image color to #3036AA
+            startButtonImage.color = new Color(0.8784314f, 0.8823529f, 1.0f);
+
+            // Remove all listeners 
+            startButton.onClick.RemoveAllListeners();
+        }
+    }
+
+    private string GetBuildingName(string path)
+    {
+        // path = ~~~\~~~/name.skp
+        char[] splitter = { '/', '\\', '.' };
+        string[] parsed = path.Split(splitter);
+        return parsed[parsed.Length - 2];
+    }
+
+    private void OnBuildingSelected(string path, string name)
+    {
+        FunctionManager.BuildingPath = path;
+        FunctionManager.BuildingName = name;
+
+        // ToDo : Check DB
+        bool dataExists = false;
+
+        if (dataExists) SceneManager.LoadScene("MonitoringMode");
+        else SceneManager.LoadScene("PlacingMode");
+    }
+
+    public void CloseApp()
+    {
+        Application.Quit();
+    }
+
+    /*
     // public RectTransform scrollList;
     public Transform content;
 
@@ -108,4 +236,5 @@ public class BuildingSelector : MonoBehaviour
 
         return prefab;
     }
+    */
 }

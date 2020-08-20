@@ -7,6 +7,7 @@
       "ValueFire": 0.0,
       "ValueSmoke": 0.0,
       "PhysicalID": "00010000",
+      "State": 2,
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
@@ -14,12 +15,12 @@
           2.91499972,
           -3.824739
         ]
-      },
-      "State": 2
+      }
     },
     {
       "$type": "NodeSound, Assembly-CSharp",
       "PhysicalID": "00020000",
+      "State": 0,
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
@@ -27,12 +28,12 @@
           0.0,
           0.0
         ]
-      },
-      "State": 0
+      }
     },
     {
       "$type": "NodeDirection, Assembly-CSharp",
       "PhysicalID": "00030000",
+      "State": 2,
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
@@ -40,13 +41,13 @@
           2.615,
           10.6247511
         ]
-      },
-      "State": 2
+      }
     },
     {
       "$type": "NodeArea, Assembly-CSharp",
       "Velocity": 4.0,
       "PhysicalID": "area1",
+      "State": 0,
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
@@ -54,8 +55,7 @@
           0.0,
           0.0
         ]
-      },
-      "State": 0
+      }
     }
   ]
 }

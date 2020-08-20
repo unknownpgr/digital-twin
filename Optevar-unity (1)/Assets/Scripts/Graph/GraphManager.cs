@@ -24,7 +24,9 @@ public class GraphManager : MonoBehaviour
         singleTone = this;
 
         size = GetComponent<RectTransform>().rect;
-        StartCoroutine(__Test());
+
+        //Uncomment here to enable graph test
+        //StartCoroutine(__Test());
     }
 
    private void AddSegment()

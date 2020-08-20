@@ -25,13 +25,8 @@ public class FunctionManager : MonoBehaviour
     // Pre-loaded UI
     //=============================================================
 
-    // Elements of date and time UI
-    private Transform dtPanel;
-    private Text dateText;
-    private Text timeText;
-
     // Elements of information window
-    Transform infoWindowPanelParnet;
+    Transform infoWindowPanelParent;
 
     // elements of node information window
     private Transform nodeInfos;
@@ -44,8 +39,21 @@ public class FunctionManager : MonoBehaviour
     private Button moniteringBtn;
     private Image placingBtnImage;
     private Image moniteringBtnImage;
-    private CanvasGroup placingBtnCG;
-    private CanvasGroup moniteringBtnCG;
+    private Text placingBtnText;
+    private Text moniteringBtnText;
+
+    // Transform of menu
+    private Transform menu;
+    private RectTransform menuRectTransform;
+    // GameObject of open menu button
+    private GameObject openMenuButton;
+    // GameObject of hide menu
+    private GameObject hiddenMenu;
+
+    // Transform of parent of menu buttons
+    Transform menuButtonParent;
+    // Array of menu button images
+    private Image[] menuButtonImages;
 
     // Program mode
     private static bool isPlacingMode = true;
@@ -130,13 +138,8 @@ public class FunctionManager : MonoBehaviour
             SetFloorVisibility(BuildingManager.FloorsCount - 1);
         }
 
-        // Set date and time texts
-        dtPanel = Find("date_and_time");
-        dateText = dtPanel.GetChild(0).GetComponent<Text>();
-        timeText = dtPanel.GetChild(1).GetComponent<Text>();
-
         // Get transform of information window
-        infoWindowPanelParnet = Find("window_information").GetChild(3);
+        infoWindowPanelParent = Find("window_information").GetChild(3);
 
         // Get elements of node information window
         nodeInfos = Find("window_node_info").GetChild(1);
@@ -145,21 +148,34 @@ public class FunctionManager : MonoBehaviour
         nodeValue = nodeInfos.GetChild(2).GetChild(1).GetComponentInChildren<Text>();
         fireInfos = nodeInfos.GetChild(3);
 
+        // Getelements of mode change button
         Transform modeBtnTransform = Find("button_mode");
         GameObject placingPart = modeBtnTransform.GetChild(0).gameObject;
         GameObject moniteringPart = modeBtnTransform.GetChild(1).gameObject;
-
         placingBtn = placingPart.GetComponent<Button>();
         moniteringBtn = moniteringPart.GetComponent<Button>();
         placingBtnImage = placingPart.GetComponent<Image>();
         moniteringBtnImage = moniteringPart.GetComponent<Image>();
-        placingBtnCG = placingPart.GetComponent<CanvasGroup>();
-        moniteringBtnCG = moniteringPart.GetComponent<CanvasGroup>();
+        placingBtnText = placingPart.GetComponentInChildren<Text>();
+        moniteringBtnText = moniteringPart.GetComponentInChildren<Text>();        
 
+        // Set mode change button color
         SetModeButtonColor(IsPlacingMode);
 
-        // Start clock
-        StartCoroutine(UpdateDateAndTime());
+        // Get transform of menu
+        menu = Find("menu");
+        menuRectTransform = menu.GetComponent<RectTransform>();
+        openMenuButton = menu.GetChild(0).gameObject;
+        hiddenMenu = menu.GetChild(1).gameObject;
+
+        // Set state of button about menu
+        openMenuButton.SetActive(true);
+        hiddenMenu.SetActive(false);
+
+        // Get transform of parent of menu buttons 
+        menuButtonParent = Find("layout_buttons");
+        // Get all image of menu buttons
+        menuButtonImages = menuButtonParent.GetComponentsInChildren<Image>();
 
         // Add callback listener
         MouseManager.OnNodeClicked -= OnNodeSelected; // Remove exsiting callback to prevent duplicated call
@@ -184,25 +200,22 @@ public class FunctionManager : MonoBehaviour
             if (i <= floor) BuildingManager.Floors[i].SetVisible(true);
             else BuildingManager.Floors[i].SetVisible(false);
 
-            if (BuildingManager.FloorsCount - i - 1 > floor) self.floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 0.5f);
-            else self.floorButtons[i].GetComponent<Image>().color = new Color(1, 1, 1, 0.9f);
+            if (((BuildingManager.FloorsCount - floor) - 1) == i)
+            {
+                // #3036aa
+                self.floorButtons[i].GetComponent<Image>().color = new Color(0.1882353f, 0.2117647f, 0.6666667f, 0.84f);
+            }
+            else
+            {
+                self.floorButtons[i].GetComponent<Image>().color = new Color(0, 0, 0, 0.84f);
+            }
+            // if (BuildingManager.FloorsCount - i - 1 > floor) self.floorButtons[i].GetComponent<Image>().color = new Color(0.1882353f, 0.2117647f, 0.6666667f, 0.84f);
+            // else self.floorButtons[i].GetComponent<Image>().color = new Color(0, 0, 0, 0.84f);
         }
 
         foreach (NodeManager node in NodeManager.GetAll())
         {
             node.Hide = BuildingManager.GetFloor(node.Position) > floor;
-        }
-    }
-
-    // Update date and time Text of UI
-    private IEnumerator UpdateDateAndTime()
-    {
-        while (true)
-        {
-            System.DateTime dateTime = System.DateTime.Now;
-            dateText.text = dateTime.ToString("yyyy/MM/dd");
-            timeText.text = dateTime.ToString("hh시 mm분 ss초");
-            yield return new WaitForSeconds(1);
         }
     }
 
@@ -212,9 +225,57 @@ public class FunctionManager : MonoBehaviour
         foreach (Transform child in parent) RecursiveRegisterChild(child, dict);
     }
 
+    private Vector2 MENU_SHOW = new Vector2(0.0f, -61.7f);
+    private Vector2 MENU_HIDE = new Vector2(-310, -61.7f);
+    private bool isMenuHidden;
+    // Move menu and Show hidden menu 
+    // or Move menu and Hide hidden menu
+    private void MoveMenu(bool isMenuHidden)
+    {
+        // If menu is hidden
+        if (isMenuHidden == true)
+        {
+            // then move menu to show hidden menu
+            menuRectTransform.anchoredPosition = MENU_SHOW;
+            isMenuHidden = false;
+        }
+        // If menu is shown
+        else if (isMenuHidden == false)
+        {
+            // then move menu to hide hidden menu
+            menuRectTransform.anchoredPosition = MENU_HIDE;
+            isMenuHidden = true;
+        }
+    }
+
+
     //=======[ Callback functions ]=========================================================
 
     // Called when sensor create button clicked
+
+    public void OnOpenMenu()
+    {
+        // Unactivate open menu Button
+        // and Activate hidden menu 
+        openMenuButton.SetActive(false);
+        hiddenMenu.SetActive(true);
+
+        // Move menu to show
+        MoveMenu(true);
+    }
+
+    public void OnCloseMenu()
+    {
+        // Activate open menu Button
+        // and unactivate hidden menu 
+        openMenuButton.SetActive(true);
+        hiddenMenu.SetActive(false);
+
+        // Move menu to hide
+        MoveMenu(false);
+
+    }
+
     public void OnCreateSensor()
     {
         WindowManager sensorWindow = WindowManager.GetWindow("window_sensor");
@@ -257,7 +318,7 @@ public class FunctionManager : MonoBehaviour
     {
         // Move transform of building information panel to the end
         // to be seen first when information window popped out
-        infoWindowPanelParnet.Find("panel_building_info").SetAsLastSibling();
+        infoWindowPanelParent.Find("panel_building_info").SetAsLastSibling();
 
         WindowManager informationWindow = WindowManager.GetWindow("window_information");
         informationWindow.SetVisible(true);
@@ -284,7 +345,7 @@ public class FunctionManager : MonoBehaviour
         }
 
         // Find panel with panel name using parent transform
-        selectedPanelTransform = infoWindowPanelParnet.Find(panelName);
+        selectedPanelTransform = infoWindowPanelParent.Find(panelName);
         // Set panel transform to the end of the transform list
         selectedPanelTransform.SetAsLastSibling();
     }
@@ -300,8 +361,16 @@ public class FunctionManager : MonoBehaviour
         if (IsPlacingMode)
         {
             // Placing mode to monitoring mode
+
+            // Set mode change button color
             SetModeButtonColor(!IsPlacingMode);
-            Find("layout_buttons").gameObject.SetActive(false);
+            
+            // Unactiavate menu
+            if (isMenuHidden == false)
+            {
+                OnCloseMenu();
+            }
+            menu.gameObject.SetActive(false);
 
             // Show all floors
             SetFloorVisibility(BuildingManager.FloorsCount - 1);
@@ -313,13 +382,18 @@ public class FunctionManager : MonoBehaviour
         }
         else
         {
-            SetModeButtonColor(!IsPlacingMode);
 
             // Monitoring mode to placing mode
-            Find("layout_buttons").gameObject.SetActive(true);
+
+            // Set mode change button color
+            SetModeButtonColor(!IsPlacingMode);
+
+            // Activate menu
+            menu.gameObject.SetActive(true);
+
             Find("warning_box").gameObject.SetActive(false);
 
-            ScenarioManager.singleTon.SetDefault();
+            ScenarioManager.singleTon.EndSimulation();
 
             // Initialize
             // DataManager dataManager = GetComponent<DataManager>();
@@ -337,7 +411,7 @@ public class FunctionManager : MonoBehaviour
         nodeID.text = node.PhysicalID;
 
         bool isFireSensor = node is NodeFireSensor;
-
+        
         fireInfos.gameObject.SetActive(isFireSensor);
 
         if (!isFireSensor) nodeType.text = GetSensorTypeString(node.DisplayName);
@@ -397,6 +471,8 @@ public class FunctionManager : MonoBehaviour
         }
     }
 
+    // When mode change button clicked
+    // Set clicked button color to #3036aa, another to #FFFFFF
     private void SetModeButtonColor(bool isPlacingMode)
     {
         if (isPlacingMode)
@@ -404,22 +480,47 @@ public class FunctionManager : MonoBehaviour
             placingBtn.interactable = false;
             moniteringBtn.interactable = true;
 
-            placingBtnImage.color = new Color(27 / 255f, 103 / 255f, 255 / 255f);
-            moniteringBtnImage.color = new Color(157 / 255f, 157 / 255f, 157 / 255f);
+            placingBtnImage.color = new Color(0.1882353f, 0.2117647f, 0.6666667f, 0.84f);
+            moniteringBtnImage.color = new Color(0f, 0f, 0f, 0.84f);
 
-            placingBtnCG.alpha = 1.0f;
-            moniteringBtnCG.alpha = 0.67f;
+            placingBtnText.color = new Color(1, 1, 1);
+            moniteringBtnText.color = new Color(1, 1, 1, 0.7f);
+            
         }
         else
         {
             placingBtn.interactable = true;
             moniteringBtn.interactable = false;
 
-            placingBtnImage.color = new Color(157 / 255f, 157 / 255f, 157 / 255f);
-            moniteringBtnImage.color = new Color(27 / 255f, 103 / 255f, 255 / 255f);
+            placingBtnImage.color = new Color(0f, 0f, 0f, 0.84f);
+            moniteringBtnImage.color = new Color(0.1882353f, 0.2117647f, 0.6666667f, 0.84f);
 
-            placingBtnCG.alpha = 0.67f;
-            moniteringBtnCG.alpha = 1.0f;
+            placingBtnText.color = new Color(1, 1, 1, 0.7f);
+            moniteringBtnText.color = new Color(1, 1, 1);
+        }
+    }
+
+    // Close system
+    public void CloseApp()
+    {
+        Application.Quit();
+    }
+
+    // When certain button of menu clicked,
+    // Set it's color to #F99774
+    // and Set 'A' value of other to zero
+    public void SetMenuButtonColors(int index)
+    {
+        for (int i = 0; i< menuButtonImages.Length; i++)
+        {
+            if (index == i)
+            {
+                menuButtonImages[i].color = new Color(0.9764706f, 0.5921569f, 0.454902f, 1f);
+            }
+            else
+            {
+                menuButtonImages[i].color = new Color(0f, 0f, 0f, 0f);
+            }
         }
     }
 }
