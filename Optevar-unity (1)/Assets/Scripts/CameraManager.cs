@@ -46,8 +46,20 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             , mainCamera
             , out localPos))
         {
+            Vector2 position = new Vector2(0f, videoWindowRect.rect.height);
+
+            if (localPos.x + videoWindowRect.rect.width > parentRect.rect.x * (-1))
+            {
+                position += new Vector2(-videoWindowRect.rect.width, 0f);
+            }
+
+            if (localPos.y + videoWindowRect.rect.height > parentRect.rect.y * (-1))
+            {
+                position += new Vector2(0f, -videoWindowRect.rect.height);
+            }
+
             // Set local position of video window to position of cursor
-            videoWindowRect.localPosition = localPos;
+            videoWindowRect.localPosition = localPos + position;
         }
 
         // and Actiavate video window

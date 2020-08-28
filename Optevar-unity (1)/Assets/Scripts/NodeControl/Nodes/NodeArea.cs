@@ -38,6 +38,7 @@ public class NodeArea : NodeManager
             humanoidList[visibleNumber].transform.localScale = Vector3.one * (value % 10 > 5 ? 1 : .75f);
 
             // Update list
+            totalHeadCount = 0;
             foreach (NodeArea node in GetNodesByType<NodeArea>()) totalHeadCount += node.num;
             if (baseTime == DateTime.MinValue) baseTime = DateTime.Now;
             headCount.Add(new Vector2((float)((DateTime.Now - baseTime).TotalMilliseconds), totalHeadCount));

@@ -6,6 +6,10 @@ using UnityEngine.AI;
 using System.Linq;
 using System;
 using System.IO;
+using CoolSms;
+using Imgur.API.Authentication.Impl;
+using Imgur.API.Endpoints.Impl;
+using Imgur.API.Models.Impl;
 
 public class ScenarioManager : MonoBehaviour
 {
@@ -22,7 +26,7 @@ public class ScenarioManager : MonoBehaviour
 
     // Check if disaster occurred at least once during simulation.
     private bool disasterOccurred = false;
-
+    
     NavMeshPath navMeshPath;
     public SimulationManager3 simulationManager = null;
     int pathSize = 0;
@@ -30,22 +34,25 @@ public class ScenarioManager : MonoBehaviour
 
     Camera subCamera;
 
+    // VideManager of video window
+    private VideoManager videoManager = null;
+
     // Elements of path window UI
     GameObject defaultPathPanel;
     Transform pathWindowcontent;
 
     // Element of disaster warning UI
     GameObject warningBox;
-    Image warningIcon;
+    UnityEngine.UI.Image warningIcon;
     Text disatsterName;
-
-    // Element of video window
-    
 
     List<ScreenshotAttr> pathImages = new List<ScreenshotAttr>();
 
     public void Start()
     {
+        // Get video manger
+        videoManager = GameObject.Find("Master").GetComponent<VideoManager>();
+
         singleTon = this;
         StartCoroutine(PeriodicCheck());
     }
@@ -79,7 +86,7 @@ public class ScenarioManager : MonoBehaviour
 
         // Get text of disaster warning UI
         warningBox = FunctionManager.Find("warning_box").gameObject;
-        warningIcon = warningBox.transform.GetChild(0).GetComponent<Image>();
+        warningIcon = warningBox.transform.GetChild(0).GetComponent<UnityEngine.UI.Image>();
         disatsterName = warningBox.transform.GetChild(1).GetComponent<Text>();
 
         // << BLOCKING TASK 2 >> Add sgrid
@@ -192,8 +199,9 @@ public class ScenarioManager : MonoBehaviour
                 // Start siren, show path window, activate warning box.
                 SetSiren(true);
                 WindowManager.GetWindow("window_path").SetVisible(true);
-                WindowManager.GetWindow("window_video").SetVisible(true);   
                 warningBox.SetActive(true);
+                WindowManager.GetWindow("window_video").SetVisible(true);
+                videoManager.videoPlayer.Play();
 
                 // Set all floor visible and start simulation.
                 FunctionManager.SetFloorVisibility(int.MaxValue);
@@ -381,7 +389,7 @@ public class ScenarioManager : MonoBehaviour
                 newPanelTransform.localPosition = Vector3.zero;
 
                 // Set image
-                Image evacpathImage = newPanelTransform.GetChild(0).GetComponent<Image>();
+                UnityEngine.UI.Image evacpathImage = newPanelTransform.GetChild(0).GetComponent<UnityEngine.UI.Image>();
                 evacpathImage.sprite = Sprite.Create(pathImages[r].scrshot, new Rect(0, 0, Screen.width - 1, Screen.height - 1), new Vector2(0.5f, 0.5f));
 
                 // Set rank text
@@ -393,6 +401,42 @@ public class ScenarioManager : MonoBehaviour
                 evacTimeText.text = "예상 시간 : " + string.Format("{0:F2}", pathImages[r].time) + "(초)";
                 // evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
             }
+        }
+    }
+
+    async void SendMessage(string PhoneNum, bool Repeat)
+    {
+        if (Repeat)
+        {
+            SmsApi api = new SmsApi(new SmsApiOptions
+            {
+                ApiKey = "NCSP8ABD0A2GUNI5", // 발급 받은 ApiKey
+                ApiSecret = "FCWNJZVBLK5EFP7LFVRLHQISHOK6YJSD", // 발급받은 ApiSecret key
+                DefaultSenderId = "01026206621" // 문자 보내는 사람 폰 번호
+            });
+            string ImageURL = "";
+            // Imgur API 키 <-- Client ID
+            string ImgurAPIKey = "8a529c085fe1019";
+            // Imgur Secret 키 <-- Client secret
+            string ImgurAPISecretKey = "5f4b5ea2dcab73133a617dabb68dbbed1466c5db";
+
+            var client = new ImgurClient(ImgurAPIKey, ImgurAPISecretKey);
+            var endpoint = new ImageEndpoint(client);
+            Imgur.API.Models.IImage img;
+
+            using (var fs = new FileStream(Application.dataPath + "/Resources/최적경로.png", FileMode.Open))
+            {
+                img = await endpoint.UploadImageStreamAsync(fs);
+            }
+            ImageURL = img.Link;
+
+            var request = new SendMessageRequest(PhoneNum, "화재 발생!" + ImageURL); // 이미지 링크가 포함된 문자 메세지 전송
+                                                                                 // 문자 보낼 전화번호 , 보낼 메세지(한글 40자)
+            var result = api.SendMessageAsync(request);
+
+            Debug.Log("메시지전송완료");
+            //return 0;
+            Repeat = false;
         }
     }
 

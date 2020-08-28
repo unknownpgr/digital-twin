@@ -53,7 +53,7 @@ public class InformationManager : MonoBehaviour
 
         Popup.Show(phoneNumber +"로 전화번호가 저장되었습니다.");
     }
-
+    
     // (TO DO) 임시로 만들어놓은 함수. 나중에 input 값이 정해지면 각자에 맞는 메서드를 만들 것.
     public void EditInformationToInput()
     {
