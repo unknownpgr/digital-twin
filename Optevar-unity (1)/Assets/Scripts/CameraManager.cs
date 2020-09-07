@@ -6,11 +6,8 @@ using UnityEngine.Video;
 
 public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    // (TO DO) Function Manager의 canvas가 초기화되기 전이라 Find 메서드로 video window의 Game Object를 가져올 수가 없음
-    // inspector 창에서 drag & drop으로 연결해놓았지만
-    // camera 객체가 prefab이므로 스크립트로 참조해야함.
-    // window to be active at the mouse position
-    public GameObject videoWindow;
+    // Game Object of window to be active at the mouse position
+    private GameObject videoWindow;
     // Rect Transform of window
     private RectTransform videoWindowRect;
     // Rect Transform of parent of window
@@ -21,10 +18,18 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     // Video Player of video window
     private VideoPlayer videoPlayer;
 
+    // video window index
+    // Because monobehavior works in single thread, do not care about race condition.
+    private static int videoWindowIndex = 1;
+
     private void Start()
     {
-        // Get exsisting window video
-        // videoWindow = FunctionManager.Find("window_video").gameObject;
+        // Get exsisting video window
+        // videoWindow = GameObject.Find("window_video").gameObject;
+        GameObject origin = GameObject.Find("window_video");
+        videoWindow = Instantiate(origin, origin.transform.parent);
+        videoWindow.name = "window_video_" + videoWindowIndex++;
+        // Get Rect Transform of video window
         videoWindowRect = videoWindow.GetComponent<RectTransform>();
         // Get Rect Transform of 'body'
         parentRect = videoWindow.transform.parent.parent.GetComponent<RectTransform>();
@@ -75,7 +80,7 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void SetVideoClip()
     {
-        // videoPlayer.clip = 
+        VideoClip videoClip;
+        videoClip = Resources.Load<VideoClip>("Video/Office Background 2") as VideoClip;
     }
-
 }

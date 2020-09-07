@@ -14,6 +14,7 @@ public static class Constants
     public const int NODE_AREA = 0x53;
     public const int NODE_SIREN = 0x26;
     public const int NODE_DIRECTION = 0x27;
+    public const int NODE_CCTV = 0x90;
 
     public const string AUTOSAVE_NAME_FORMAT = "AutoSave_{0}.json";
 
@@ -57,6 +58,10 @@ public static class Constants
 
             case NODE_SIREN:
                 type = typeof(NodeSound);
+                break;
+
+            case NODE_CCTV:
+                type = typeof(NodeCCTV);
                 break;
 
             default:

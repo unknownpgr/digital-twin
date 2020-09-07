@@ -201,7 +201,7 @@ public class ScenarioManager : MonoBehaviour
                 WindowManager.GetWindow("window_path").SetVisible(true);
                 warningBox.SetActive(true);
                 WindowManager.GetWindow("window_video").SetVisible(true);
-                videoManager.videoPlayer.Play();
+                //videoManager.videoPlayer.Play();
 
                 // Set all floor visible and start simulation.
                 FunctionManager.SetFloorVisibility(int.MaxValue);

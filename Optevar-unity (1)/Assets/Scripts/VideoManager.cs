@@ -6,7 +6,21 @@ using UnityEngine.Video;
 
 public class VideoManager : MonoBehaviour
 {
-    public VideoPlayer videoPlayer = null;
+
+    private Dictionary<int, VideoManager> videoManagers = new Dictionary<int, VideoManager>();
+
+    private VideoPlayer videoPlayer = null;
+
+    private void Start()
+    {
+        videoPlayer = this.GetComponent<VideoPlayer>();
+    }
+
+    public void AddVideoManager()
+    {
+        //VideoManager videoManager;
+
+    }
 
     public void HandleVideoPlayer()
     {
@@ -18,5 +32,10 @@ public class VideoManager : MonoBehaviour
         {
             videoPlayer.Play();
         }   
+    }
+
+    public void SetAllVideoClips(bool isDisaster)
+    {
+
     }
 }

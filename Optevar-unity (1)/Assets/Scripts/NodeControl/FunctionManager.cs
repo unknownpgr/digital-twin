@@ -221,13 +221,13 @@ public class FunctionManager : MonoBehaviour
 
     private static void RecursiveRegisterChild(Transform parent, Dictionary<string, Transform> dict)
     {
-        if (!dict.ContainsKey(parent.name)) dict.Add(parent.name, parent);
+        if (!dict.ContainsKey(parent.name)) dict.Add(parent.name, parent); 
         foreach (Transform child in parent) RecursiveRegisterChild(child, dict);
     }
 
     private Vector2 MENU_SHOW = new Vector2(0.0f, -61.7f);
     private Vector2 MENU_HIDE = new Vector2(-310, -61.7f);
-    private bool isMenuHidden;
+    private bool isMenuHidden = false;
     // Move menu and Show hidden menu 
     // or Move menu and Hide hidden menu
     private void MoveMenu(bool isMenuHidden)
@@ -322,32 +322,6 @@ public class FunctionManager : MonoBehaviour
 
         WindowManager informationWindow = WindowManager.GetWindow("window_information");
         informationWindow.SetVisible(true);
-    }
-
-    public void OnClickInformationWindowMenu()
-    {
-        // Transform of panel about clicked button
-        Transform selectedPanelTransform;
-        // Name of clicked button
-        string buttonName = EventSystem.current.currentSelectedGameObject.name;
-        /*
-         * button name : button_****
-         * panel name : panel_****
-         */
-        string[] parsed = buttonName.Split('_');
-        string panelName = "panel";
-
-        // Make panel name with parsed button name
-        for (int i=1;i<parsed.Length;i++)
-        {
-            string temp = "_" + parsed[i];
-            panelName += temp;
-        }
-
-        // Find panel with panel name using parent transform
-        selectedPanelTransform = infoWindowPanelParent.Find(panelName);
-        // Set panel transform to the end of the transform list
-        selectedPanelTransform.SetAsLastSibling();
     }
 
     public void OnModeChange()

@@ -315,6 +315,19 @@
           -10.1635113
         ]
       }
+    },
+    {
+      "$type": "NodeCCTV, Assembly-CSharp",
+      "PhysicalID": "101010",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          4.73430634,
+          15.765,
+          -18.76101
+        ]
+      }
     }
   ]
 }
