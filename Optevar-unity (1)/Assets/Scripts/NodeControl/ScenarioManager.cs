@@ -10,6 +10,7 @@ using CoolSms;
 using Imgur.API.Authentication.Impl;
 using Imgur.API.Endpoints.Impl;
 using Imgur.API.Models.Impl;
+using System.Net.Http;
 
 public class ScenarioManager : MonoBehaviour
 {
@@ -26,7 +27,7 @@ public class ScenarioManager : MonoBehaviour
 
     // Check if disaster occurred at least once during simulation.
     private bool disasterOccurred = false;
-    
+
     NavMeshPath navMeshPath;
     public SimulationManager3 simulationManager = null;
     int pathSize = 0;
@@ -201,7 +202,7 @@ public class ScenarioManager : MonoBehaviour
                 WindowManager.GetWindow("window_path").SetVisible(true);
                 warningBox.SetActive(true);
                 WindowManager.GetWindow("window_video").SetVisible(true);
-                //videoManager.videoPlayer.Play();
+                videoManager.videoPlayer.Play();
 
                 // Set all floor visible and start simulation.
                 FunctionManager.SetFloorVisibility(int.MaxValue);
@@ -402,6 +403,43 @@ public class ScenarioManager : MonoBehaviour
                 // evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
             }
         }
+    }
+
+    // Upload image on server and send sms
+    async void UploadImage(string PhoneNum)
+    {
+        string uploadServer = "http://web-dev.iptime.org";
+
+        // Upload image
+        HttpClient httpClient = new HttpClient();
+        MultipartFormDataContent form = new MultipartFormDataContent();
+        using (FileStream fs = new FileStream("./Resources/최적경로.png", FileMode.Open))
+        {
+            int len = (int)fs.Length;
+            byte[] buf = new byte[len];
+            fs.Read(buf, 0, len);
+            form.Add(new ByteArrayContent(buf), "img", "img");
+        }
+        HttpResponseMessage response = await httpClient.PostAsync(uploadServer + "/upload", form);
+        response.EnsureSuccessStatusCode();
+        httpClient.Dispose();
+        string sd = response.Content.ReadAsStringAsync().Result;
+        string url = uploadServer + sd
+            .Split(':')[1]
+            .Replace("}", "")
+            .Replace("\"", "");
+
+        // Send message
+        SmsApi api = new SmsApi(new SmsApiOptions
+        {
+            ApiKey = "NCSP8ABD0A2GUNI5", // 발급 받은 ApiKey
+            ApiSecret = "FCWNJZVBLK5EFP7LFVRLHQISHOK6YJSD", // 발급받은 ApiSecret key
+            DefaultSenderId = "01026206621" // 문자 보내는 사람 폰 번호
+        });
+        var request = new SendMessageRequest(PhoneNum, "화재 발생! - " + url); // 이미지 링크가 포함된 문자 메세지 전송
+        var result = api.SendMessageAsync(request);
+
+        Debug.Log("메시지 전송완료");
     }
 
     async void SendMessage(string PhoneNum, bool Repeat)

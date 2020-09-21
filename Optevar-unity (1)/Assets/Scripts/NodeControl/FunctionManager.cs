@@ -227,7 +227,7 @@ public class FunctionManager : MonoBehaviour
 
     private Vector2 MENU_SHOW = new Vector2(0.0f, -61.7f);
     private Vector2 MENU_HIDE = new Vector2(-310, -61.7f);
-    private bool isMenuHidden = false;
+    private bool isMenuHidden = true;
     // Move menu and Show hidden menu 
     // or Move menu and Hide hidden menu
     private void MoveMenu(bool isMenuHidden)

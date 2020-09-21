@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
+using UnityEngine.UI;
 
 /*
 이 스크립트는 화재 센서에 해당하는 스크립트를 구현한 것이다.
@@ -34,6 +35,8 @@ public class NodeFireSensor : NodeManager
             isDisaster = value;
             navObstacle.carving = value;
             material.color = new Color(1, 0, 0, value ? .3f : 0);
+            FunctionManager.Find("window_video").GetChild(1).GetChild(2).GetComponent<Text>().text
+                = FindCamera();
         }
     }
 
@@ -54,5 +57,31 @@ public class NodeFireSensor : NodeManager
 
         gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
     }
+
+    private string FindCamera()
+    {
+        string cameraID = null;
+        float min = 10000000f;
+        float temp = 0f;
+
+        List<NodeCCTV> nodeCCTVs = NodeManager.GetNodesByType<NodeCCTV>();
+
+        foreach (NodeCCTV nodeCCTV in nodeCCTVs)
+        {
+            if (BuildingManager.GetFloor(nodeCCTV.Position) == BuildingManager.GetFloor(this.Position))
+            {
+                temp = Vector3.Distance(nodeCCTV.Position, this.Position);
+
+                if (temp < min)
+                {
+                    min = temp;
+                    cameraID = nodeCCTV.PhysicalID;
+                }
+            }
+        }
+
+        return cameraID;
+    }
+
 }
 
