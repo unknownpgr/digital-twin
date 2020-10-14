@@ -6,6 +6,8 @@ public class NodeCCTV : NodeManager
 {
     protected override string prefabName => "Camera";
 
+    public override string DisplayName { get => "CCTV:" + PhysicalID; }
+
     protected override void Init()
     {
 

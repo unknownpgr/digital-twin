@@ -24,6 +24,9 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     private Text cameraID;
     private Text sensorID;
 
+    // video manager
+    private VideoManager videoManager = null;
+
     private void Start()
     {
         // Get exsisting video window
@@ -37,10 +40,14 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         // Get exsiting main camera
         mainCamera = Camera.main;
 
+        // Get exsiting video manager
+        videoManager = GameObject.Find("Master").GetComponent<VideoManager>();
 
+        // Get texts of video window object
         cameraID = videoWindow.transform.GetChild(1).GetChild(1).GetComponent<Text>();
         sensorID = videoWindow.transform.GetChild(1).GetChild(2).GetComponent<Text>();
 
+        // update texts with saved data
         UpdateTextOfWindow();
     }
 
@@ -75,6 +82,9 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
         // and Actiavate video window
         videoWindow.SetActive(true);
+
+        // Play video
+        videoManager.videoPlayer.Play();
     }
 
     // Detect when Cursor leaves the camera object
@@ -82,6 +92,9 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         // Unactivate video window
         videoWindow.SetActive(false);
+
+        // Stop playing video
+        videoManager.videoPlayer.Stop();
     }
 
     public void UpdateTextOfWindow()

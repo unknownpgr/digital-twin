@@ -328,6 +328,32 @@
           -16.5856552
         ]
       }
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "InputField (UnityEngine.UI.InputField)",
+      "State": 0,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "exit4",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          15.7292862,
+          15.765,
+          -16.89088
+        ]
+      }
     }
   ]
 }

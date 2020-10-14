@@ -35,6 +35,7 @@ public class ScenarioManager : MonoBehaviour
 
     Camera subCamera;
 
+    GameObject videoWindowObject;
     // VideManager of video window
     private VideoManager videoManager = null;
 
@@ -89,6 +90,8 @@ public class ScenarioManager : MonoBehaviour
         warningBox = FunctionManager.Find("warning_box").gameObject;
         warningIcon = warningBox.transform.GetChild(0).GetComponent<UnityEngine.UI.Image>();
         disatsterName = warningBox.transform.GetChild(1).GetComponent<Text>();
+
+        videoWindowObject = FunctionManager.Find("window_video").gameObject;
 
         // << BLOCKING TASK 2 >> Add sgrid
         simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
@@ -201,6 +204,7 @@ public class ScenarioManager : MonoBehaviour
                 SetSiren(true);
                 WindowManager.GetWindow("window_path").SetVisible(true);
                 warningBox.SetActive(true);
+                videoWindowObject.SetActive(true);
                 WindowManager.GetWindow("window_video").SetVisible(true);
                 videoManager.videoPlayer.Play();
 

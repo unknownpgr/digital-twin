@@ -36,7 +36,7 @@ public class InformationManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+   
     }
 
     // (TO DO) 임시로 만들어놓은 함수. 나중에 input 값이 정해지면 각자에 맞는 메서드를 만들 것.

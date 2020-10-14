@@ -266,6 +266,9 @@ public class FunctionManager : MonoBehaviour
 
     public void OnCloseMenu()
     {
+        // Set every button color of menu to default
+        SetMenuButtonColors(100);
+
         // Activate open menu Button
         // and unactivate hidden menu 
         openMenuButton.SetActive(true);
@@ -483,8 +486,18 @@ public class FunctionManager : MonoBehaviour
     // When certain button of menu clicked,
     // Set it's color to #F99774
     // and Set 'A' value of other to zero
+    // value 100 mean "set all button color to default"
     public void SetMenuButtonColors(int index)
     {
+        if (index == 100)
+        {
+            for (int i = 0; i < menuButtonImages.Length; i++)
+            {
+                    menuButtonImages[i].color = new Color(0f, 0f, 0f, 0f);
+
+            }
+        }
+
         for (int i = 0; i< menuButtonImages.Length; i++)
         {
             if (index == i)

@@ -18,6 +18,9 @@ public class DataManager : MonoBehaviour
     private static List<GameObject> jsonButtons = new List<GameObject>();
     private Dictionary<string, GameObject> sensorButtons = new Dictionary<string, GameObject>();
     private InputField inputSaveFileName;
+    private static GameObject exitButton;
+    private static GameObject createExitButton;
+    private static GameObject createCCTVButton;
 
     // Current json file
     private static FileInfo currentJsonFile;
@@ -41,6 +44,10 @@ public class DataManager : MonoBehaviour
         jsonButton.SetActive(false);
         sensorButton = GameObject.Find("button_sensor_ID").gameObject;
         sensorButton.SetActive(false);
+        exitButton = GameObject.Find("button_create_exit").gameObject;
+        exitButton.SetActive(false);
+        createExitButton = GameObject.Find("button_create_exit_with_input").gameObject;
+        createCCTVButton = GameObject.Find("button_create_CCTV_with_input").gameObject;
 
         // Register input feild
         inputSaveFileName = GameObject.Find("input_save_file").GetComponent<InputField>();
@@ -283,6 +290,7 @@ public class DataManager : MonoBehaviour
         RenderNodeButtons();
     }
 
+    /*
     // 탈출구 생성 버튼을 눌렀을 때 발생
     public void OnExitCreate()
     {
@@ -291,6 +299,8 @@ public class DataManager : MonoBehaviour
         else Popup.Show("문제가 발생하여 탈출구를 새로 추가하지 못했습니다.");
         RenderNodeButtons();
     }
+     */
+
 
     // 노드 설치 윈도우에서 노드 설치했을 경우 발생. 굳이 함수로 안 꺼내고, Lambda로 집어넣어버리는 것도 고려할 것.
     public void OnSelectNode(string nodeID)
@@ -336,6 +346,63 @@ public class DataManager : MonoBehaviour
         if (LoadDataFromDB()) Popup.Show("데이터가 성공적으로 DB에서 로드되었습니다.");
         else Popup.Show("DB에서 데이터를 로드하는 데 실패했습니다.");
     }
+
+    //===================[Callback method]=========================
+    public void OnExitCreate()
+    {
+        // Activate input area
+        // and Unactivate button area
+        createExitButton.transform.GetChild(0).gameObject.SetActive(false);
+        createExitButton.transform.GetChild(1).gameObject.SetActive(true);
+    }
+
+    public void OnCreateExitWithInput(InputField input)
+    {
+        string newExitID = input.text;
+        if (NodeManager.AddNode(newExitID, typeof(NodeExit))) Popup.Show("탈출구를 새로 추가하였습니다.");
+        else Popup.Show("문제가 발생하여 탈출구를 새로 추가하지 못했습니다.");
+        RenderNodeButtons();
+
+        // Activate button area
+        createExitButton.transform.GetChild(0).gameObject.SetActive(true);
+        createExitButton.transform.GetChild(1).gameObject.SetActive(false);
+    }
+
+    public void OnCancelCreateExit()
+    {
+        // Activate button area
+        // and Unactivate input area
+        createExitButton.transform.GetChild(0).gameObject.SetActive(true);
+        createExitButton.transform.GetChild(1).gameObject.SetActive(false);
+    }
+
+    public void OnCCTVCreate()
+    {
+        // Activate input area
+        createCCTVButton.transform.GetChild(0).gameObject.SetActive(false);
+        createCCTVButton.transform.GetChild(1).gameObject.SetActive(true);
+    }
+
+    public void OnCreateCCTVWithInput(InputField input)
+    {
+        string newCCTVID = input.text;
+        if (NodeManager.AddNode(newCCTVID, typeof(NodeCCTV))) Popup.Show("카메라를 새로 추가하였습니다.");
+        else Popup.Show("문제가 발생하여 카메라를 새로 추가하지 못했습니다.");
+        RenderNodeButtons();
+
+        // Activate button area
+        createCCTVButton.transform.GetChild(0).gameObject.SetActive(true);
+        createCCTVButton.transform.GetChild(1).gameObject.SetActive(false);
+    }
+
+    public void OnCancelCreateCCTV()
+    {
+        // Activate input area
+        createCCTVButton.transform.GetChild(0).gameObject.SetActive(true);
+        createCCTVButton.transform.GetChild(1).gameObject.SetActive(false);
+    }
+
+    //===================[Callback method]=========================
 }
 
 class Headcounter
