@@ -408,7 +408,7 @@ public class ScenarioManager : MonoBehaviour
     // Upload image on server and send sms
     async void UploadImage(string PhoneNum)
     {
-        string uploadServer = "http://web-dev.iptime.org";
+        string uploadServer = Constants.IMAGE_SERVER;
 
         // Upload image
         HttpClient httpClient = new HttpClient();
@@ -418,9 +418,9 @@ public class ScenarioManager : MonoBehaviour
             int len = (int)fs.Length;
             byte[] buf = new byte[len];
             fs.Read(buf, 0, len);
-            form.Add(new ByteArrayContent(buf), "img", "img");
+            form.Add(new ByteArrayContent(buf), Constants.IMAGE_KEY, Constants.IMAGE_KEY);
         }
-        HttpResponseMessage response = await httpClient.PostAsync(uploadServer + "/upload", form);
+        HttpResponseMessage response = await httpClient.PostAsync(uploadServer+"/upload", form);
         response.EnsureSuccessStatusCode();
         httpClient.Dispose();
         string sd = response.Content.ReadAsStringAsync().Result;
@@ -428,6 +428,7 @@ public class ScenarioManager : MonoBehaviour
             .Split(':')[1]
             .Replace("}", "")
             .Replace("\"", "");
+        Debug.Log("URL: " + url);
 
         // Send message
         SmsApi api = new SmsApi(new SmsApiOptions

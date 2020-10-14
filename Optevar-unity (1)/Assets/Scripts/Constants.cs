@@ -16,6 +16,9 @@ public static class Constants
     public const int NODE_DIRECTION = 0x27;
     public const int NODE_CCTV = 0x90;
 
+    public const string IMAGE_SERVER = "http://urbanscience.uos.ac.kr:8000";
+    public const string IMAGE_KEY = "img";
+
     public const string AUTOSAVE_NAME_FORMAT = "AutoSave_{0}.json";
 
     public static string GetAutoSaveFileName(string buildingName)
