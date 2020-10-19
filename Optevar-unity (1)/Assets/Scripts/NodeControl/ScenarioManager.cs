@@ -35,7 +35,7 @@ public class ScenarioManager : MonoBehaviour
 
     Camera subCamera;
 
-    GameObject videoWindowObject;
+    GameObject videoWindow;
     // VideManager of video window
     private VideoManager videoManager = null;
 
@@ -44,9 +44,10 @@ public class ScenarioManager : MonoBehaviour
     Transform pathWindowcontent;
 
     // Element of disaster warning UI
-    GameObject warningBox;
-    UnityEngine.UI.Image warningIcon;
-    Text disatsterName;
+    private GameObject warningBox;
+    private UnityEngine.UI.Image warningBoxBg;
+    private UnityEngine.UI.Image warningIcon;
+    private Text disatsterName;
 
     List<ScreenshotAttr> pathImages = new List<ScreenshotAttr>();
 
@@ -88,10 +89,11 @@ public class ScenarioManager : MonoBehaviour
 
         // Get text of disaster warning UI
         warningBox = FunctionManager.Find("warning_box").gameObject;
+        warningBoxBg = warningBox.GetComponent<UnityEngine.UI.Image>();
         warningIcon = warningBox.transform.GetChild(0).GetComponent<UnityEngine.UI.Image>();
         disatsterName = warningBox.transform.GetChild(1).GetComponent<Text>();
 
-        videoWindowObject = FunctionManager.Find("window_video").gameObject;
+        videoWindow = FunctionManager.Find("window_video").gameObject;
 
         // << BLOCKING TASK 2 >> Add sgrid
         simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
@@ -203,10 +205,16 @@ public class ScenarioManager : MonoBehaviour
                 // Start siren, show path window, activate warning box.
                 SetSiren(true);
                 WindowManager.GetWindow("window_path").SetVisible(true);
+                SetWarningBoxWithDisasterState(true);
                 warningBox.SetActive(true);
-                videoWindowObject.SetActive(true);
+                videoWindow.SetActive(true);
+
+                // Show video window
                 WindowManager.GetWindow("window_video").SetVisible(true);
-                videoManager.videoPlayer.Play();
+                // Set video clip
+                videoManager.SetVideoClipWithDisasterState(true);
+                // Play video
+                videoManager.PlayVideoClip();
 
                 // Set all floor visible and start simulation.
                 FunctionManager.SetFloorVisibility(int.MaxValue);
@@ -228,8 +236,16 @@ public class ScenarioManager : MonoBehaviour
                 grid.ViewMinPath = false;
                 grid.InitLiner();
 
-                // Deactivate warning box
-                warningBox.SetActive(false);
+                // Set warning box
+                SetWarningBoxWithDisasterState(false);
+
+                // Set video clip
+                videoManager.SetVideoClipWithDisasterState(false);
+                // Play video
+                videoManager.PlayVideoClip();
+                // Hide video window
+                WindowManager.GetWindow("window_video").SetVisible(false);
+
             }
 
             currentDisasterState = newDisasterState;
@@ -567,6 +583,22 @@ public class ScenarioManager : MonoBehaviour
             warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
             disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
             yield return new WaitForSeconds(0.6f);
+        }
+    }
+
+    private void SetWarningBoxWithDisasterState(bool IsDisaster)
+    {
+        if (IsDisaster == true)
+        {
+            // Set background color to red
+            warningBoxBg.color = new Color(1.0f, 0.2648465f, 0.1037736f, 1.0f);
+
+        }
+        else if (IsDisaster == false)
+        {
+            // Set background color to green
+            warningBoxBg.color = new Color(0.2707055f, 0.8773585f, 0.240032f, 1.0f);
+            disatsterName.text = "상태 안전";
         }
     }
 }

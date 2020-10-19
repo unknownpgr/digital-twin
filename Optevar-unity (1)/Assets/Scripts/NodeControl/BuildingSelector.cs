@@ -64,6 +64,15 @@ public class BuildingSelector : MonoBehaviour
         dropdown.AddOptions(buildingNames);
     }
 
+    public void SetPrefaceText(){
+        GameObject.Find("Dropdown List").transform      // Dropdown List
+        .GetChild(0)        // Viewport
+        .GetChild(0)        // Content
+        .GetChild(1)        // Item 0: 건물 선택하기
+        .GetChild(1)        // Item Label
+        .GetComponent<Text>().text = "--------------------------------------------------";
+    }
+
     // This method is attached to dropdown
     public void SetStartButton()
     {

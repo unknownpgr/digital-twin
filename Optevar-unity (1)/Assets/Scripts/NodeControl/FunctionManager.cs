@@ -55,6 +55,9 @@ public class FunctionManager : MonoBehaviour
     // Array of menu button images
     private Image[] menuButtonImages;
 
+    // GameObject of warning box
+    GameObject warningBox;
+
     // Program mode
     private static bool isPlacingMode = true;
     public static bool IsPlacingMode
@@ -157,7 +160,7 @@ public class FunctionManager : MonoBehaviour
         placingBtnImage = placingPart.GetComponent<Image>();
         moniteringBtnImage = moniteringPart.GetComponent<Image>();
         placingBtnText = placingPart.GetComponentInChildren<Text>();
-        moniteringBtnText = moniteringPart.GetComponentInChildren<Text>();        
+        moniteringBtnText = moniteringPart.GetComponentInChildren<Text>();
 
         // Set mode change button color
         SetModeButtonColor(IsPlacingMode);
@@ -176,6 +179,9 @@ public class FunctionManager : MonoBehaviour
         menuButtonParent = Find("layout_buttons");
         // Get all image of menu buttons
         menuButtonImages = menuButtonParent.GetComponentsInChildren<Image>();
+
+        // Get existing warning box
+        warningBox = Find("warning_box").gameObject;
 
         // Add callback listener
         MouseManager.OnNodeClicked -= OnNodeSelected; // Remove exsiting callback to prevent duplicated call
@@ -221,7 +227,7 @@ public class FunctionManager : MonoBehaviour
 
     private static void RecursiveRegisterChild(Transform parent, Dictionary<string, Transform> dict)
     {
-        if (!dict.ContainsKey(parent.name)) dict.Add(parent.name, parent); 
+        if (!dict.ContainsKey(parent.name)) dict.Add(parent.name, parent);
         foreach (Transform child in parent) RecursiveRegisterChild(child, dict);
     }
 
@@ -341,7 +347,7 @@ public class FunctionManager : MonoBehaviour
 
             // Set mode change button color
             SetModeButtonColor(!IsPlacingMode);
-            
+
             // Unactiavate menu
             if (isMenuHidden == false)
             {
@@ -349,6 +355,8 @@ public class FunctionManager : MonoBehaviour
             }
             menu.gameObject.SetActive(false);
 
+            // Activate warning box
+            warningBox.SetActive(true);
             // Show all floors
             SetFloorVisibility(BuildingManager.FloorsCount - 1);
             ScenarioManager.singleTon.Init();
@@ -368,7 +376,8 @@ public class FunctionManager : MonoBehaviour
             // Activate menu
             menu.gameObject.SetActive(true);
 
-            Find("warning_box").gameObject.SetActive(false);
+            // Unactivate warning box
+            warningBox.SetActive(false);
 
             ScenarioManager.singleTon.EndSimulation();
 
@@ -388,7 +397,7 @@ public class FunctionManager : MonoBehaviour
         nodeID.text = node.PhysicalID;
 
         bool isFireSensor = node is NodeFireSensor;
-        
+
         fireInfos.gameObject.SetActive(isFireSensor);
 
         if (!isFireSensor) nodeType.text = GetSensorTypeString(node.DisplayName);
@@ -462,7 +471,7 @@ public class FunctionManager : MonoBehaviour
 
             placingBtnText.color = new Color(1, 1, 1);
             moniteringBtnText.color = new Color(1, 1, 1, 0.7f);
-            
+
         }
         else
         {
@@ -493,12 +502,12 @@ public class FunctionManager : MonoBehaviour
         {
             for (int i = 0; i < menuButtonImages.Length; i++)
             {
-                    menuButtonImages[i].color = new Color(0f, 0f, 0f, 0f);
+                menuButtonImages[i].color = new Color(0f, 0f, 0f, 0f);
 
             }
         }
 
-        for (int i = 0; i< menuButtonImages.Length; i++)
+        for (int i = 0; i < menuButtonImages.Length; i++)
         {
             if (index == i)
             {

@@ -30,9 +30,7 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     private void Start()
     {
         // Get exsisting video window
-        // videoWindow = GameObject.Find("window_video").gameObject;
         videoWindow = GameObject.Find("window_video");
-        // videoWindow.name = "window_video_" + videoWindowIndex++;
         // Get Rect Transform of video window
         videoWindowRect = videoWindow.GetComponent<RectTransform>();
         // Get Rect Transform of 'body'
@@ -47,7 +45,7 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         cameraID = videoWindow.transform.GetChild(1).GetChild(1).GetComponent<Text>();
         sensorID = videoWindow.transform.GetChild(1).GetChild(2).GetComponent<Text>();
 
-        // update texts with saved data
+        // Display texts with saved data
         UpdateTextOfWindow();
     }
 

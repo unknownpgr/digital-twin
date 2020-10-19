@@ -6,32 +6,32 @@ using UnityEngine.Video;
 
 public class VideoManager : MonoBehaviour
 {
+    // Video player of video window
     public VideoPlayer videoPlayer = null;
+    // Continaer for video
+    private VideoClip videoClip = null;
 
     private void Start()
     {
     }
 
-    public void AddVideoManager()
+    public void PlayVideoClip()
     {
-        //VideoManager videoManager;
-
+        videoPlayer.Play();
     }
 
-    public void HandleVideoPlayer()
-    {
-        if(videoPlayer.isPlaying == true)
+    public void SetVideoClipWithDisasterState(bool isDisaster)
+    { 
+        if (isDisaster == true)
         {
-            videoPlayer.Stop();
+            videoClip = Resources.Load<VideoClip>("Video/Laptop explodes in Letchworth office");
+            videoPlayer.clip = videoClip;
         }
-        else
+        else if (isDisaster == false)
         {
-            videoPlayer.Play();
-        }   
-    }
-
-    public void SetAllVideoClips(bool isDisaster)
-    {
+            videoClip = Resources.Load<VideoClip>("Video/sample1");
+            videoPlayer.clip = videoClip;
+        }
 
     }
 }

@@ -206,7 +206,7 @@
     },
     {
       "$type": "NodeFireSensor, Assembly-CSharp",
-      "ValueTemp": 100.0,
+      "ValueTemp": 10.0,
       "ValueFire": 0.0,
       "ValueSmoke": 0.0,
       "PhysicalID": "13000001",
