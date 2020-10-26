@@ -6,17 +6,23 @@ using UnityEngine.EventSystems;
 
 public class InformationManager : MonoBehaviour
 {
-    // InputField about building
-    public InputField inputBuilding;
 
     // InputField about phone number
     public InputField inputPhoneNum;
+
+    /*
+    // InputField about building
+    public InputField inputBuilding;
+
+
 
     // InputField about mqtt
     public InputField inputMqtt;
 
     // InputField about system
     public InputField inputSystem;
+    */
+
 
     // Transform of information window
     public Transform informationWindow;
@@ -58,7 +64,7 @@ public class InformationManager : MonoBehaviour
             case "phone":
                 inputValue = inputPhoneNum.text;
                 break;
-
+            /*
             case "building":
                 inputValue = inputBuilding.text;
                 break;
@@ -70,6 +76,7 @@ public class InformationManager : MonoBehaviour
             case "system":
                 inputValue = inputSystem.text;
                 break;
+            */
             default:
                 inputValue = null;
                 break;
@@ -154,9 +161,11 @@ public class InformationManager : MonoBehaviour
     public void UpdateTextsOfInformationWindow()
     {
         inputPhoneNum.text = GetInformationValue("phone");
+        /*
         inputBuilding.text = GetInformationValue("building");
         inputMqtt.text = GetInformationValue("mqtt");
         inputSystem.text = GetInformationValue("system");
+        */
 
     }
 

@@ -8,6 +8,7 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 {
     // Game Object of window to be active at the mouse position
     private GameObject videoWindow;
+
     // Rect Transform of window
     private RectTransform videoWindowRect;
     // Rect Transform of parent of window
@@ -24,13 +25,23 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     private Text cameraID;
     private Text sensorID;
 
+    // Window manager of video window
+    private WindowManager videoWindowManager;
+
     // video manager
     private VideoManager videoManager = null;
 
     private void Start()
     {
         // Get exsisting video window
-        videoWindow = GameObject.Find("window_video");
+        videoWindow = FunctionManager.Find("window_video").gameObject;
+
+        if (videoWindow == null)
+        {
+            videoWindow = GameObject.Find("window_video");
+        }
+
+
         // Get Rect Transform of video window
         videoWindowRect = videoWindow.GetComponent<RectTransform>();
         // Get Rect Transform of 'body'
@@ -44,6 +55,9 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         // Get texts of video window object
         cameraID = videoWindow.transform.GetChild(1).GetChild(1).GetComponent<Text>();
         sensorID = videoWindow.transform.GetChild(1).GetChild(2).GetComponent<Text>();
+
+        // Get window manager of video window
+        videoWindowManager = WindowManager.GetWindow("window_video");
 
         // Display texts with saved data
         UpdateTextOfWindow();
@@ -106,7 +120,7 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         bool isSaved;
 
-        if(PlayerPrefs.HasKey("cameraID") == true)
+        if (PlayerPrefs.HasKey("cameraID") == true)
         {
             RemoveSavedCameraID();
         }
@@ -114,7 +128,7 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         PlayerPrefs.SetString("cameraID", cameraID);
         PlayerPrefs.Save();
 
-        if(PlayerPrefs.HasKey("cameraID") == true &&
+        if (PlayerPrefs.HasKey("cameraID") == true &&
             PlayerPrefs.GetString("cameraID") == cameraID)
         {
             isSaved = true;
@@ -146,7 +160,7 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         string cameraID = "camera ID";
 
-        if(PlayerPrefs.HasKey("cameraID") == true)
+        if (PlayerPrefs.HasKey("cameraID") == true)
         {
             cameraID = PlayerPrefs.GetString("cameraID");
         }
