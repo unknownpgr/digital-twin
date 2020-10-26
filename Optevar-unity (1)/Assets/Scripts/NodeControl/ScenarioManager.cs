@@ -116,22 +116,26 @@ public class ScenarioManager : MonoBehaviour
         simulationManager.EvacuatersList.Clear();
 
         // Reset area number
-        foreach (NodeArea nodeArea in NodeManager.GetNodesByType<NodeArea>()) nodeArea.Num = 0;
-        foreach (NodeFireSensor fireSensor in NodeManager.GetNodesByType<NodeFireSensor>()) fireSensor.IsDisaster = false;
+        foreach (NodeArea node in NodeManager.GetNodesByType<NodeArea>()) node.Num = 0;
+        foreach (NodeFireSensor node in NodeManager.GetNodesByType<NodeFireSensor>()) node.IsDisasterFire = node.IsDisasterSmoke = node.IsDisasterTemp = false;
+        foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>()) node.Direction = "off";
 
         // If a disaster has occurred at least once, reset the sensor. else, skip this process.
         if (disasterOccurred)
         {
             // Turn off all siren and all direction sensors
             SetSiren(false);
-            foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>()) mQTTManager.PubDirectionOperation(node.PhysicalID, "off");
+            foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>())
+            {
+                mQTTManager.PubDirectionOperation(node.PhysicalID, "off");
+            }
         }
 
         // Close mqttManager
         mQTTManager?.Close();
     }
 
-    void OnNodeUpdated(MQTTManager.MQTTMsgData data)
+    private void OnNodeUpdated(MQTTManager.MQTTMsgData data)
     {
         // Ignore wrong MQTT data
         if (NodeManager.GetNodeByID(data.PhysicalID) == null)
@@ -145,22 +149,22 @@ public class ScenarioManager : MonoBehaviour
         NodeManager node = NodeManager.GetNodeByID(data.PhysicalID);
 
         // Apply changes on node and check current disaster state.
-        if (node is NodeFireSensor)
+        if (node is NodeFireSensor nodeFire)
         {
-            NodeFireSensor nodeFire = (NodeFireSensor)node;
-            nodeFire.IsDisaster = data.IsDisaster;
-
             switch (data.sensorType)
             {
                 case Constants.NODE_SENSOR_TEMP:
+                    nodeFire.IsDisasterTemp = data.IsDisaster;
                     nodeFire.ValueTemp = data.Value;
                     break;
 
                 case Constants.NODE_SENSOR_FIRE:
+                    nodeFire.IsDisasterFire = data.IsDisaster;
                     nodeFire.ValueFire = data.Value;
                     break;
 
                 case Constants.NODE_SENSOR_SMOKE:
+                    nodeFire.IsDisasterSmoke = data.IsDisaster;
                     nodeFire.ValueSmoke = data.Value;
                     break;
             }
@@ -171,9 +175,8 @@ public class ScenarioManager : MonoBehaviour
         }
 
         // Update node
-        else if (node is NodeArea)
+        else if (node is NodeArea nodeArea)
         {
-            NodeArea nodeArea = (NodeArea)node;
             if (nodeArea.Num != data.Value)
             {
                 nodeArea.Num = (int)data.Value;
@@ -183,14 +186,13 @@ public class ScenarioManager : MonoBehaviour
         }
 
         // Set direction sensor
-        else if (node is NodeDirection)
+        else if (node is NodeDirection nodeDirection)
         {
-            NodeDirection nodeDirection = (NodeDirection)node;
             nodeDirection.Direction = data.Direction;
         }
     }
 
-    IEnumerator PeriodicCheck()
+    private IEnumerator PeriodicCheck()
     {
         for (int i = 0; ; i++)
         {
@@ -296,7 +298,7 @@ public class ScenarioManager : MonoBehaviour
         }
     }
 
-    IEnumerator StartSimulation()
+    private IEnumerator StartSimulation()
     {
         yield return new WaitForEndOfFrame();
         yield return new WaitForEndOfFrame();
@@ -357,7 +359,7 @@ public class ScenarioManager : MonoBehaviour
         isSimulating = true;
     }
 
-    IEnumerator ScreenShot(float time)
+    private IEnumerator ScreenShot(float time)
     {
         ScreenshotAttr screenShotData = new ScreenshotAttr
         {
@@ -426,7 +428,7 @@ public class ScenarioManager : MonoBehaviour
     }
 
     // Upload image on server and send sms
-    async void UploadImage(string PhoneNum)
+    private async void UploadImage(string PhoneNum)
     {
         string uploadServer = Constants.IMAGE_SERVER;
 
@@ -440,7 +442,7 @@ public class ScenarioManager : MonoBehaviour
             fs.Read(buf, 0, len);
             form.Add(new ByteArrayContent(buf), Constants.IMAGE_KEY, Constants.IMAGE_KEY);
         }
-        HttpResponseMessage response = await httpClient.PostAsync(uploadServer+"/upload", form);
+        HttpResponseMessage response = await httpClient.PostAsync(uploadServer + "/upload", form);
         response.EnsureSuccessStatusCode();
         httpClient.Dispose();
         string sd = response.Content.ReadAsStringAsync().Result;
@@ -463,7 +465,7 @@ public class ScenarioManager : MonoBehaviour
         Debug.Log("메시지 전송완료");
     }
 
-    async void SendMessage(string PhoneNum, bool Repeat)
+    private async void SendMessage(string PhoneNum, bool Repeat)
     {
         if (Repeat)
         {
@@ -499,7 +501,7 @@ public class ScenarioManager : MonoBehaviour
         }
     }
 
-    static int GetTargetFloor(int startFloor, int[] dangerFloor, int floor)
+    private static int GetTargetFloor(int startFloor, int[] dangerFloor, int floor)
     {
         if (startFloor == -1) return -1;
         bool toDown, toUp;
@@ -516,7 +518,7 @@ public class ScenarioManager : MonoBehaviour
         return -1;
     }
 
-    void SetDirectionSensor() //최적경로에 따른 대피유도신호로 바꾸기
+    private void SetDirectionSensor() //최적경로에 따른 대피유도신호로 바꾸기
     {
         foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>())
         {

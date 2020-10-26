@@ -24,20 +24,37 @@ public class NodeFireSensor : NodeManager
     // private 변수는 [JsonProperty]라는 태그를 변수 위에 써 주면 반영이 된다.
     private UnityEngine.AI.NavMeshObstacle navObstacle;
     private Material material;
-    private Material nodeColor;
-    private bool isDisaster = false;
+    private bool isDisasterTemp = false,
+        isDisasterFire = false,
+        isDisasterSmoke = false;
     [JsonIgnore]
-    public bool IsDisaster
+    public bool IsDisasterTemp
     {
-        get => isDisaster;
+        get => isDisasterTemp;
         set
         {
-            isDisaster = value;
+            isDisasterTemp = value;
             navObstacle.carving = value;
             material.color = new Color(1, 0, 0, value ? .3f : 0);
-            FunctionManager.Find("window_video").GetChild(1).GetChild(2).GetComponent<Text>().text
-                = FindCamera();
+            // ToDo : Why it is here? Move it to ScenarioManager.cs.
+            FunctionManager.Find("window_video").GetChild(1).GetChild(2).GetComponent<Text>().text = GetNearestCameraID();
         }
+    }
+    [JsonIgnore]
+    public bool IsDisasterFire
+    {
+        get => isDisasterFire;
+        set { isDisasterFire = value; }
+    }
+    [JsonIgnore]
+    public bool IsDisasterSmoke
+    {
+        get => isDisasterSmoke;
+        set { isDisasterSmoke = value; }
+    }
+    public bool IsDisaster
+    {
+        get => isDisasterTemp | isDisasterFire | isDisasterSmoke;
     }
 
     // ToDo : Connect it with window
@@ -54,34 +71,26 @@ public class NodeFireSensor : NodeManager
         navObstacle = gameObject.GetComponent<UnityEngine.AI.NavMeshObstacle>();
         if (material == null) throw new System.Exception("Material is null");
         if (navObstacle == null) throw new System.Exception("NavObstacle is null");
-
         gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
     }
 
-    private string FindCamera()
+    private string GetNearestCameraID()
     {
-        string cameraID = null;
-        float min = 10000000f;
-        float temp = 0f;
-
-        List<NodeCCTV> nodeCCTVs = NodeManager.GetNodesByType<NodeCCTV>();
-
-        foreach (NodeCCTV nodeCCTV in nodeCCTVs)
+        string cameraID = "No CCTV on this floor";
+        float minDist = float.MaxValue;
+        foreach (NodeCCTV nodeCCTV in GetNodesByType<NodeCCTV>())
         {
-            if (BuildingManager.GetFloor(nodeCCTV.Position) == BuildingManager.GetFloor(this.Position))
+            if (BuildingManager.GetFloor(nodeCCTV.Position) == BuildingManager.GetFloor(Position))
             {
-                temp = Vector3.Distance(nodeCCTV.Position, this.Position);
-
-                if (temp < min)
+                float cctvDist = Vector3.Distance(nodeCCTV.Position, Position);
+                if (cctvDist < minDist)
                 {
-                    min = temp;
+                    minDist = cctvDist;
                     cameraID = nodeCCTV.PhysicalID;
                 }
             }
         }
-
         return cameraID;
     }
 
 }
-
