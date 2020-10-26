@@ -52,12 +52,14 @@ public class NodeFireSensor : NodeManager
         get => isDisasterSmoke;
         set { isDisasterSmoke = value; }
     }
+    [JsonIgnore]
     public bool IsDisaster
     {
         get => isDisasterTemp | isDisasterFire | isDisasterSmoke;
     }
 
     // ToDo : Connect it with window
+    [JsonIgnore]
     public float ValueTemp, ValueFire, ValueSmoke;
 
     // 3. 다음으로 구현해야 하는 것은 Init 함수이다. 이 역시 필수적으로 구현해야만 한다.(abstract)
