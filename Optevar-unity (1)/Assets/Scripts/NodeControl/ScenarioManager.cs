@@ -449,7 +449,7 @@ public class ScenarioManager : MonoBehaviour
         response.EnsureSuccessStatusCode();
         httpClient.Dispose();
         string sd = response.Content.ReadAsStringAsync().Result;
-        string url = uploadServer + sd
+        string url = uploadServer + "?img=" + sd
             .Split(':')[1]
             .Replace("}", "")
             .Replace("\"", "");
