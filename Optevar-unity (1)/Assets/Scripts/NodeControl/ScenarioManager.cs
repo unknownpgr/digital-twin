@@ -201,8 +201,8 @@ public class ScenarioManager : MonoBehaviour
             foreach (NodeFireSensor nodeFire in NodeManager.GetNodesByType<NodeFireSensor>())
                 newDisasterState |= nodeFire.IsDisaster;
 
-            // Disaster started(false->true) or during disaster, per 60s.
-            if (newDisasterState & (!currentDisasterState || (i % 60 == 0)))
+            // Disaster started(false->true) or during disaster
+            if (newDisasterState & (!currentDisasterState || (i % Constants.PERIODIC_CHECK_TIME == 0)))
             {
                 // Start siren, show path window, activate warning box.
                 SetSiren(true);
@@ -221,7 +221,7 @@ public class ScenarioManager : MonoBehaviour
                 // Set all floor visible and start simulation.
                 FunctionManager.SetFloorVisibility(int.MaxValue);
                 StartCoroutine(StartSimulation());
-                StartCoroutine(SetTextOpacity());
+                StartCoroutine(SetWarningTextOpacity());
 
                 // Set disaster occurred flag
                 disasterOccurred = true;
@@ -322,6 +322,9 @@ public class ScenarioManager : MonoBehaviour
             // for targets
             foreach (NodeExit exit in NodeManager.GetNodesByType<NodeExit>())
             {
+                // Except inactivated node
+                if (exit.Hide) continue;
+
                 // Calculate path
                 List<Node3> path = new List<Node3>();
                 navMeshPath = new NavMeshPath();
@@ -570,7 +573,7 @@ public class ScenarioManager : MonoBehaviour
         return ret;
     }
 
-    private IEnumerator SetTextOpacity()
+    private IEnumerator SetWarningTextOpacity()
     {
         warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
         disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);

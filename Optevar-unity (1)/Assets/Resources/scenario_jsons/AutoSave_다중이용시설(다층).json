@@ -172,9 +172,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          -14.0317688,
-          1.66500008,
-          -8.686335
+          8.122074,
+          15.765,
+          24.2977142
         ]
       }
     },
@@ -185,30 +185,27 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          35.27929,
-          0.0150000006,
-          -18.1340446
+          10.0767517,
+          12.6150007,
+          -17.2134933
         ]
       }
     },
     {
       "$type": "NodeExit, Assembly-CSharp",
       "PhysicalID": "exit3",
-      "State": 2,
+      "State": 0,
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          -14.1573982,
-          1.66500008,
-          24.611908
+          10.9827271,
+          0.0150000006,
+          -21.1375179
         ]
       }
     },
     {
       "$type": "NodeFireSensor, Assembly-CSharp",
-      "ValueTemp": 10.0,
-      "ValueFire": 0.0,
-      "ValueSmoke": 0.0,
       "PhysicalID": "13000001",
       "State": 2,
       "position": {
@@ -222,9 +219,6 @@
     },
     {
       "$type": "NodeFireSensor, Assembly-CSharp",
-      "ValueTemp": 0.0,
-      "ValueFire": 0.0,
-      "ValueSmoke": 0.0,
       "PhysicalID": "13000002",
       "State": 2,
       "position": {
@@ -238,9 +232,6 @@
     },
     {
       "$type": "NodeFireSensor, Assembly-CSharp",
-      "ValueTemp": 0.0,
-      "ValueFire": 0.0,
-      "ValueSmoke": 0.0,
       "PhysicalID": "13000003",
       "State": 2,
       "position": {
@@ -254,9 +245,6 @@
     },
     {
       "$type": "NodeFireSensor, Assembly-CSharp",
-      "ValueTemp": 0.0,
-      "ValueFire": 0.0,
-      "ValueSmoke": 0.0,
       "PhysicalID": "13000004",
       "State": 0,
       "position": {
@@ -270,9 +258,6 @@
     },
     {
       "$type": "NodeFireSensor, Assembly-CSharp",
-      "ValueTemp": 0.0,
-      "ValueFire": 0.0,
-      "ValueSmoke": 0.0,
       "PhysicalID": "13000005",
       "State": 2,
       "position": {
@@ -286,9 +271,6 @@
     },
     {
       "$type": "NodeFireSensor, Assembly-CSharp",
-      "ValueTemp": 90.0,
-      "ValueFire": 0.0,
-      "ValueSmoke": 0.0,
       "PhysicalID": "13000006",
       "State": 2,
       "position": {
@@ -302,9 +284,6 @@
     },
     {
       "$type": "NodeFireSensor, Assembly-CSharp",
-      "ValueTemp": 0.0,
-      "ValueFire": 0.0,
-      "ValueSmoke": 0.0,
       "PhysicalID": "13000007",
       "State": 2,
       "position": {
@@ -336,9 +315,9 @@
       "position": {
         "$type": "System.Single[], mscorlib",
         "$values": [
-          0.0,
-          0.0,
-          0.0
+          -30.610033,
+          0.0150000006,
+          -11.273901
         ]
       }
     }

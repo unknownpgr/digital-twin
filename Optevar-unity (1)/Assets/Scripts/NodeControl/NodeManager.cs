@@ -115,17 +115,27 @@ abstract public class NodeManager
     public bool Hide
     {
         get => hide;
-        set { if (hide == value) return; hide = value; onNodeStateChanged(); }
+        set
+        {
+            bool hideBef = hide;
+            if (state == NodeState.STATE_INITIALIZED) hide = value;
+            else hide = true;
+            if (hide ^ hideBef) onNodeStateChanged();
+        }
     }
 
     private NodeState state = NodeState.STATE_UNINITIALIZED;
     public NodeState State
     {
         get => state;
-        set { if (state == value) return;
+        set {
+            if (state == value) return;
             // Unhide when placed
             if (value == NodeState.STATE_INITIALIZED) hide = false;
-            state = value; onNodeStateChanged(); 
+            // Hide when removed
+            else hide = true;
+            state = value; 
+            onNodeStateChanged(); 
         }
     }
 
@@ -148,8 +158,7 @@ abstract public class NodeManager
     {
         if (gameObject == null) return;
 
-        // Do not modify 'Hide' or 'State' variable at here. It would occur stack overflow by recursive function call.
-        if (state != NodeState.STATE_INITIALIZED) hide = true;
+        // Never modify 'Hide' or 'State' variable at here. It would occur stack overflow by recursive function call.
         gameObject.SetActive(!hide);                    // If node is initialized and not hidden, show it.
         OnNodeStateChanged?.Invoke();                   // Invoke callback
     }
