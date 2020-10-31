@@ -401,7 +401,7 @@ public class ScenarioManager : MonoBehaviour
             // Remove existing panels
             foreach (Transform child in pathWindowcontent.transform)
             {
-                GameObject.Destroy(child.gameObject);
+                Destroy(child.gameObject);
             }
 
             // Show top-10 fastest pathes on panel
@@ -427,24 +427,27 @@ public class ScenarioManager : MonoBehaviour
                 evacTimeText.text = "예상 시간 : " + string.Format("{0:F2}", pathImages[r].time) + "(초)";
                 // evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
             }
+            UploadImage();
         }
     }
 
     // Upload image on server and send sms
-    private async void UploadImage(string PhoneNum)
+    private async void UploadImage()
     {
         string uploadServer = Constants.IMAGE_SERVER;
 
         // Upload image
         HttpClient httpClient = new HttpClient();
         MultipartFormDataContent form = new MultipartFormDataContent();
-        using (FileStream fs = new FileStream("./Resources/최적경로.png", FileMode.Open))
+        using (FileStream fs = new FileStream(Application.dataPath + "/Resources/최적경로.png", FileMode.Open))
         {
             int len = (int)fs.Length;
             byte[] buf = new byte[len];
             fs.Read(buf, 0, len);
             form.Add(new ByteArrayContent(buf), Constants.IMAGE_KEY, Constants.IMAGE_KEY);
         }
+
+        // Get URL
         HttpResponseMessage response = await httpClient.PostAsync(uploadServer + "/upload", form);
         response.EnsureSuccessStatusCode();
         httpClient.Dispose();
@@ -462,63 +465,11 @@ public class ScenarioManager : MonoBehaviour
             ApiSecret = "FCWNJZVBLK5EFP7LFVRLHQISHOK6YJSD", // 발급받은 ApiSecret key
             DefaultSenderId = "01026206621" // 문자 보내는 사람 폰 번호
         });
-        var request = new SendMessageRequest(PhoneNum, "화재 발생! - " + url); // 이미지 링크가 포함된 문자 메세지 전송
+        var request = new SendMessageRequest("01041924488", "화재 발생! - " + url); // 이미지 링크가 포함된 문자 메세지 전송
         var result = api.SendMessageAsync(request);
 
-        Debug.Log("메시지 전송완료");
-    }
-
-    private async void SendMessage(string PhoneNum, bool Repeat)
-    {
-        if (Repeat)
-        {
-            SmsApi api = new SmsApi(new SmsApiOptions
-            {
-                ApiKey = "NCSP8ABD0A2GUNI5", // 발급 받은 ApiKey
-                ApiSecret = "FCWNJZVBLK5EFP7LFVRLHQISHOK6YJSD", // 발급받은 ApiSecret key
-                DefaultSenderId = "01026206621" // 문자 보내는 사람 폰 번호
-            });
-            string ImageURL = "";
-            // Imgur API 키 <-- Client ID
-            string ImgurAPIKey = "8a529c085fe1019";
-            // Imgur Secret 키 <-- Client secret
-            string ImgurAPISecretKey = "5f4b5ea2dcab73133a617dabb68dbbed1466c5db";
-
-            var client = new ImgurClient(ImgurAPIKey, ImgurAPISecretKey);
-            var endpoint = new ImageEndpoint(client);
-            Imgur.API.Models.IImage img;
-
-            using (var fs = new FileStream(Application.dataPath + "/Resources/최적경로.png", FileMode.Open))
-            {
-                img = await endpoint.UploadImageStreamAsync(fs);
-            }
-            ImageURL = img.Link;
-
-            var request = new SendMessageRequest(PhoneNum, "화재 발생!" + ImageURL); // 이미지 링크가 포함된 문자 메세지 전송
-                                                                                 // 문자 보낼 전화번호 , 보낼 메세지(한글 40자)
-            var result = api.SendMessageAsync(request);
-
-            Debug.Log("메시지전송완료");
-            //return 0;
-            Repeat = false;
-        }
-    }
-
-    private static int GetTargetFloor(int startFloor, int[] dangerFloor, int floor)
-    {
-        if (startFloor == -1) return -1;
-        bool toDown, toUp;
-        toDown = toUp = true;
-        for (int i = 0; i < dangerFloor.Length; i++)
-        {
-            if (startFloor > dangerFloor[i])
-                toDown &= false;
-            if (startFloor < dangerFloor[i])
-                toUp &= false;
-        }
-        if (toDown) return 1;
-        if (toUp) return floor;
-        return -1;
+        // Log result
+        Debug.Log("메시지 전송완료 : "+result);
     }
 
     private void SetDirectionSensor() //최적경로에 따른 대피유도신호로 바꾸기
@@ -573,21 +524,27 @@ public class ScenarioManager : MonoBehaviour
         return ret;
     }
 
+    private bool isRunning = false;
     private IEnumerator SetWarningTextOpacity()
     {
-        warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-        disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-
-        yield return new WaitForSeconds(0.8f);
-        while (currentDisasterState) // Please avoid using indirect stat flag. (warningBox.activeSelf)
+        if (!isRunning)
         {
-            warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
-            disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
-            yield return new WaitForSeconds(0.6f);
-
+            isRunning = true;
             warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
             disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-            yield return new WaitForSeconds(0.6f);
+
+            yield return new WaitForSeconds(0.8f);
+            while (currentDisasterState) // Please avoid using indirect stat flag. (warningBox.activeSelf)
+            {
+                warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
+                disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
+                yield return new WaitForSeconds(0.6f);
+
+                warningIcon.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+                disatsterName.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+                yield return new WaitForSeconds(0.6f);
+            }
+            isRunning = false;
         }
     }
 

@@ -307,32 +307,6 @@
           -17.595108
         ]
       }
-    },
-    {
-      "$type": "NodeExit, Assembly-CSharp",
-      "PhysicalID": "InputField (UnityEngine.UI.InputField)",
-      "State": 0,
-      "position": {
-        "$type": "System.Single[], mscorlib",
-        "$values": [
-          -30.610033,
-          0.0150000006,
-          -11.273901
-        ]
-      }
-    },
-    {
-      "$type": "NodeCCTV, Assembly-CSharp",
-      "PhysicalID": "101020",
-      "State": 2,
-      "position": {
-        "$type": "System.Single[], mscorlib",
-        "$values": [
-          14.2549667,
-          15.765,
-          -17.9551315
-        ]
-      }
     }
   ]
 }
