@@ -427,12 +427,14 @@ public class ScenarioManager : MonoBehaviour
                 evacTimeText.text = "예상 시간 : " + string.Format("{0:F2}", pathImages[r].time) + "(초)";
                 // evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
             }
-            UploadImage();
+
+            // ToDo : Enter phone number
+            UploadImage(null);
         }
     }
 
     // Upload image on server and send sms
-    private async void UploadImage()
+    private async void UploadImage(string phone)
     {
         string uploadServer = Constants.IMAGE_SERVER;
 
@@ -458,6 +460,8 @@ public class ScenarioManager : MonoBehaviour
             .Replace("\"", "");
         Debug.Log("URL: " + url);
 
+        if (phone == null) Debug.Log("SMS canceled because phone number was null.");
+
         // Send message
         SmsApi api = new SmsApi(new SmsApiOptions
         {
@@ -465,7 +469,7 @@ public class ScenarioManager : MonoBehaviour
             ApiSecret = "FCWNJZVBLK5EFP7LFVRLHQISHOK6YJSD", // 발급받은 ApiSecret key
             DefaultSenderId = "01026206621" // 문자 보내는 사람 폰 번호
         });
-        var request = new SendMessageRequest("01041924488", "화재 발생! - " + url); // 이미지 링크가 포함된 문자 메세지 전송
+        var request = new SendMessageRequest(phone, "화재 발생! - " + url); // 이미지 링크가 포함된 문자 메세지 전송
         var result = api.SendMessageAsync(request);
 
         // Log result
