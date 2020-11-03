@@ -7,9 +7,6 @@ using System.Linq;
 using System;
 using System.IO;
 using CoolSms;
-using Imgur.API.Authentication.Impl;
-using Imgur.API.Endpoints.Impl;
-using Imgur.API.Models.Impl;
 using System.Net.Http;
 
 public class ScenarioManager : MonoBehaviour
@@ -385,6 +382,8 @@ public class ScenarioManager : MonoBehaviour
         byte[] bytes = screenShotTexture.EncodeToPNG();
         File.WriteAllBytes(Application.dataPath + "/Resources/최적경로.png", bytes);
 
+        GameObject phoneNumber = GameObject.Find("inputField_user_phone_number");
+
         screenShotData.scrshot = screenShotTexture;
         pathImages.Add(screenShotData);
 
@@ -427,9 +426,7 @@ public class ScenarioManager : MonoBehaviour
                 evacTimeText.text = "예상 시간 : " + string.Format("{0:F2}", pathImages[r].time) + "(초)";
                 // evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
             }
-
-            // ToDo : Enter phone number
-            UploadImage(null);
+            //UploadImage(phoneNumber.transform.GetChild(2).GetComponent<Text>().text);
         }
     }
 
@@ -454,26 +451,28 @@ public class ScenarioManager : MonoBehaviour
         response.EnsureSuccessStatusCode();
         httpClient.Dispose();
         string sd = response.Content.ReadAsStringAsync().Result;
-        string url = uploadServer + "?img=" + sd
+        string url = uploadServer + "/?img=" + sd
             .Split(':')[1]
             .Replace("}", "")
             .Replace("\"", "");
         Debug.Log("URL: " + url);
 
         if (phone == null) Debug.Log("SMS canceled because phone number was null.");
-
-        // Send message
-        SmsApi api = new SmsApi(new SmsApiOptions
+        else
         {
-            ApiKey = "NCSP8ABD0A2GUNI5", // 발급 받은 ApiKey
-            ApiSecret = "FCWNJZVBLK5EFP7LFVRLHQISHOK6YJSD", // 발급받은 ApiSecret key
-            DefaultSenderId = "01026206621" // 문자 보내는 사람 폰 번호
-        });
-        var request = new SendMessageRequest(phone, "화재 발생! - " + url); // 이미지 링크가 포함된 문자 메세지 전송
-        var result = api.SendMessageAsync(request);
+            // Send message
+            SmsApi api = new SmsApi(new SmsApiOptions
+            {
+                ApiKey = "NCSP8ABD0A2GUNI5", // 발급 받은 ApiKey
+                ApiSecret = "FCWNJZVBLK5EFP7LFVRLHQISHOK6YJSD", // 발급받은 ApiSecret key
+                DefaultSenderId = "01026206621" // 문자 보내는 사람 폰 번호
+            });
+            var request = new SendMessageRequest(phone, "화재 발생! - " + url); // 이미지 링크가 포함된 문자 메세지 전송
+            var result = api.SendMessageAsync(request);
 
-        // Log result
-        Debug.Log("메시지 전송완료 : "+result);
+            // Log result
+            Debug.Log("메시지 전송완료 : " + result);
+        }
     }
 
     private void SetDirectionSensor() //최적경로에 따른 대피유도신호로 바꾸기
@@ -558,7 +557,6 @@ public class ScenarioManager : MonoBehaviour
         {
             // Set background color to red
             warningBoxBg.color = new Color(1.0f, 0.2648465f, 0.1037736f, 1.0f);
-
         }
         else if (IsDisaster == false)
         {
