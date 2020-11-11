@@ -112,11 +112,9 @@ public class DataManager : MonoBehaviour
     // 루트 디렉토리를 읽어서 json파일 리스트를 업데이트한다. 이 함수를 따로 만든 이유는, 자주 호출해야하는 반면 blocking되는 작업일 것 같아서.
     public static void UpdateSaveFileList()
     {
-        new Thread(() =>
-        {
-            DirectoryInfo folder = new DirectoryInfo(root);
-            foreach (var file in folder.GetFiles("*.json")) jsonFileList.Add(file);
-        }).Start();
+        DirectoryInfo folder = new DirectoryInfo(root);
+        jsonFileList.Clear();
+        foreach (var file in folder.GetFiles("*.json")) jsonFileList.Add(file);
     }
 
     // 저장된 정보 파일 리스트 윈도우의 버튼들을 지우고 새로 만든다.
@@ -128,7 +126,6 @@ public class DataManager : MonoBehaviour
 
         Transform panelJson = GameObject.Find("panel_json_file").transform;
 
-        // Create floor buttons
         GameObject newButton;
         foreach (FileInfo fi in jsonFileList)
         {
@@ -330,7 +327,7 @@ public class DataManager : MonoBehaviour
         // 노드 정보 저장
         string path = root + fileName + ".json";
         string data = NodeManager.Jsonfy();
-        new Thread(() => File.WriteAllText(path, data)).Start();
+        File.WriteAllText(path, data);
 
         // 팝업 띄우고
         Popup.Show("저장되었습니다.");

@@ -191,12 +191,23 @@ public class ScenarioManager : MonoBehaviour
 
     private IEnumerator PeriodicCheck()
     {
+        // Infinite loop with counter
         for (int i = 0; ; i++)
         {
-            // Get new disaster state
+            // Get new disaster state. Default is false
             bool newDisasterState = false;
+
+            // If any fire sensor is active, it is disaster.
             foreach (NodeFireSensor nodeFire in NodeManager.GetNodesByType<NodeFireSensor>())
                 newDisasterState |= nodeFire.IsDisaster;
+
+            // But if there are nobody in the building, it is not disaster.
+            int headTotalCount = 0;
+            foreach (NodeArea node in NodeManager.GetNodesByType<NodeArea>())
+            {
+                headTotalCount += node.Num;
+            }
+            if (headTotalCount == 0) newDisasterState = false;
 
             // Disaster started(false->true) or during disaster
             if (newDisasterState & (!currentDisasterState || (i % Constants.PERIODIC_CHECK_TIME == 0)))
