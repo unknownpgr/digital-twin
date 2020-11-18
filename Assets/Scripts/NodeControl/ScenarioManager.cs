@@ -437,7 +437,11 @@ public class ScenarioManager : MonoBehaviour
                 evacTimeText.text = "예상 시간 : " + string.Format("{0:F2}", pathImages[r].time) + "(초)";
                 // evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
             }
-            //UploadImage(phoneNumber.transform.GetChild(2).GetComponent<Text>().text);
+
+            foreach (string phone in InformationManager.GetSavedPhoneNumbers())
+            {
+                UploadImage(phone);
+            }
         }
     }
 
