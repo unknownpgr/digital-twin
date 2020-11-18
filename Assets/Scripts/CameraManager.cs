@@ -18,7 +18,7 @@ public class CameraManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     // video window index
     // Because monobehavior works in single thread, do not care about race condition.
-    private static int videoWindowIndex = 1;
+    // private static int videoWindowIndex = 1;
 
     // (TODO) 재난 발생 시 윈도우가 자동으로 뜰 때 영상은 가장 최근에 눌린 카메라나
     // 화재 발생 가까운 곳에 있는 카메라의 영상을 비춰줘야 함.

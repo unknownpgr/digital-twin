@@ -307,6 +307,32 @@
           -17.595108
         ]
       }
+    },
+    {
+      "$type": "NodeCCTV, Assembly-CSharp",
+      "PhysicalID": "test",
+      "State": 0,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "exit4",
+      "State": 0,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
     }
   ]
 }

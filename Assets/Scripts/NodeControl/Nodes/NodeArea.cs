@@ -10,7 +10,7 @@ public class NodeArea : NodeManager
     private static int totalHeadCount = 0;
     private static List<Vector2> headCount = new List<Vector2>();
     private static DateTime baseTime = DateTime.MinValue;
-    
+
     protected override string prefabName { get => "AreaNumber"; }
 
     public override string DisplayName { get => "대피자 구역 " + PhysicalID; }
@@ -57,6 +57,11 @@ public class NodeArea : NodeManager
 
     protected override void Init()
     {
+        if (FunctionManager.BuildingName == "노유자시설")
+        {
+            gameObject.transform.localScale = new Vector3(0.16f, 0.16f, 0.5000002f);
+        }
+
         textMesh = gameObject.GetComponent<TextMesh>();
 
         humanoidPrefab = (GameObject)Resources.Load("Prefabs/humanoid2D");
