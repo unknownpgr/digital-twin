@@ -367,7 +367,6 @@ public class FunctionManager : MonoBehaviour
         }
         else
         {
-
             // Monitoring mode to placing mode
 
             // Set mode change button color
@@ -380,10 +379,6 @@ public class FunctionManager : MonoBehaviour
             warningBox.SetActive(false);
 
             ScenarioManager.singleTon.EndSimulation();
-
-            // Initialize
-            // DataManager dataManager = GetComponent<DataManager>();
-            // dataManager.LoadDataFromDB();
         }
 
         isPlacingMode = !isPlacingMode;

@@ -122,10 +122,14 @@ public class ScenarioManager : MonoBehaviour
         {
             // Turn off all siren and all direction sensors
             SetSiren(false);
-            foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>())
-            {
-                mQTTManager.PubDirectionOperation(node.PhysicalID, "off");
-            }
+        }
+
+        // I put direction node off function here, not in if statement so that whether disaster is occurred or not,
+        // user can deactivate direction node by changing mode.
+        // It is because the direction nodes in real building miss off signal sometimes.
+        foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>())
+        {
+            mQTTManager.PubDirectionOperation(node.PhysicalID, "off");
         }
 
         // Close mqttManager
