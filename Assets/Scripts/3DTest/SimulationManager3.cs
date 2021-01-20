@@ -58,7 +58,6 @@ public class SimulationManager3 : ScriptableObject
     //List<List<int>> evacNumList = new List<List<int>>();
     //List<List<List<int>>> PrintList = new List<List<List<int>>>();
     List<PrintableValue> PrintableList;
-    int targetSize = 0;
     public List<float> delayList = new List<float>();
 
     string savePath;
@@ -76,19 +75,6 @@ public class SimulationManager3 : ScriptableObject
     // 2. Update sensor data.
     // 3. Simulate.
 
-    public void AddEvacuater(Vector3 area, int nums, List<Node3[]> paths)
-    {
-        if (nums > 0)
-        {
-            Evacuaters3 sc = new Evacuaters3(
-                nums, area, grid);
-            sc.SetVelocity(4);
-            sc.SetPaths(paths);
-            EvacuatersList.Add(sc);
-            targetSize = paths.Count;
-        }
-    }
-
     public void AddEvacuater(Vector3 area, int nums, List<Node3[]> paths, float _velo = 4)
     {
         if (nums > 0)
@@ -98,7 +84,6 @@ public class SimulationManager3 : ScriptableObject
             sc.SetVelocity(_velo);
             sc.SetPaths(paths);
             EvacuatersList.Add(sc);
-            targetSize = paths.Count;
         }
     }
 

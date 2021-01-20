@@ -6,7 +6,6 @@
 
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
 public class Bresenham3D : IEnumerable
 {
@@ -14,17 +13,11 @@ public class Bresenham3D : IEnumerable
     Vector3 end;
     float steps = 1;
 
-    public Bresenham3D(Vector3 p_start, Vector3 p_end)
+    public Bresenham3D(Vector3 start, Vector3 end,float steps = 1)
     {
-        start = p_start;
-        end = p_end;
-        steps = 1;
-    }
-    public Bresenham3D(Vector3 p_start, Vector3 p_end, float p_steps)
-    {
-        steps = p_steps;
-        start = p_start * steps;
-        end = p_end * steps;
+        this.start = start;
+        this.end = end;
+        this.steps = steps;
     }
 
     public IEnumerator GetEnumerator()
