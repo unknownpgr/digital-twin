@@ -15,9 +15,6 @@ public class Humanoid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (FunctionManager.BuildingName != "노유자시설")
-        {
-            transform.LookAt(Camera.main.transform.position, Vector3.up);
-        }
+            // transform.LookAt(Camera.main.transform.position, Vector3.up);
     }
 }

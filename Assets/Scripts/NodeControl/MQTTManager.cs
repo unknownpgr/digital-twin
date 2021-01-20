@@ -179,12 +179,24 @@ public class MQTTManager : MonoBehaviour
     }
 
     // ===[ Specialized publish method ]===========================
-
+    private static DateTime Delay(int MS)
+    {
+        DateTime ThisMoment = DateTime.Now;
+        TimeSpan duration = new TimeSpan(0, 0, 0, 0, MS);
+        DateTime AfterWards = ThisMoment.Add(duration);
+        while (AfterWards >= ThisMoment)
+        {
+            ThisMoment = DateTime.Now;
+        }
+        return DateTime.Now;
+    }
+    
     public void PubDirectionOperation(string physicalID, string dir)
     {
         // e.g. {"nodeId":"4", "direction":"down"}
         string json = "{\"nodeId\":\"" + physicalID + "\",\"direction\":\"" + dir + "\"}";
         Publish(mqttConf.topic[3], json);
+        Delay(100);
     }
 
     public void PubAreaUpdate(string id)

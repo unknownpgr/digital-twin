@@ -1,0 +1,203 @@
+{
+  "$type": "System.Collections.Generic.List`1[[NodeManager, Assembly-CSharp]], mscorlib",
+  "$values": [
+    {
+      "$type": "NodeArea, Assembly-CSharp",
+      "Velocity": 4.0,
+      "PhysicalID": "room3",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -25.24678,
+          15.765,
+          -10.3468075
+        ]
+      }
+    },
+    {
+      "$type": "NodeArea, Assembly-CSharp",
+      "Velocity": 4.0,
+      "PhysicalID": "room2",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          12.659462,
+          6.31500053,
+          -10.0003338
+        ]
+      }
+    },
+    {
+      "$type": "NodeArea, Assembly-CSharp",
+      "Velocity": 4.0,
+      "PhysicalID": "room1",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -7.2811203,
+          15.765,
+          1.27978134
+        ]
+      }
+    },
+    {
+      "$type": "NodeDirection, Assembly-CSharp",
+      "PhysicalID": "13000008",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          0.5022011,
+          15.765,
+          -16.9970665
+        ]
+      }
+    },
+    {
+      "$type": "NodeDirection, Assembly-CSharp",
+      "PhysicalID": "13000007",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -7.4344635,
+          15.765,
+          3.7958107
+        ]
+      }
+    },
+    {
+      "$type": "NodeFireSensor, Assembly-CSharp",
+      "PhysicalID": "13000006",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          7.55466461,
+          15.765,
+          14.3788643
+        ]
+      }
+    },
+    {
+      "$type": "NodeFireSensor, Assembly-CSharp",
+      "PhysicalID": "13000005",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          10.8458023,
+          15.765,
+          -17.16539
+        ]
+      }
+    },
+    {
+      "$type": "NodeFloodSensor, Assembly-CSharp",
+      "PhysicalID": "13000004",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -12.15353,
+          15.765,
+          15.6286888
+        ]
+      }
+    },
+    {
+      "$type": "NodeFloodSensor, Assembly-CSharp",
+      "PhysicalID": "13000003",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -33.6829948,
+          15.765,
+          -11.2272034
+        ]
+      }
+    },
+    {
+      "$type": "NodeEarthquakeSensor, Assembly-CSharp",
+      "PhysicalID": "13000002",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          28.3328171,
+          15.765,
+          -16.9970531
+        ]
+      }
+    },
+    {
+      "$type": "NodeEarthquakeSensor, Assembly-CSharp",
+      "PhysicalID": "13000001",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -15.2830219,
+          15.765,
+          -22.6689682
+        ]
+      }
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "exit1",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -12.8825111,
+          0.0150000006,
+          -14.8058834
+        ]
+      }
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "exit2",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          35.138443,
+          0.0150000006,
+          -15.7111883
+        ]
+      }
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "exit3",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -9.575525,
+          0.0150000006,
+          25.4704514
+        ]
+      }
+    },
+    {
+      "$type": "NodeExit, Assembly-CSharp",
+      "PhysicalID": "exit4",
+      "State": 2,
+      "position": {
+        "$type": "System.Single[], mscorlib",
+        "$values": [
+          -6.61408043,
+          15.765,
+          23.1182289
+        ]
+      }
+    }
+  ]
+}

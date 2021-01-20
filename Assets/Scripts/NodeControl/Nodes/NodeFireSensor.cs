@@ -36,8 +36,6 @@ public class NodeFireSensor : NodeManager
             isDisasterTemp = value;
             navObstacle.carving = value;
             material.color = new Color(1, 0, 0, value ? .3f : 0);
-            // ToDo : Why it is here? Move it to ScenarioManager.cs.
-            FunctionManager.Find("window_video").GetChild(1).GetChild(2).GetComponent<Text>().text = GetNearestCameraID();
         }
     }
     [JsonIgnore]
@@ -75,24 +73,4 @@ public class NodeFireSensor : NodeManager
         if (navObstacle == null) throw new System.Exception("NavObstacle is null");
         gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
     }
-
-    private string GetNearestCameraID()
-    {
-        string cameraID = "No CCTV on this floor";
-        float minDist = float.MaxValue;
-        foreach (NodeCCTV nodeCCTV in GetNodesByType<NodeCCTV>())
-        {
-            if (BuildingManager.GetFloor(nodeCCTV.Position) == BuildingManager.GetFloor(Position))
-            {
-                float cctvDist = Vector3.Distance(nodeCCTV.Position, Position);
-                if (cctvDist < minDist)
-                {
-                    minDist = cctvDist;
-                    cameraID = nodeCCTV.PhysicalID;
-                }
-            }
-        }
-        return cameraID;
-    }
-
 }

@@ -1,7 +1,7 @@
 {
   "ipAddress": "127.0.0.1",
   "db_id": "etriservicebroker",
-  "db_pw": "etri1234",
+  "db_pw": "secret",
   "db_name": "etriservicebroker",
   "port": "3306",
   "sensor_table": "tb_sensornode",
