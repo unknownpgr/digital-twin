@@ -309,10 +309,7 @@ public class Grid3 : MonoBehaviour
                         line.SetPositions(NodesToPos(this.MinPaths[i]));
                         line.enabled = true;
                         this.lineObjects.Add(lineTmp);
-
-                        //DrawArrow(MinPaths[i]);
                     }
-
                 }
             }
         }

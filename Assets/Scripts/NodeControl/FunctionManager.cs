@@ -16,9 +16,9 @@ public class FunctionManager : MonoBehaviour
 	// Current canvas
 	public Canvas canvas;
 	// Dictionary of uis
-	private static Dictionary<string, Transform> uis = new Dictionary<string, Transform>();
+	private static readonly Dictionary<string, Transform> uis = new Dictionary<string, Transform>();
 	// Floor side display buttons
-	private List<GameObject> floorButtons = new List<GameObject>();
+	private readonly List<GameObject> floorButtons = new List<GameObject>();
 	// Sensor buttons of sensor window
 
 	//=============================================================

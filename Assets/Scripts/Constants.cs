@@ -16,7 +16,7 @@ public static class Constants
     public const int NODE_DIRECTION = 0x27;
     public const int NODE_CCTV = 0x90;
 
-    public const int PERIODIC_CHECK_TIME = 100;
+    public const int PERIODIC_CHECK_TIME = 15;
 
     public const string IMAGE_SERVER = "http://disaster.urbanscience.uos.ac.kr";
     public const string IMAGE_KEY = "img";

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.AI;
-using System.Linq;
-using System;
 using System.IO;
 using CoolSms;
 using System.Net.Http;
@@ -15,7 +13,6 @@ public class ScenarioManager : MonoBehaviour
     public static ScenarioManager singleTon;
 
     MQTTManager mQTTManager;
-    public Grid3 grid;
 
     // Current state.
     // true = at least one sensor is in disaster mode.
@@ -26,9 +23,6 @@ public class ScenarioManager : MonoBehaviour
     private bool disasterOccurred = false;
 
     NavMeshPath navMeshPath;
-    public SimulationManager3 simulationManager = null;
-    int pathSize = 0;
-    public bool isSimulating = false;
 
     Camera subCamera;
 
@@ -42,10 +36,11 @@ public class ScenarioManager : MonoBehaviour
 
     // Element of disaster warning UI
     private GameObject warningBox;
-    private UnityEngine.UI.Image warningBoxBg;
-    private UnityEngine.UI.Image warningIcon;
+    private Image warningBoxBg;
+    private Image warningIcon;
     private Text disasterName;
     private Text nearestCameraID;
+
     private List<ScreenshotAttr> pathImages = new List<ScreenshotAttr>();
 
     public void Start()
@@ -59,20 +54,16 @@ public class ScenarioManager : MonoBehaviour
 
     public void InitSimulation()
     {
-        //Camera initiation
+        // Initialize sub camera
         if (subCamera == null) subCamera = GameObject.Find("SubCamera").GetComponent<Camera>();
         Vector3 buildingSize = BuildingManager.BuildingBound.size;
         float cameraViewSize = Mathf.Max(buildingSize.x, buildingSize.z) / 2;
         subCamera.orthographicSize = cameraViewSize;
-
         Vector3 cameraPosition = BuildingManager.BuildingBound.center;
         cameraPosition.y = 100;
         subCamera.transform.position = cameraPosition;
 
-        // << BLOCKING TASK 1 >> Make new navgrid
-        if (grid == null) grid = transform.GetComponent<Grid3>();
         NavMeshTriangulation tri = NavMesh.CalculateTriangulation();
-        grid.CreateGrid(tri.vertices, BuildingManager.FloorsCount);
 
         if (mQTTManager == null) mQTTManager = GetComponent<MQTTManager>();
         mQTTManager.Init();
@@ -95,25 +86,12 @@ public class ScenarioManager : MonoBehaviour
         nearestCameraID = videoWindow.transform.GetChild(1).GetChild(2).GetComponent<Text>();
         SetTextOfViedoWindowWithDisasterState(false);
 
-        // << BLOCKING TASK 2 >> Add sgrid
-        simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
-        simulationManager.SetGrid(grid);
-
         // Initialize disaster state
         disasterOccurred = false;
     }
 
     public void EndSimulation()
     {
-        // Reset path
-        grid.ResetFinalPaths();
-        grid.InitWeight();
-        grid.ViewMinPath = false;
-        grid.InitLiner();
-
-        // Clear simulationManager
-        simulationManager.EvacuatersList.Clear();
-
         // Reset area number
         foreach (NodeArea node in NodeManager.GetNodesByType<NodeArea>()) node.Num = 0;
         foreach (NodeFireSensor node in NodeManager.GetNodesByType<NodeFireSensor>()) node.IsDisasterFire = node.IsDisasterSmoke = node.IsDisasterTemp = false;
@@ -281,11 +259,6 @@ public class ScenarioManager : MonoBehaviour
                 // Turn off siren
                 SetSiren(false);
 
-                // Init grid(should make this process simpler)
-                grid.InitWeight();
-                grid.ViewMinPath = false;
-                grid.InitLiner();
-
                 // Set warning box
                 SetWarningBoxWithDisasterState(false);
 
@@ -303,29 +276,6 @@ public class ScenarioManager : MonoBehaviour
             currentDisasterState = newDisasterState;
 
             yield return new WaitForSeconds(1);
-        }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (isSimulating)
-        {
-            if (simulationManager.EvacuatersList.Count > 0)
-            {
-                Debug.Log("SIM...");
-                if (simulationManager.Progress())
-                {
-                    // 모든 경로에 대해 시뮬레이션이 완료됨.
-                    grid.InitWeight();
-                    grid.ViewMinPath = true;
-                    grid.Liner();
-                    isSimulating = false;
-                    simulationManager.PrintOut("");
-                    SetDirectionSensor();
-                }
-                StartCoroutine(ScreenShot(simulationManager.delayList[simulationManager.delayList.Count - 1]));
-            }
         }
     }
 
@@ -356,13 +306,9 @@ public class ScenarioManager : MonoBehaviour
         yield return new WaitForEndOfFrame();
 
         // Init simulation manager
-        simulationManager = ScriptableObject.CreateInstance<SimulationManager3>();
-        simulationManager.SetGrid(grid);
-        simulationManager.EvacuatersList.Clear();
-        grid.ResetFinalPaths();
-        grid.ViewMinPath = false;
         exits.Clear();
 
+        // ToDo : Refactor here; Hard to read.
         float height = -1;
         foreach (NodeExit exit in NodeManager.GetNodesByType<NodeExit>())
         {
@@ -410,112 +356,47 @@ public class ScenarioManager : MonoBehaviour
             }
         }
 
-        // Store paths
+        EvacuateRouter router = new EvacuateRouter();
+
+        // Calculate path from every area to every exit
         foreach (NodeArea area in NodeManager.GetNodesByType<NodeArea>())
         {
-            // Pass empty area
-            if (area.Num <= 0) continue;
-
-            //simulationManager.SetEvacuaters(this.areaJsons, this.areaNums);
-            List<Node3[]> paths = new List<Node3[]>();
+            // Skip empty area
+            if (area.Num <= 0)
+            {
+                Debug.Log("Skipped empty area " + area.PhysicalID);
+                continue;
+            }
 
             // for targets
             foreach (NodeExit exit in NodeManager.GetNodesByType<NodeExit>())
             {
-                // Except inactivated node
+                // Skip inactivated node
                 if (exit.Hide) continue;
 
-                // Calculate path
-                List<Node3> path = new List<Node3>();
+                // Calculate shortest path
                 navMeshPath = new NavMeshPath();
-
-                // Calculate path from every area to every exit
                 NavMesh.CalculatePath(area.Position, exit.Position, -1, navMeshPath);
-                for (int o = 0; o < navMeshPath.corners.Length - 1; o++)
-                {
-                    path.AddRange(grid.GetNodesFromLine(navMeshPath.corners[o], navMeshPath.corners[o + 1]));
-                }
+                Vector3[] path = navMeshPath.corners;
 
-                // Remove duplicated location
-                for (int o = 0; o < path.Count - 1; o++)
-                {
-                    if (path[o] == path[o + 1])
-                    {
-                        while (path[o] == path[o + 1])
-                            path.Remove(path[o + 1]);
-                    }
-                }
+                // Add calculated route to router
+                router.AddRoute(area, exit, path);
+            }
+        }
 
-                // Add to paths
-                if (path.Count > 0) paths.Add(path.ToArray());
+        EvacuateRoute[] routes = router.CalculateOptimalRoute();
+        RouteRenderer.Render(routes, routes_ =>
+        {
+            foreach(Transform child in pathWindowcontent)
+            {
+                Destroy(child.gameObject);
             }
 
-            pathSize += paths.Count;
-            simulationManager.AddEvacuater(area.Position, area.Num, paths, area.Velocity);
-        }
-
-        // Now, path calculating finished.
-        simulationManager.InitSimParam(pathSize);
-        pathImages.Clear();
-
-        // Start simulating
-        isSimulating = true;
-    }
-
-    private IEnumerator ScreenShot(float time)
-    {
-        // Remove existing panels
-        foreach (Transform child in pathWindowcontent.transform)
-        {
-            DestroyImmediate(child.gameObject);
-        }
-        ScreenshotAttr screenShotData = new ScreenshotAttr
-        {
-            time = time
-        };
-
-        // Take picture
-        subCamera.enabled = true;
-        yield return new WaitForEndOfFrame();
-        RenderTexture rt = new RenderTexture(Screen.width, Screen.height, 24);
-        subCamera.targetTexture = rt;
-        subCamera.Render();
-        subCamera.enabled = false;
-        RenderTexture.active = rt;
-
-        Texture2D screenShotTexture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, true);
-        screenShotTexture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0, true);
-        screenShotTexture.Apply();
-
-        byte[] bytes = screenShotTexture.EncodeToPNG();
-        File.WriteAllBytes(Application.dataPath + "/Resources/최적경로.png", bytes);
-
-        GameObject phoneNumber = GameObject.Find("inputField_user_phone_number");
-
-        screenShotData.scrshot = screenShotTexture;
-        pathImages.Add(screenShotData);
-
-        // If image is full
-        if (pathSize == pathImages.Count)
-        {
-            pathImages.Sort(delegate (ScreenshotAttr x, ScreenshotAttr y)
+            for (int i = 0; i < routes_.Length; i++)
             {
-                if (x.time > y.time) return 1;
-                else if (x.time < y.time) return -1;
-                return 0;
-            });
+                float time = routes_[i].RequiredTime;
+                Texture2D texture = routes_[i].Screenshot;
 
-            /*
-			// Remove existing panels
-			foreach (Transform child in pathWindowcontent.transform)
-			{
-                DestroyImmediate(child.gameObject);
-			}*/
-
-            // Show top-10 fastest pathes on panel
-            int listCount = Math.Min(pathImages.Count, 10);
-            for (int r = 0; r < listCount; r++)
-            {
                 // Create new image
                 GameObject newPathPanel = Instantiate(defaultPathPanel);
                 Transform newPanelTransform = newPathPanel.transform;
@@ -523,28 +404,18 @@ public class ScenarioManager : MonoBehaviour
                 newPanelTransform.localPosition = Vector3.zero;
 
                 // Set image
-                UnityEngine.UI.Image evacpathImage = newPanelTransform.GetChild(0).GetComponent<UnityEngine.UI.Image>();
-                evacpathImage.sprite = Sprite.Create(pathImages[r].scrshot, new Rect(0, 0, Screen.width - 1, Screen.height - 1), new Vector2(0.5f, 0.5f));
+                Image evacpathImage = newPanelTransform.GetChild(0).GetComponent<Image>();
+                evacpathImage.sprite = Sprite.Create(texture, new Rect(0, 0, Screen.width - 1, Screen.height - 1), new Vector2(0.5f, 0.5f));
 
                 // Set rank text
                 Text evacRankText = newPanelTransform.GetChild(1).GetComponentInChildren<Text>();
-                evacRankText.text = (r + 1).ToString();
+                evacRankText.text = (i + 1).ToString();
 
                 // Set time
                 Text evacTimeText = newPanelTransform.GetChild(2).GetComponentInChildren<Text>();
-                evacTimeText.text = "예상 시간 : " + string.Format("{0:F2}", pathImages[r].time) + "(초)";
-                // evacTimeText.text = "Time : " + pathImages[r].time.ToString() + "(초)";
+                evacTimeText.text = "예상 시간 : " + string.Format("{0:F2}", time) + "(초)";
             }
-
-            foreach (string phone in InformationManager.GetSavedPhoneNumbers())
-            {
-                // ToDo : DO NOT CALL UploadImage MULTIPLE TIMES.
-                // Move it out of loop. Instead of passing each phone number to method, pass whole list.
-                string _phone = phone;
-                _phone = null; // Comment here to send message
-                UploadImage(_phone);
-            }
-        }
+        });
     }
 
     // Upload optimal path image on server and send sms
@@ -627,24 +498,26 @@ public class ScenarioManager : MonoBehaviour
     // 가장 가까운 경로 위치를 가져옴.
     private Vector3 GetNearestPathPoint(Vector3 origin)
     {
-        float minDistance = float.MaxValue;
-        Vector3 target = Vector3.zero;
-        foreach (Node3[] node in grid.MinPaths)
-        {
-            float tmp = Vector3.Distance(origin, node[0].position);
-            if (tmp < minDistance)
-            {
-                minDistance = tmp;
-                target = node.Last().position;
-            }
-        }
-        return target;
+        // 이 알고리즘, 뭔가 이상하다. node[0]이랑만 비교하는 게 맞나? 
+        //
+        //        float minDistance = float.MaxValue;
+        //       foreach (Node3[] node in grid.MinPaths)
+        //      {
+        //         float tmp = Vector3.Distance(origin, node[0].position);
+        //        if (tmp < minDistance)
+        //       {
+        //          minDistance = tmp;
+        //         target = node.Last().position;
+        //   }
+        //}
+        //        return target;
+        return new Vector3(0, 0, 0);
     }
 
     // return = up(z), right(x), down(-z), left(-x)
     private string VectorToDirection(Vector3 dir)
     {
-        string ret = "up";
+        string ret;
         Vector3 tmp = dir.normalized;
         if (tmp.z < tmp.x)
         {
