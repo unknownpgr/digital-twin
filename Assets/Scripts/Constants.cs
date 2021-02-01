@@ -16,9 +16,10 @@ public static class Constants
     public const int NODE_DIRECTION = 0x27;
     public const int NODE_CCTV = 0x90;
 
-    public const int PERIODIC_CHECK_TIME = 15;
+    public const int PERIODIC_CHECK_TIME = 30;
 
-    public const string IMAGE_SERVER = "http://disaster.urbanscience.uos.ac.kr";
+    public static string IMAGE_FILENAME { get { return Application.dataPath + "/Resources/최적경로.png"; } }
+    public const string IMAGE_SERVER = "https://disaster.urbanscience.uos.ac.kr";
     public const string IMAGE_KEY = "img";
 
     public const string AUTOSAVE_NAME_FORMAT = "AutoSave_{0}.json";

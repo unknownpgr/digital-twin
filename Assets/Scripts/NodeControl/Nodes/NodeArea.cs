@@ -47,6 +47,12 @@ public class NodeArea : NodeManager
         }
     }
 
+    public static void ClearHeadCount()
+    {
+        headCount.Clear();
+        GraphManager.StaticSetGraph(headCount);
+    }
+
     // Humanoid model 
     private GameObject humanoidPrefab;
     private GameObject[] humanoidList = new GameObject[10]; // Maximum 100.

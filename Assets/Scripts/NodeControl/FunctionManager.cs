@@ -16,9 +16,9 @@ public class FunctionManager : MonoBehaviour
 	// Current canvas
 	public Canvas canvas;
 	// Dictionary of uis
-	private static readonly Dictionary<string, Transform> uis = new Dictionary<string, Transform>();
+	private static Dictionary<string, Transform> uis = new Dictionary<string, Transform>();
 	// Floor side display buttons
-	private readonly List<GameObject> floorButtons = new List<GameObject>();
+	private List<GameObject> floorButtons = new List<GameObject>();
 	// Sensor buttons of sensor window
 
 	//=============================================================
@@ -153,8 +153,8 @@ public class FunctionManager : MonoBehaviour
 
 		// Getelements of mode change button
 		Transform modeBtnTransform = Find("button_mode");
-		GameObject placingPart = modeBtnTransform.GetChild(0).gameObject;
-		GameObject moniteringPart = modeBtnTransform.GetChild(1).gameObject;
+		GameObject moniteringPart = Find("button_monitering").gameObject;
+		GameObject placingPart = Find("button_placing").gameObject;
 		placingBtn = placingPart.GetComponent<Button>();
 		moniteringBtn = moniteringPart.GetComponent<Button>();
 		placingBtnImage = placingPart.GetComponent<Image>();
@@ -163,7 +163,7 @@ public class FunctionManager : MonoBehaviour
 		moniteringBtnText = moniteringPart.GetComponentInChildren<Text>();
 
 		// Set mode change button color
-		SetModeButtonColor(IsPlacingMode);
+		SetModeButtonColor(true);
 
 		// Get transform of menu
 		menu = Find("menu");
@@ -335,7 +335,7 @@ public class FunctionManager : MonoBehaviour
 
 	public void OnClickDocumentDownload()
 	{
-		System.Diagnostics.Process.Start("http://disaster.urbanscience.uos.ac.kr/docs.html");
+		System.Diagnostics.Process.Start("https://disaster.urbanscience.uos.ac.kr/docs.html");
 	}
 
 	public void OnModeChange()
@@ -362,7 +362,7 @@ public class FunctionManager : MonoBehaviour
 
 			// Show all floors
 			SetFloorVisibility(BuildingManager.FloorsCount - 1);
-			ScenarioManager.singleTon.InitSimulation();
+			ScenarioManager.singleton.InitSimulation();
 
 			// Show graph
 			WindowManager graphManager = WindowManager.GetWindow("window_graph");
@@ -381,7 +381,7 @@ public class FunctionManager : MonoBehaviour
 			// Unactivate warning box
 			warningBox.SetActive(false);
 
-			ScenarioManager.singleTon.EndSimulation();
+			ScenarioManager.singleton.EndSimulation();
 
 			// Initialize
 			// DataManager dataManager = GetComponent<DataManager>();

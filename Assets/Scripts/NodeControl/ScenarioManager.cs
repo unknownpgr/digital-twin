@@ -1,16 +1,16 @@
-﻿using System.Collections;
+﻿using CoolSms;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.AI;
-using System.IO;
-using CoolSms;
 using System.Net.Http;
+using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class ScenarioManager : MonoBehaviour
 {
     // Singleton obejct for static call
-    public static ScenarioManager singleTon;
+    public static ScenarioManager singleton;
 
     MQTTManager mQTTManager;
 
@@ -41,28 +41,28 @@ public class ScenarioManager : MonoBehaviour
     private Text disasterName;
     private Text nearestCameraID;
 
-    private List<ScreenshotAttr> pathImages = new List<ScreenshotAttr>();
-
     public void Start()
     {
         // Get video manger
         videoManager = GameObject.Find("Master").GetComponent<VideoManager>();
 
-        singleTon = this;
+        singleton = this;
         StartCoroutine(PeriodicCheck());
     }
 
     public void InitSimulation()
     {
-        // Initialize sub camera
+        //Camera initiation
         if (subCamera == null) subCamera = GameObject.Find("SubCamera").GetComponent<Camera>();
         Vector3 buildingSize = BuildingManager.BuildingBound.size;
         float cameraViewSize = Mathf.Max(buildingSize.x, buildingSize.z) / 2;
         subCamera.orthographicSize = cameraViewSize;
+
         Vector3 cameraPosition = BuildingManager.BuildingBound.center;
         cameraPosition.y = 100;
         subCamera.transform.position = cameraPosition;
 
+        // << BLOCKING TASK 1 >> Make new navgrid
         NavMeshTriangulation tri = NavMesh.CalculateTriangulation();
 
         if (mQTTManager == null) mQTTManager = GetComponent<MQTTManager>();
@@ -92,9 +92,17 @@ public class ScenarioManager : MonoBehaviour
 
     public void EndSimulation()
     {
+        NodeArea.ClearHeadCount();
+        RouteRenderer.InitRenderer();
+
         // Reset area number
-        foreach (NodeArea node in NodeManager.GetNodesByType<NodeArea>()) node.Num = 0;
-        foreach (NodeFireSensor node in NodeManager.GetNodesByType<NodeFireSensor>()) node.IsDisasterFire = node.IsDisasterSmoke = node.IsDisasterTemp = false;
+        foreach (var node in NodeManager.GetNodesByType<NodeArea>()) node.Num = 0;
+
+        // Reset disaster sensors
+        foreach (var node in NodeManager.GetNodesByType<NodeFireSensor>()) node.IsDisasterFire = node.IsDisasterSmoke = node.IsDisasterTemp = false;
+        foreach (var node in NodeManager.GetNodesByType<NodeEarthquakeSensor>()) node.IsDisaster = false;
+        foreach (var node in NodeManager.GetNodesByType<NodeFloodSensor>()) node.IsDisaster = false;
+
         foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>())
         {
             node.Direction = "off";
@@ -109,6 +117,9 @@ public class ScenarioManager : MonoBehaviour
 
         // Close mqttManager
         mQTTManager?.Close();
+
+        currentDisasterState = false;
+        disasterOccurred = false;
     }
 
     private void OnNodeUpdated(MQTTManager.MQTTMsgData data)
@@ -267,8 +278,10 @@ public class ScenarioManager : MonoBehaviour
 
                 // Set video clip
                 videoManager.SetVideoClipWithDisasterState(false);
+
                 // Play video
                 videoManager.PlayVideoClip();
+
                 // Hide video window
                 WindowManager.GetWindow("window_video").SetVisible(false);
             }
@@ -305,10 +318,8 @@ public class ScenarioManager : MonoBehaviour
         yield return new WaitForEndOfFrame();
         yield return new WaitForEndOfFrame();
 
-        // Init simulation manager
         exits.Clear();
 
-        // ToDo : Refactor here; Hard to read.
         float height = -1;
         foreach (NodeExit exit in NodeManager.GetNodesByType<NodeExit>())
         {
@@ -364,7 +375,7 @@ public class ScenarioManager : MonoBehaviour
             // Skip empty area
             if (area.Num <= 0)
             {
-                Debug.Log("Skipped empty area " + area.PhysicalID);
+                Debug.Log("Skip empty area " + area.PhysicalID);
                 continue;
             }
 
@@ -384,18 +395,27 @@ public class ScenarioManager : MonoBehaviour
             }
         }
 
-        EvacuateRoute[] routes = router.CalculateOptimalRoute();
-        RouteRenderer.Render(routes, routes_ =>
-        {
-            foreach(Transform child in pathWindowcontent)
-            {
-                Destroy(child.gameObject);
-            }
+        // Calculate all senarios
+        EvacuateRouter.EvacuateScenario[] allScenarios = router.CalculateScenarios();
 
-            for (int i = 0; i < routes_.Length; i++)
+        // Set direction sensors
+        SetDirectionSensor(allScenarios[0]);
+
+        // Get top 10 senarios
+        EvacuateRouter.EvacuateScenario[] bestSenarios = new EvacuateRouter.EvacuateScenario[allScenarios.Length > 10 ? 10 : allScenarios.Length];
+        Array.Copy(allScenarios, 0, bestSenarios, 0, bestSenarios.Length);
+
+        RouteRenderer.Render(bestSenarios, () =>
+        {
+            // This callback function is called after all rendering finished.
+
+            // Remove existing panels
+            foreach (Transform child in pathWindowcontent) Destroy(child.gameObject);
+
+            for (int i = 0; i < bestSenarios.Length; i++)
             {
-                float time = routes_[i].RequiredTime;
-                Texture2D texture = routes_[i].Screenshot;
+                float time = bestSenarios[i].RequiredTime;
+                Texture2D texture = bestSenarios[i].Screenshot;
 
                 // Create new image
                 GameObject newPathPanel = Instantiate(defaultPathPanel);
@@ -414,24 +434,25 @@ public class ScenarioManager : MonoBehaviour
                 // Set time
                 Text evacTimeText = newPanelTransform.GetChild(2).GetComponentInChildren<Text>();
                 evacTimeText.text = "예상 시간 : " + string.Format("{0:F2}", time) + "(초)";
+
+                bestSenarios[i].Log();
             }
+
+            List<string> phones = InformationManager.GetSavedPhoneNumbers();
+            phones = null; // Comment here to send message;
+            UploadImage(phones, bestSenarios[0].Screenshot);
         });
     }
 
     // Upload optimal path image on server and send sms
-    private async void UploadImage(string phone)
+    private async void UploadImage(List<String> phones, Texture2D image)
     {
         string imageServer = Constants.IMAGE_SERVER;
 
         // To upload the image, construct the form object
         MultipartFormDataContent form = new MultipartFormDataContent();
-        using (FileStream fs = new FileStream(Application.dataPath + "/Resources/최적경로.png", FileMode.Open))
-        {
-            int len = (int)fs.Length;
-            byte[] buf = new byte[len];
-            fs.Read(buf, 0, len);
-            form.Add(new ByteArrayContent(buf), Constants.IMAGE_KEY, Constants.IMAGE_KEY);
-        }
+        byte[] buf = image.EncodeToPNG();
+        form.Add(new ByteArrayContent(buf), Constants.IMAGE_KEY, Constants.IMAGE_KEY);
 
         // Upload the image and get the url of the uploaded image 
         HttpResponseMessage response = null;
@@ -457,33 +478,36 @@ public class ScenarioManager : MonoBehaviour
             .Replace("\"", "");
         Debug.Log("Image viewer URL: " + url);
 
-        if (phone == null)
+        if (phones == null)
         {
             Debug.Log("SMS sending canceled because the phone number is not provided.");
             return;
         }
 
-        // Send message
-        SmsApi api = new SmsApi(new SmsApiOptions
+        foreach (var phone in phones)
         {
-            ApiKey = "NCSP8ABD0A2GUNI5", // 발급 받은 ApiKey
-            ApiSecret = "FCWNJZVBLK5EFP7LFVRLHQISHOK6YJSD", // 발급받은 ApiSecret key
-            DefaultSenderId = "01026206621" // 문자 보내는 사람 폰 번호
-        });
-        var request = new SendMessageRequest(phone, "화재 발생! - " + url); // 이미지 링크가 포함된 문자 메세지 전송
-        var result = api.SendMessageAsync(request);
+            // Send message
+            SmsApi api = new SmsApi(new SmsApiOptions
+            {
+                ApiKey = "NCSP8ABD0A2GUNI5", // 발급 받은 ApiKey
+                ApiSecret = "FCWNJZVBLK5EFP7LFVRLHQISHOK6YJSD", // 발급받은 ApiSecret key
+                DefaultSenderId = "01026206621" // 문자 보내는 사람 폰 번호
+            });
+            var request = new SendMessageRequest(phone, "화재 발생! - " + url); // 이미지 링크가 포함된 문자 메세지 전송
+            var result = api.SendMessageAsync(request);
 
-        // Log result
-        Debug.Log("메시지 전송완료 : " + result);
+            // Log result
+            Debug.Log("메시지 전송완료 : " + result);
+        }
     }
 
     //최적경로에 따른 대피유도신호로 바꾸기
-    private void SetDirectionSensor()
+    private void SetDirectionSensor(EvacuateRouter.EvacuateScenario optimalScenario)
     {
         foreach (NodeDirection node in NodeManager.GetNodesByType<NodeDirection>())
         {
             // target = nearest path position
-            Vector3 target = GetNearestPathPoint(node.Position);
+            Vector3 target = GetNearestPathPoint(node.Position,optimalScenario);
 
             // Calculate direction
             NavMeshPath p = new NavMeshPath();
@@ -496,22 +520,20 @@ public class ScenarioManager : MonoBehaviour
     }
 
     // 가장 가까운 경로 위치를 가져옴.
-    private Vector3 GetNearestPathPoint(Vector3 origin)
+    private Vector3 GetNearestPathPoint(Vector3 origin,EvacuateRouter.EvacuateScenario optimalScenario)
     {
-        // 이 알고리즘, 뭔가 이상하다. node[0]이랑만 비교하는 게 맞나? 
-        //
-        //        float minDistance = float.MaxValue;
-        //       foreach (Node3[] node in grid.MinPaths)
-        //      {
-        //         float tmp = Vector3.Distance(origin, node[0].position);
-        //        if (tmp < minDistance)
-        //       {
-        //          minDistance = tmp;
-        //         target = node.Last().position;
-        //   }
-        //}
-        //        return target;
-        return new Vector3(0, 0, 0);
+        float minDistance = float.MaxValue;
+        Vector3 target = Vector3.zero;
+        foreach (Vector3[] route in optimalScenario.Routes)
+        {
+            float distance = Vector3.Distance(origin, route[0]);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                target = route[route.Length-1];
+            }
+        }
+        return target;
     }
 
     // return = up(z), right(x), down(-z), left(-x)

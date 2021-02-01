@@ -10,7 +10,7 @@ public class GraphManager : MonoBehaviour
     // 현재는 총합을 그리는 그래프 하나만 필요하다.
     // 그러므로, 쉽게 non-singletone으로 전환할 수 있게, 기존 클래스를 static으로 wrapping하기만 한다.
 
-    private static GraphManager singleTone;
+    private static GraphManager singleton;
 
     private readonly List<RectTransform> segment = new List<RectTransform>();
     private readonly List<RectTransform> scale = new List<RectTransform>();
@@ -21,7 +21,7 @@ public class GraphManager : MonoBehaviour
     void Start()
     {
         // Graphmanager를 두 개 이상 생성할 수 있게 하는 제한은 없으므로, 완전한 싱글톤은 아니다.
-        singleTone = this;
+        singleton = this;
 
         size = GetComponent<RectTransform>().rect;
 
@@ -82,7 +82,7 @@ public class GraphManager : MonoBehaviour
         }
     }
 
-    public void SetGraph(List<Vector2> newPoints)
+    private void SetGraph(List<Vector2> newPoints)
     {
         while (segment.Count < newPoints.Count) AddSegment();
 
@@ -146,5 +146,5 @@ public class GraphManager : MonoBehaviour
         GameObject.Find("label_y").GetComponent<Text>().text = "Number of people (Max=" + maxY+")";
     }
 
-    public static void StaticSetGraph(List<Vector2> newPoints) => singleTone?.SetGraph(newPoints);
+    public static void StaticSetGraph(List<Vector2> newPoints) => singleton?.SetGraph(newPoints);
 }
