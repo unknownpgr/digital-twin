@@ -1,0 +1,215 @@
+fileFormatVersion: 2
+guid: ed9d1ce38b0d2604a9b31a7dc9b1bffa
+SketchUpImporter:
+  generateBackFace: 1
+  mergeCoplanarFaces: 0
+  selectedNodes: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000130000001400000015000000160000001700000018000000190000001a0000001b0000001c0000001d0000001e0000001f000000200000002100000022000000230000002400000025000000260000002700000028000000290000002a0000002b0000002c0000002d0000002e0000002f000000300000003100000032000000330000003400000035000000360000003700000038000000390000003a0000003b0000003c0000003d0000003e0000003f0000004000000041000000420000004300000044000000
+  assetHash:
+    serializedVersion: 2
+    Hash: 3f6bcac9433fb29fe27ed783ee7650ad
+  longitude: -105.242139
+  latitude: 40.018309
+  northCorrection: -0
+  fileUnit: 0
+  sketchUpImportData:
+    defaultCamera:
+      position: {x: 0, y: 0, z: 0}
+      lookAt: {x: 0.0254, y: 0, z: 0}
+      up: {x: 0, y: 1, z: 0}
+      fov: 45
+      aspectRatio: 1.33
+      orthoSize: 1
+      isPerspective: 1
+      nearPlane: 0
+      farPlane: 0
+    scenes:
+    - camera:
+        position: {x: -77.765785, y: 62.775803, z: -104.21213}
+        lookAt: {x: -18.801346, y: 26.408785, z: -33.58738}
+        up: {x: 0.23559357, y: 0.92998314, z: 0.28218257}
+        fov: 20
+        aspectRatio: 0
+        orthoSize: 1
+        isPerspective: 1
+        nearPlane: 0
+        farPlane: 0
+      name: Scene 1
+    - camera:
+        position: {x: -23.304342, y: 12.833273, z: -35.453487}
+        lookAt: {x: 42.566475, y: -4.0312247, z: 36.406406}
+        up: {x: 0.11518894, y: 0.9853632, z: 0.12566212}
+        fov: 20
+        aspectRatio: 0
+        orthoSize: 1
+        isPerspective: 1
+        nearPlane: 0
+        farPlane: 0
+      name: Scene 2
+    - camera:
+        position: {x: 77.798805, y: 15.291648, z: -19.655088}
+        lookAt: {x: -6.1510262, y: -5.2195115, z: 28.500269}
+        up: {x: -0.17984211, y: 0.97827125, z: 0.103161156}
+        fov: 20
+        aspectRatio: 0
+        orthoSize: 1
+        isPerspective: 1
+        nearPlane: 0
+        farPlane: 0
+      name: Scene 3
+    - camera:
+        position: {x: -6.001457, y: 16.578413, z: 69.833595}
+        lookAt: {x: 35.963184, y: -5.8435183, z: -16.904205}
+        up: {x: 0.098707035, y: 0.9739778, z: -0.20402013}
+        fov: 20
+        aspectRatio: 0
+        orthoSize: 1
+        isPerspective: 1
+        nearPlane: 0
+        farPlane: 0
+      name: Scene 4
+    - camera:
+        position: {x: -28.804558, y: 25.17828, z: -31.891376}
+        lookAt: {x: 41.46896, y: -7.6726446, z: 29.506264}
+        up: {x: 0.250063, y: 0.9432579, z: 0.21847887}
+        fov: 20
+        aspectRatio: 0
+        orthoSize: 1
+        isPerspective: 1
+        nearPlane: 0
+        farPlane: 0
+      name: Scene 5
+    - camera:
+        position: {x: 47.713734, y: 38.662937, z: -42.871304}
+        lookAt: {x: 12.000955, y: -12.746592, z: 33.7373}
+        up: {x: -0.2195626, y: 0.85437703, z: 0.4709906}
+        fov: 20
+        aspectRatio: 0
+        orthoSize: 1
+        isPerspective: 1
+        nearPlane: 0
+        farPlane: 0
+      name: Scene 6
+    - camera:
+        position: {x: 67.50085, y: 52.596554, z: 13.380892}
+        lookAt: {x: 1.9815587, y: -21.527227, z: 13.709923}
+        up: {x: -0.74924254, y: 0.6622851, z: 0.0037626168}
+        fov: 20
+        aspectRatio: 0
+        orthoSize: 1
+        isPerspective: 1
+        nearPlane: 0
+        farPlane: 0
+      name: Scene 7
+    - camera:
+        position: {x: -22.04782, y: 52.56539, z: -45.378235}
+        lookAt: {x: 25.89256, y: -4.92834, z: 19.301064}
+        up: {x: 0.34605736, y: 0.813794, z: 0.46688715}
+        fov: 20
+        aspectRatio: 0
+        orthoSize: 1
+        isPerspective: 1
+        nearPlane: 0
+        farPlane: 0
+      name: Scene 8
+    - camera:
+        position: {x: -17.52411, y: 116.10898, z: -83.85111}
+        lookAt: {x: 8.702145, y: 43.18489, z: -22.357359}
+        up: {x: 0.2891732, y: 0.6757561, z: 0.67803586}
+        fov: 20
+        aspectRatio: 0
+        orthoSize: 1
+        isPerspective: 1
+        nearPlane: 0
+        farPlane: 0
+      name: Scene 9
+  serializedVersion: 25
+  internalIDToNameTable: []
+  externalObjects: {}
+  materials:
+    importMaterials: 1
+    materialName: 2
+    materialSearch: 0
+    materialLocation: 0
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.0254
+    meshCompression: 0
+    addColliders: 1
+    useSRGBMaterialColor: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 0
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 0.0254
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

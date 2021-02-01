@@ -252,9 +252,6 @@
     <Compile Include="Assets\Scripts\NodeControl\CloseButton.cs" />
     <Compile Include="Assets\Scripts\NodeControl\DataManager.cs" />
     <Compile Include="Assets\Scripts\NodeControl\Dispatcher.cs" />
-    <Compile Include="Assets\Scripts\NodeControl\EvacuateRouting\EvacuateRoute.cs" />
-    <Compile Include="Assets\Scripts\NodeControl\EvacuateRouting\EvacuateRouter.cs" />
-    <Compile Include="Assets\Scripts\NodeControl\EvacuateRouting\RouteRenderer.cs" />
     <Compile Include="Assets\Scripts\NodeControl\FunctionManager.cs" />
     <Compile Include="Assets\Scripts\NodeControl\MouseManager.cs" />
     <Compile Include="Assets\Scripts\NodeControl\MQTTManager.cs" />
@@ -269,6 +266,8 @@
     <Compile Include="Assets\Scripts\NodeControl\Nodes\NodeFloodSensor.cs" />
     <Compile Include="Assets\Scripts\NodeControl\Nodes\NodeSound.cs" />
     <Compile Include="Assets\Scripts\NodeControl\Popup.cs" />
+    <Compile Include="Assets\Scripts\NodeControl\Router\EvacuateRouter.cs" />
+    <Compile Include="Assets\Scripts\NodeControl\Router\RouteRenderer.cs" />
     <Compile Include="Assets\Scripts\NodeControl\ScenarioManager.cs" />
     <Compile Include="Assets\Scripts\NodeControl\ScreenshotManager.cs" />
     <Compile Include="Assets\Scripts\NodeControl\SplashManager.cs" />
@@ -281,7 +280,6 @@
     <None Include="Assets\MarkLight\Examples\Views\UI\DataBinding\DynamicTabPanelExample.xml" />
     <None Include="Assets\MarkLight\Views\UI\HyperLink.xml" />
     <None Include="Assets\Packages\Imgur.API.4.0.1\lib\net45\Imgur.API.xml" />
-    <None Include="Assets\Resources\scenario_jsons\20210121.json" />
     <None Include="Assets\MarkLight\Views\ContentPlaceholder.xml" />
     <None Include="Assets\MarkLight\Examples\Views\UI\PlayingCardsExample.xml" />
     <None Include="Assets\MarkLight\Views\UI\Scrollbar.xml" />
@@ -347,7 +345,6 @@
     <None Include="Assets\MarkLight\Please Read This.txt" />
     <None Include="Assets\MarkLight\Views\UI\Group.xml" />
     <None Include="Assets\TextMesh Pro\Sprites\EmojiOne Attribution.txt" />
-    <None Include="Assets\Resources\scenario_jsons\AutoSave_다중이용시설(단층).json" />
     <None Include="Assets\MarkLight\Views\UI\RadialMenu.xml" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\Resources\scenario_jsons\AutoSave_노유자시설.json" />
