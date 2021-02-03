@@ -58,6 +58,9 @@ public class FunctionManager : MonoBehaviour
 	// GameObject of warning box
 	GameObject warningBox;
 
+	// GameObject of show graph button
+	GameObject showGraphButton;
+
 	// Program mode
 	private static bool isPlacingMode = true;
 	public static bool IsPlacingMode
@@ -182,6 +185,11 @@ public class FunctionManager : MonoBehaviour
 
 		// Get existing warning box
 		warningBox = Find("warning_box").gameObject;
+		warningBox.SetActive(false);
+
+		// Get existing show graph button
+		showGraphButton = Find("button_graph").gameObject;
+		showGraphButton.SetActive(false);
 
 		// Add callback listener
 		MouseManager.OnNodeClicked -= OnNodeSelected; // Remove exsiting callback to prevent duplicated call
@@ -257,6 +265,12 @@ public class FunctionManager : MonoBehaviour
 
 
 	//=======[ Callback functions ]=========================================================
+
+	public void OnShowGraphButtonClick()
+	{
+		WindowManager graphWindow = WindowManager.GetWindow("window_graph");
+		graphWindow.SetVisible(true);
+	}
 
 	// Called when sensor create button clicked
 
@@ -360,13 +374,12 @@ public class FunctionManager : MonoBehaviour
 			// Activate warning box
 			warningBox.SetActive(true);
 
+			// Activate show graph button
+			showGraphButton.SetActive(true);
+
 			// Show all floors
 			SetFloorVisibility(BuildingManager.FloorsCount - 1);
 			ScenarioManager.singleton.InitSimulation();
-
-			// Show graph
-			WindowManager graphManager = WindowManager.GetWindow("window_graph");
-			graphManager.SetVisible(true);
 		}
 		else
 		{
@@ -380,6 +393,9 @@ public class FunctionManager : MonoBehaviour
 
 			// Unactivate warning box
 			warningBox.SetActive(false);
+
+			// Deactivate show graph button
+			showGraphButton.SetActive(false);
 
 			ScenarioManager.singleton.EndSimulation();
 

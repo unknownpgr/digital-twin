@@ -207,7 +207,14 @@ public class MQTTManager : MonoBehaviour
 
     public void PubSiren(bool siren)
     {
-        //ToDo : NodeID for siren
+        {
+            string json = "{\"nodeId\":\"nodeSound\",\"sound\":\"" + (siren ? "on" : "off") + "\"}";
+            Publish("mws/Set/Sound", json);
+        }
+
+        // ToDo : NodeID for siren - 현재 맵에 NodeSound 객체가 없음. 임의 노드 생성 기능도 없애서 설치도 불가.
+        // 따라서 위 코드블럭에서 그냥 default로 하나 설정해주고, 아래 loop는 무시한다.
+        // 추후 위 코드블럭을 제거하고 아래 loop를 통해 동작하도록, NodeSound 추가할 수 있도록 만드는 편이 좋다.
         foreach (NodeSound ns in NodeManager.GetNodesByType<NodeSound>())
         {
             string json = "{\"nodeId\":\"" + ns.PhysicalID + "\",\"sound\":\"" + (siren ? "on" : "off") + "\"}";
